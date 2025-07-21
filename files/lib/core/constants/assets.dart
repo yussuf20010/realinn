@@ -1,0 +1,24 @@
+class AssetsManager {
+  // png
+  static const String logo = 'assets/png/logo.png';
+  static const String splashLogo = 'assets/png/splash.png';
+  static const String appLogo = 'assets/png/logo-transparent.png';
+  static const String horizontalLogo = 'assets/png/horizontal_logo.png';
+  static const String horizontalLogoDark = 'assets/png/horizontal_logo_dark.png';
+  static const String sentSuccessfully = 'assets/png/sent_sucessfully.png';
+  static const String error = 'assets/png/error.png';
+
+  // jsons
+  static const String loadingAnimation = 'assets/jsons/loading.json';
+  static const String successAnimation = 'assets/jsons/success.json';
+
+  // svg
+  static const cloud = 'assets/svg/clouds.svg';
+  static const bookings = 'assets/svg/booking.svg';
+  static const favorites = 'assets/svg/nav/favorite.svg';
+  static const pin_hotel = 'assets/svg/pin_hotels.svg';
+  static const booking = 'assets/svg/nav/booking.svg';
+  static const home = 'assets/svg/nav/home.svg';
+  static const profile = 'assets/svg/nav/profile.svg';
+  static const settings = 'assets/svg/nav/settings.svg';
+}
