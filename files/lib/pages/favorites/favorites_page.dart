@@ -5,7 +5,8 @@ import '../../widgets/custom_app_bar.dart';
 import '../hotel_details/hotel_details_page.dart';
 import '../notifications/notifications_page.dart';
 import '../settings/pages/customer_support_page.dart';
-import '../../widgets/vertical_hotel_card.dart';
+import '../home/components/hotel_card.dart'; // Import to use HotelCardModern
+
 
 final favoritesProvider = StateNotifierProvider<FavoritesNotifier, List<Hotel>>((ref) {
   return FavoritesNotifier();
@@ -79,21 +80,12 @@ class FavoritesPage extends ConsumerWidget {
               itemCount: favorites.length,
               itemBuilder: (context, index) {
                 final hotel = favorites[index];
-                return VerticalHotelCard(
+                return HotelCardModern(
                   hotel: hotel,
-                  onRemove: () => ref.read(favoritesProvider.notifier).removeHotel(hotel),
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => HotelDetailsPage(hotel: hotel),
-                      ),
-                    );
-                  },
-                  isFavorite: true,
+                  bookingType: 0,
                 );
               },
             ),
     );
-  }
+  } 
 }

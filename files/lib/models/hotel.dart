@@ -33,10 +33,11 @@ class Hotel {
   // Additional fields from API
   final String? slug;
   final int? stars;
-  final String? amenities;
   final String? categorySlug;
   final double? latitude;
   final double? longitude;
+  final String? oldPrice;
+  final String? dealLabel;
 
   Hotel({
     this.id,
@@ -67,15 +68,16 @@ class Hotel {
     this.cityId,
     this.slug,
     this.stars,
-    this.amenities,
     this.categorySlug,
     this.latitude,
     this.longitude,
+    this.oldPrice,
+    this.dealLabel,
   });
 
   factory Hotel.fromJson(Map<String, dynamic> json, String id) {
     // Handle image URL
-    String? imageUrl = json['image_url'] ?? json['logo'];
+    String? imageUrl = json['image_url'] ?? json['logo'] ?? json['image'];
     if (imageUrl != null && !imageUrl.startsWith('http')) {
       imageUrl = WPConfig.imageBaseUrl + imageUrl;
     }
@@ -89,8 +91,6 @@ class Hotel {
     } else if (json['price_range'] != null) {
       priceRange = json['price_range'].toString();
     }
-    
-
     
     // Handle rate conversion safely
     double? rate;
@@ -130,14 +130,55 @@ class Hotel {
       };
     }
 
+    // Handle List<String> fields safely
+    List<String>? facilities;
+    if (json['facilities'] != null) {
+      if (json['facilities'] is List<dynamic>) {
+        facilities = json['facilities'].map((item) => item?.toString() ?? '').toList();
+      }
+    }
+
+    List<String>? roomTypes;
+    if (json['room_types'] != null) {
+      if (json['room_types'] is List<dynamic>) {
+        roomTypes = json['room_types'].map((item) => item?.toString() ?? '').toList();
+      }
+    }
+
+    List<String>? images;
+    if (json['images'] != null) {
+      if (json['images'] is List<dynamic>) {
+        images = json['images'].map((item) => item?.toString() ?? '').toList();
+      }
+    }
+
+    List<String>? nearbyAttractions;
+    if (json['nearby_attractions'] != null) {
+      if (json['nearby_attractions'] is List<dynamic>) {
+        nearbyAttractions = json['nearby_attractions'].map((item) => item?.toString() ?? '').toList();
+      }
+    }
+
+    List<String>? availableDates;
+    if (json['available_dates'] != null) {
+      if (json['available_dates'] is List<dynamic>) {
+        availableDates = json['available_dates'].map((item) => item?.toString() ?? '').toList();
+      }
+    }
+
     return Hotel(
       id: id.isNotEmpty ? id : json['id']?.toString(),
       name: json['name'] ?? json['title'],
-      location: json['location'] ?? json['categoryName'],
+      location: json['location'] ?? json['address'],
       imageUrl: imageUrl,
       rate: rate,
       priceRange: priceRange,
       category: json['category'] ?? json['categoryName'],
+      facilities: facilities,
+      roomTypes: roomTypes,
+      images: images,
+      nearbyAttractions: nearbyAttractions,
+      availableDates: availableDates,
       country: json['country'],
       state: json['state'],
       city: json['city'],
@@ -146,11 +187,12 @@ class Hotel {
       cityId: json['city_id'] is int ? json['city_id'] : (json['city_id'] is String ? int.tryParse(json['city_id']) : null),
       slug: json['slug'],
       stars: json['stars'] is int ? json['stars'] : (json['stars'] is String ? int.tryParse(json['stars']) : null),
-      amenities: json['amenities'],
       categorySlug: json['categorySlug'],
       latitude: latitude,
       longitude: longitude,
       locationCoordinates: coordinates,
+      oldPrice: json['old_price']?.toString(),
+      dealLabel: json['deal_label']?.toString(),
       // Map other fields as needed
     );
   }
@@ -185,10 +227,11 @@ class Hotel {
       'city_id': cityId,
       'slug': slug,
       'stars': stars,
-      'amenities': amenities,
       'categorySlug': categorySlug,
       'latitude': latitude,
       'longitude': longitude,
+      'old_price': oldPrice,
+      'deal_label': dealLabel,
     };
   }
 }

@@ -231,18 +231,32 @@ import '../utils/ui_helper.dart';
 class AppTheme {
   /// Add your custom font name here, which you added in [pubspec.yaml] file
   static const fontName = 'Montserrat';
+  static const Color kPrimary = Color(0xFF7371FC);
 
   /// A light theme for NewsPro
   static ThemeData get lightTheme => ThemeData(
     colorScheme: ColorScheme.fromSwatch(
       primarySwatch: AppUiHelper.generateMaterialColor(
-        AppColors.primary,
+        kPrimary,
       ),
     ),
-    textTheme: ThemeData.light().textTheme.apply(
-      fontFamily: fontName,
-      displayColor: Colors.black,
-      bodyColor: Colors.black,
+    primaryColor: kPrimary,
+    textTheme: TextTheme(
+      displayLarge: TextStyle(fontFamily: fontName, fontSize: 24, fontWeight: FontWeight.bold, color: kPrimary), // Main titles
+      displayMedium: TextStyle(fontFamily: fontName, fontSize: 22, fontWeight: FontWeight.bold, color: kPrimary),
+      displaySmall: TextStyle(fontFamily: fontName, fontSize: 20, fontWeight: FontWeight.bold, color: kPrimary),
+      headlineLarge: TextStyle(fontFamily: fontName, fontSize: 18, fontWeight: FontWeight.bold, color: kPrimary), // Subtitles
+      headlineMedium: TextStyle(fontFamily: fontName, fontSize: 16, fontWeight: FontWeight.bold, color: kPrimary),
+      headlineSmall: TextStyle(fontFamily: fontName, fontSize: 14, fontWeight: FontWeight.bold, color: kPrimary),
+      titleLarge: TextStyle(fontFamily: fontName, fontSize: 16, fontWeight: FontWeight.w500, color: kPrimary), // Details
+      titleMedium: TextStyle(fontFamily: fontName, fontSize: 14, fontWeight: FontWeight.w500, color: kPrimary),
+      titleSmall: TextStyle(fontFamily: fontName, fontSize: 12, fontWeight: FontWeight.w500, color: kPrimary),
+      bodyLarge: TextStyle(fontFamily: fontName, fontSize: 14, color: kPrimary), // Normal text
+      bodyMedium: TextStyle(fontFamily: fontName, fontSize: 12, color: kPrimary), // Sub/explanatory text
+      bodySmall: TextStyle(fontFamily: fontName, fontSize: 10, color: kPrimary),
+      labelLarge: TextStyle(fontFamily: fontName, fontSize: 16, fontWeight: FontWeight.w500, color: kPrimary), // Buttons
+      labelMedium: TextStyle(fontFamily: fontName, fontSize: 14, fontWeight: FontWeight.w500, color: kPrimary),
+      labelSmall: TextStyle(fontFamily: fontName, fontSize: 12, color: kPrimary),
     ),
     scaffoldBackgroundColor: AppColors.scaffoldBackground,
     cardColor: AppColors.cardColor,
@@ -255,7 +269,7 @@ class AppTheme {
       focusedBorder: OutlineInputBorder(
         borderRadius: AppDefaults.borderRadius,
         borderSide: BorderSide(
-          color: AppColors.primary,
+          color: kPrimary,
         ),
       ),
       fillColor: AppColors.cardColor,
@@ -263,24 +277,20 @@ class AppTheme {
       floatingLabelBehavior: FloatingLabelBehavior.never,
     ),
     appBarTheme: AppBarTheme(
-      backgroundColor: AppColors.scaffoldBackground,
+      backgroundColor: kPrimary,
       elevation: 0,
-      systemOverlayStyle: SystemUiOverlayStyle(
-        statusBarBrightness: Brightness.light,
-        statusBarIconBrightness: Brightness.dark,
-        systemNavigationBarColor: AppColors.scaffoldBackground,
-        statusBarColor: AppColors.scaffoldBackground,
-      ),
-      iconTheme: IconThemeData(color: AppColors.primary),
+      iconTheme: IconThemeData(color: Colors.white),
       titleTextStyle: TextStyle(
-        color: Colors.black,
+        color: Colors.white,
         fontFamily: fontName,
+        fontWeight: FontWeight.bold,
+        fontSize: 22,
       ),
       centerTitle: true,
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
-        backgroundColor: AppColors.primary,
+        backgroundColor: kPrimary,
         foregroundColor: Colors.white,
         padding: const EdgeInsets.all(AppDefaults.padding),
         shape: RoundedRectangleBorder(
@@ -290,8 +300,8 @@ class AppTheme {
     ),
     outlinedButtonTheme: OutlinedButtonThemeData(
       style: OutlinedButton.styleFrom(
-        foregroundColor: AppColors.primary,
-        side: BorderSide(color: AppColors.primary),
+        foregroundColor: kPrimary,
+        side: BorderSide(color: kPrimary),
         padding: const EdgeInsets.all(AppDefaults.padding),
         shape: RoundedRectangleBorder(
           borderRadius: AppDefaults.borderRadius,
@@ -301,7 +311,7 @@ class AppTheme {
     tabBarTheme: TabBarTheme(
       indicator: UnderlineTabIndicator(
         borderSide: BorderSide(
-          color: AppColors.primary,
+          color: kPrimary,
           width: 2,
         ),
       ),
@@ -309,7 +319,7 @@ class AppTheme {
         horizontal: AppDefaults.padding,
         vertical: AppDefaults.padding / 1.15,
       ),
-      labelColor: AppColors.primary,
+      labelColor: kPrimary,
       unselectedLabelColor: AppColors.cardColorDark.withOpacity(0.5),
       indicatorSize: TabBarIndicatorSize.label,
       labelStyle: TextStyle(
@@ -329,7 +339,7 @@ class AppTheme {
   static ThemeData get darkTheme => ThemeData(
     colorScheme: ColorScheme.fromSwatch(
       primarySwatch: AppUiHelper.generateMaterialColor(
-        AppColors.primary,
+        kPrimary,
       ),
     ),
     textTheme: ThemeData.dark().textTheme.apply(
@@ -348,7 +358,7 @@ class AppTheme {
       focusedBorder: OutlineInputBorder(
         borderRadius: AppDefaults.borderRadius,
         borderSide: BorderSide(
-          color: AppColors.primary,
+          color: kPrimary,
         ),
       ),
       fillColor: AppColors.cardColorDark,
@@ -358,8 +368,8 @@ class AppTheme {
       iconColor: AppColors.placeholder,
       hintStyle: TextStyle(color: AppColors.placeholder),
     ),
-    iconTheme: IconThemeData(color: AppColors.primary),
-    listTileTheme: ListTileThemeData(iconColor: AppColors.primary),
+    iconTheme: IconThemeData(color: kPrimary),
+    listTileTheme: ListTileThemeData(iconColor: kPrimary),
     appBarTheme: AppBarTheme(
       backgroundColor: AppColors.scaffoldBackgrounDark,
       elevation: 0,
@@ -381,7 +391,7 @@ class AppTheme {
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
-        backgroundColor: AppColors.primary,
+        backgroundColor: kPrimary,
         foregroundColor: Colors.white,
         padding: const EdgeInsets.all(AppDefaults.padding),
         shape: RoundedRectangleBorder(
@@ -391,8 +401,8 @@ class AppTheme {
     ),
     outlinedButtonTheme: OutlinedButtonThemeData(
       style: OutlinedButton.styleFrom(
-        foregroundColor: AppColors.primary,
-        side: BorderSide(color: AppColors.primary),
+        foregroundColor: kPrimary,
+        side: BorderSide(color: kPrimary),
         padding: const EdgeInsets.all(AppDefaults.padding),
         shape: RoundedRectangleBorder(
           borderRadius: AppDefaults.borderRadius,
@@ -402,7 +412,7 @@ class AppTheme {
     tabBarTheme: TabBarTheme(
       indicator: UnderlineTabIndicator(
         borderSide: BorderSide(
-          color: AppColors.primary,
+          color: kPrimary,
           width: 2,
         ),
       ),
@@ -410,7 +420,7 @@ class AppTheme {
         horizontal: AppDefaults.padding,
         vertical: AppDefaults.padding / 1.15,
       ),
-      labelColor: AppColors.primary,
+      labelColor: kPrimary,
       unselectedLabelColor: AppColors.cardColor.withOpacity(0.5),
       indicatorSize: TabBarIndicatorSize.label,
       labelStyle: TextStyle(

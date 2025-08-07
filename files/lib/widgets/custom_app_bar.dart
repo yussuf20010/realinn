@@ -12,6 +12,7 @@ class CustomAppBar extends ConsumerStatefulWidget implements PreferredSizeWidget
   final VoidCallback? onChatPressed;
   final VoidCallback? onProfilePressed;
   final VoidCallback? onNotificationPressed;
+  final bool minimal; // Add this line
 
   const CustomAppBar({
     Key? key,
@@ -20,6 +21,7 @@ class CustomAppBar extends ConsumerStatefulWidget implements PreferredSizeWidget
     this.onChatPressed,
     this.onProfilePressed,
     this.onNotificationPressed,
+    this.minimal = false, // Add this line
   }) : super(key: key);
 
   @override
@@ -30,12 +32,32 @@ class CustomAppBar extends ConsumerStatefulWidget implements PreferredSizeWidget
 }
 
 class _CustomAppBarState extends ConsumerState<CustomAppBar> {
-  void _toggleLanguage() {
+  void _toggleLanguage() async {
     final currentLocale = context.locale;
-    if (currentLocale.languageCode == 'ar') {
-      context.setLocale(Locale('en', 'US'));
-    } else {
-      context.setLocale(Locale('ar', 'SA'));
+    final newLocale = currentLocale.languageCode == 'ar'
+        ? Locale('en', 'US')
+        : Locale('ar', 'SA');
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Change Language'),
+        content: Text('Do you want to change the app language?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Text('OK'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true) {
+      await context.setLocale(newLocale);
+      // Reload the app by pushing replacement to HomePage
+      Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
     }
   }
 
@@ -64,114 +86,142 @@ class _CustomAppBarState extends ConsumerState<CustomAppBar> {
     final dynamicConfig = ref.watch(dynamicConfigProvider);
     final primaryColor = dynamicConfig.primaryColor ?? WPConfig.primaryColor;
 
+    if (widget.minimal) {
+      return AppBar(
+        backgroundColor: primaryColor,
+        elevation: 2,
+        shadowColor: Colors.black.withOpacity(0.1),
+        toolbarHeight: 70,
+        leading: widget.showBackButton
+            ? IconButton(
+                icon: Icon(Icons.arrow_back, color: Colors.white),
+                onPressed: () => Navigator.of(context).maybePop(),
+              )
+            : null,
+        title: Center(
+          child: Text(
+            'Chat',
+            style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: isTablet ? 24 : 20,
+            ),
+          ),
+        ),
+        centerTitle: true,
+      );
+    }
+
     return AppBar(
       backgroundColor: primaryColor,
       elevation: 2,
       shadowColor: Colors.black.withOpacity(0.1),
       toolbarHeight: 70, // Increased height
-             leading: widget.showBackButton
-           ? IconButton(
-               icon: Icon(Icons.arrow_back, color: Colors.white, size: isTablet ? 28 : 24),
-               onPressed: () => Navigator.pop(context),
-             )
-                       : Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    // Notification icon
-                    if (widget.onNotificationPressed != null)
-                      IconButton(
-                        icon: Icon(
-                          Icons.notifications_outlined,
-                          color: Colors.white,
-                          size: isTablet ? 26 : 22,
-                        ),
-                        onPressed: widget.onNotificationPressed,
-                      ),
-                    // Profile icon
-                    IconButton(
-                      icon: Icon(
-                        Icons.person_outline,
-                        color: Colors.white,
-                        size: isTablet ? 26 : 22,
-                      ),
-                      onPressed: widget.onProfilePressed ?? _openProfile,
-                    ),
-                  ],
+      leading: null,
+      title: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          // Left side: Profile and Chat
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              IconButton(
+                icon: Icon(
+                  Icons.person_outline,
+                  color: Colors.white,
+                  size: isTablet ? 26 : 22,
                 ),
-      title: Builder(
-        builder: (context) {
-          if (dynamicConfig.logoUrl != null && dynamicConfig.logoUrl!.isNotEmpty) {
-            return Image.network(
-              dynamicConfig.logoUrl!,
-              height: isTablet ? 30 : 25,
-              fit: BoxFit.contain,
-            );
-          } else if (dynamicConfig.appName != null) {
-            return Text(
-              dynamicConfig.appName!,
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-                fontSize: isTablet ? 24 : 20,
+                onPressed: widget.onProfilePressed ?? _openProfile,
               ),
-            );
-          } else {
-            return Text(
-              widget.title,
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-                fontSize: isTablet ? 24 : 20,
+              IconButton(
+                icon: Icon(
+                  Icons.chat_bubble_outline,
+                  color: Colors.white,
+                  size: isTablet ? 26 : 22,
+                ),
+                onPressed: widget.onChatPressed ?? _openCustomerSupport,
               ),
-            );
-          }
-        },
-      ),
-      centerTitle: true,
-      actions: [
-        // Right side icons (Language and Chat)
-        Row(
-          children: [
-            // Language toggle button
-            Container(
-              margin: EdgeInsets.symmetric(horizontal: 4),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.2),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.white.withOpacity(0.3)),
+            ],
+          ),
+          // Center: Title or Logo
+          Expanded(
+            child: Center(
+              child: Builder(
+                builder: (context) {
+                  if (dynamicConfig.logoUrl != null && dynamicConfig.logoUrl!.isNotEmpty) {
+                    return Image.network(
+                      dynamicConfig.logoUrl!,
+                      height: isTablet ? 30 : 25,
+                      fit: BoxFit.contain,
+                    );
+                  } else if (dynamicConfig.appName != null) {
+                    return Text(
+                      dynamicConfig.appName!,
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                        fontSize: isTablet ? 24 : 20,
+                      ),
+                    );
+                  } else {
+                    return Text(
+                      widget.title,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: isTablet ? 24 : 20,
+                      ),
+                    );
+                  }
+                },
               ),
-              child: Material(
-                color: Colors.transparent,
-                child: InkWell(
+            ),
+          ),
+          // Right side: Language and Notification
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                margin: EdgeInsets.symmetric(horizontal: 4),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.2),
                   borderRadius: BorderRadius.circular(8),
-                  onTap: _toggleLanguage,
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                                         child: Text(
-                       context.locale.languageCode == 'ar' ? 'AR' : 'EN',
-                       style: TextStyle(
-                         color: Colors.white,
-                         fontWeight: FontWeight.bold,
-                         fontSize: isTablet ? 16 : 14,
-                       ),
-                     ),
+                  border: Border.all(color: Colors.white.withOpacity(0.3)),
+                ),
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(8),
+                    onTap: _toggleLanguage,
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      child: Text(
+                        context.locale.languageCode == 'ar' ? 'AR' : 'EN',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: isTablet ? 16 : 14,
+                        ),
+                      ),
+                    ),
                   ),
                 ),
               ),
-            ),
-            // Chat icon
-            IconButton(
-              icon: Icon(
-                Icons.chat_bubble_outline,
-                color: Colors.white,
-                size: isTablet ? 26 : 22,
-              ),
-              onPressed: widget.onChatPressed ?? _openCustomerSupport,
-            ),
-          ],
-        ),
-        SizedBox(width: 8),
-      ],
+              if (widget.onNotificationPressed != null)
+                IconButton(
+                  icon: Icon(
+                    Icons.notifications_outlined,
+                    color: Colors.white,
+                    size: isTablet ? 26 : 22,
+                  ),
+                  onPressed: widget.onNotificationPressed,
+                ),
+            ],
+          ),
+        ],
+      ),
+      centerTitle: true,
+      actions: [SizedBox(width: 8)],
     );
   }
 } 

@@ -1,0 +1,733 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../controllers/hotel_controller.dart';
+import '../../../../controllers/location_controller.dart';
+import '../../../../models/hotel.dart';
+import '../../../../models/location.dart' as location_model;
+import '../../../../config/dynamic_config.dart';
+
+class DailyBookingModal extends ConsumerStatefulWidget {
+  @override
+  ConsumerState<DailyBookingModal> createState() => _DailyBookingModalState();
+}
+
+class _DailyBookingModalState extends ConsumerState<DailyBookingModal> {
+  int currentStep = 0;
+  String? selectedCountry;
+  String? selectedCity;
+  String? selectedHotel;
+  TimeOfDay? startTime;
+  TimeOfDay? endTime;
+  String locationSearchQuery = '';
+
+  @override
+  Widget build(BuildContext context) {
+    final primaryColor = ref.watch(dynamicConfigProvider).primaryColor ?? Color(0xFF895ffc);
+    
+    return Container(
+      height: MediaQuery.of(context).size.height * 0.8,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      child: Column(
+        children: [
+          // Header
+          Container(
+            padding: EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: primaryColor,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+            ),
+            child: Row(
+              children: [
+                Text(
+                  'Daily Booking',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Spacer(),
+                IconButton(
+                  icon: Icon(Icons.close, color: Colors.white),
+                  onPressed: () => Navigator.pop(context),
+                ),
+              ],
+            ),
+          ),
+          
+          // Progress indicator
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Row(
+              children: List.generate(4, (index) => Expanded(
+                child: Container(
+                  height: 4,
+                  margin: EdgeInsets.symmetric(horizontal: 4),
+                  decoration: BoxDecoration(
+                    color: index <= currentStep ? primaryColor : Colors.grey[300],
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              )),
+            ),
+          ),
+          
+          // Content
+          Flexible(
+            child: Padding(
+              padding: EdgeInsets.all(16),
+              child: _buildStepContent(),
+            ),
+          ),
+          
+          // Navigation buttons
+          Container(
+            padding: EdgeInsets.all(16),
+            child: Row(
+              children: [
+                if (currentStep > 0)
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () => setState(() => currentStep--),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.grey[300],
+                        foregroundColor: Colors.black,
+                      ),
+                      child: Text('Back'),
+                    ),
+                  ),
+                if (currentStep > 0) SizedBox(width: 16),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: _canProceed() ? _nextStep : null,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: primaryColor,
+                      foregroundColor: Colors.white,
+                    ),
+                    child: Text(currentStep == 3 ? 'Finish' : 'Next'),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStepContent() {
+    switch (currentStep) {
+      case 0:
+        return _buildCountryStep();
+      case 1:
+        return _buildCityStep();
+      case 2:
+        return _buildHotelStep();
+      case 3:
+        return _buildTimeStep();
+      default:
+        return Container();
+    }
+  }
+
+  Widget _buildCountryStep() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Select Country',
+          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black),
+        ),
+        SizedBox(height: 16),
+        // Search field
+        TextField(
+          decoration: InputDecoration(
+            hintText: 'Search for countries...',
+            prefixIcon: Icon(Icons.search, color: Colors.black),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          ),
+          onChanged: (value) => setState(() => locationSearchQuery = value.toLowerCase()),
+        ),
+        SizedBox(height: 16),
+        Flexible(
+          child: Consumer(
+            builder: (context, ref, child) {
+              final locationResponseAsync = ref.watch(locationProvider);
+              return locationResponseAsync.when(
+                data: (locationResponse) => Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Show All Hotels option
+                    ListTile(
+                      leading: Icon(Icons.hotel, color: Colors.black),
+                      title: Text('Show All Hotels', style: TextStyle(color: Colors.black)),
+                      subtitle: Text('Skip location filtering'),
+                      selected: selectedCountry == null,
+                      selectedTileColor: selectedCountry == null ? Colors.blue.withOpacity(0.15) : Colors.grey[100],
+                      onTap: () => setState(() => selectedCountry = null),
+                    ),
+                    Divider(),
+                    // Countries list
+                    if (locationResponse.countries?.isNotEmpty == true) ...[
+                      Text(
+                        'Countries',
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black),
+                      ),
+                      SizedBox(height: 8),
+                      Flexible(
+                        child: ListView.builder(
+                          shrinkWrap: true,
+                          itemCount: locationResponse.countries!.length,
+                          itemBuilder: (context, index) {
+                            final country = locationResponse.countries![index];
+                            final countryName = country.name ?? '';
+                            if (locationSearchQuery.isNotEmpty && 
+                                !countryName.toLowerCase().contains(locationSearchQuery)) {
+                              return SizedBox.shrink();
+                            }
+                            
+                            // Count hotels in this country
+                            final hotelCount = locationResponse.hotels?.where((hotel) => 
+                              hotel.countryId == country.id
+                            ).length ?? 0;
+                            
+                            return ListTile(
+                              leading: Icon(Icons.location_on, color: Colors.black),
+                              title: Text(countryName, style: TextStyle(color: Colors.black)),
+                              subtitle: Text('Country'),
+                              trailing: Container(
+                                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                decoration: BoxDecoration(
+                                  color: Colors.blue.withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(Icons.hotel, size: 14, color: Colors.blue),
+                                    SizedBox(width: 4),
+                                    Text(
+                                      '$hotelCount',
+                                      style: TextStyle(
+                                        color: Colors.blue,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              selected: selectedCountry == countryName,
+                              selectedTileColor: selectedCountry == countryName ? Colors.blue.withOpacity(0.15) : Colors.grey[100],
+                              onTap: () => setState(() => selectedCountry = countryName),
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+                loading: () => Center(child: CircularProgressIndicator()),
+                error: (e, _) => Text('Error loading countries', style: TextStyle(color: Colors.black)),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCityStep() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Select City',
+          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black),
+        ),
+        if (selectedCountry != null)
+          Padding(
+            padding: EdgeInsets.only(top: 8),
+            child: Text(
+              'Cities in $selectedCountry',
+              style: TextStyle(fontSize: 14, color: Colors.black),
+            ),
+          ),
+        SizedBox(height: 16),
+        // Search field
+        TextField(
+          decoration: InputDecoration(
+            hintText: 'Search for cities...',
+            prefixIcon: Icon(Icons.search, color: Colors.black),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          ),
+          onChanged: (value) => setState(() => locationSearchQuery = value.toLowerCase()),
+        ),
+        SizedBox(height: 16),
+        Flexible(
+          child: Consumer(
+            builder: (context, ref, child) {
+              final locationResponseAsync = ref.watch(locationProvider);
+              return locationResponseAsync.when(
+                data: (locationResponse) {
+                  // Find the selected country ID
+                  final selectedCountryId = locationResponse.countries
+                      ?.firstWhere((c) => c.name == selectedCountry, orElse: () => location_model.Country())
+                      .id;
+                  
+                  // Filter cities by selected country
+                  final citiesInCountry = locationResponse.cities
+                      ?.where((city) => city.countryId == selectedCountryId)
+                      .toList() ?? [];
+                  
+                  return Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // Show All Hotels option
+                      ListTile(
+                        leading: Icon(Icons.hotel, color: Colors.black),
+                        title: Text('Show All Hotels', style: TextStyle(color: Colors.black)),
+                        subtitle: Text('Skip location filtering'),
+                        selected: selectedCity == null,
+                        selectedTileColor: selectedCity == null ? Colors.blue.withOpacity(0.15) : Colors.grey[100],
+                        onTap: () => setState(() => selectedCity = null),
+                      ),
+                      Divider(),
+                      // Cities list
+                      if (citiesInCountry.isNotEmpty) ...[
+                        Text(
+                          'Cities in $selectedCountry',
+                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black),
+                        ),
+                        SizedBox(height: 8),
+                        Flexible(
+                          child: ListView.builder(
+                            shrinkWrap: true,
+                            itemCount: citiesInCountry.length,
+                            itemBuilder: (context, index) {
+                              final city = citiesInCountry[index];
+                              final cityName = city.name ?? '';
+                              if (locationSearchQuery.isNotEmpty && 
+                                  !cityName.toLowerCase().contains(locationSearchQuery)) {
+                                return SizedBox.shrink();
+                              }
+                              
+                              // Count hotels in this city
+                              final hotelCount = locationResponse.hotels?.where((hotel) => 
+                                hotel.cityId == city.id
+                              ).length ?? 0;
+                              
+                              return ListTile(
+                                leading: Icon(Icons.location_city, color: Colors.black),
+                                title: Text(cityName, style: TextStyle(color: Colors.black)),
+                                subtitle: Text('City'),
+                                trailing: Container(
+                                  padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    color: Colors.blue.withOpacity(0.1),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(Icons.hotel, size: 14, color: Colors.blue),
+                                      SizedBox(width: 4),
+                                      Text(
+                                        '$hotelCount',
+                                        style: TextStyle(
+                                          color: Colors.blue,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                selected: selectedCity == cityName,
+                                selectedTileColor: selectedCity == cityName ? Colors.blue.withOpacity(0.15) : Colors.grey[100],
+                                onTap: () => setState(() => selectedCity = cityName),
+                              );
+                            },
+                          ),
+                        ),
+                      ] else ...[
+                        Flexible(
+                          child: Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.location_city_outlined, size: 64, color: Colors.grey[400]),
+                                SizedBox(height: 16),
+                                Text(
+                                  'No cities found in $selectedCountry',
+                                  style: TextStyle(fontSize: 16, color: Colors.black),
+                                ),
+                                SizedBox(height: 8),
+                                Text(
+                                  'Try selecting a different country',
+                                  style: TextStyle(fontSize: 14, color: Colors.grey[500]),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ],
+                  );
+                },
+                loading: () => Center(child: CircularProgressIndicator()),
+                error: (e, _) => Text('Error loading cities', style: TextStyle(color: Colors.black)),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildHotelStep() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Select Hotel',
+          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black),
+        ),
+        if (selectedCity != null)
+          Padding(
+            padding: EdgeInsets.only(top: 8),
+            child: Text(
+              'Hotels in $selectedCity',
+              style: TextStyle(fontSize: 14, color: Colors.black),
+            ),
+          ),
+        SizedBox(height: 16),
+        Flexible(
+          child: Consumer(
+            builder: (context, ref, child) {
+              final hotelsAsync = ref.watch(hotelProvider);
+              return hotelsAsync.when(
+                data: (hotels) {
+                  // Filter hotels based on selected location using helper function
+                  final filteredHotels = _filterHotelsForDailyBooking(hotels, selectedCity, ref);
+                  
+                  if (filteredHotels.isEmpty) {
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.hotel_outlined, size: 64, color: Colors.grey[400]),
+                          SizedBox(height: 16),
+                          Text(
+                            selectedCity != null 
+                                ? 'No hotels found in $selectedCity'
+                                : 'No hotels available',
+                            style: TextStyle(fontSize: 16, color: Colors.black),
+                          ),
+                          SizedBox(height: 8),
+                          Text(
+                            'Total hotels loaded: ${hotels.length}',
+                            style: TextStyle(fontSize: 14, color: Colors.grey[500]),
+                          ),
+                          if (selectedCity != null) ...[
+                            SizedBox(height: 8),
+                            Text(
+                              'Try selecting a different city or check if hotels have location data',
+                              style: TextStyle(fontSize: 12, color: Colors.grey[500]),
+                            ),
+                            SizedBox(height: 16),
+                            ElevatedButton(
+                              onPressed: () => setState(() => selectedCity = null),
+                              child: Text('Show All Hotels'),
+                            ),
+                          ],
+                        ],
+                      ),
+                    );
+                  }
+                  
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Summary header
+                      Container(
+                        padding: EdgeInsets.all(12),
+                        margin: EdgeInsets.only(bottom: 8),
+                        decoration: BoxDecoration(
+                          color: Colors.blue.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(Icons.info_outline, color: Colors.blue, size: 20),
+                            SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                selectedCity != null 
+                                    ? 'Found ${filteredHotels.length} hotels in "$selectedCity"'
+                                    : 'Showing all ${filteredHotels.length} hotels',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.blue[700],
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Flexible(
+                        child: ListView.builder(
+                          shrinkWrap: true,
+                          itemCount: filteredHotels.length,
+                          itemBuilder: (context, index) {
+                            final hotel = filteredHotels[index];
+                            return ListTile(
+                              leading: CircleAvatar(
+                                backgroundColor: Colors.grey[200],
+                                child: hotel.imageUrl != null && hotel.imageUrl!.isNotEmpty
+                                    ? ClipOval(
+                                        child: Image.network(
+                                          hotel.imageUrl!,
+                                          width: 40,
+                                          height: 40,
+                                          fit: BoxFit.cover,
+                                          errorBuilder: (context, error, stackTrace) => Icon(
+                                            Icons.hotel,
+                                            color: Colors.black,
+                                            size: 20,
+                                          ),
+                                        ),
+                                      )
+                                    : Icon(
+                                        Icons.hotel,
+                                        color: Colors.black,
+                                        size: 20,
+                                      ),
+                              ),
+                              title: Text(hotel.name ?? '', style: TextStyle(color: Colors.black)),
+                              subtitle: Text(hotel.city ?? hotel.country ?? hotel.category ?? hotel.location ?? '', style: TextStyle(color: Colors.black)),
+                              selected: selectedHotel == hotel.name,
+                              selectedTileColor: Colors.grey[100],
+                              onTap: () => setState(() => selectedHotel = hotel.name),
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+                  );
+                },
+                loading: () => Center(child: CircularProgressIndicator()),
+                error: (e, _) => Text('Error loading hotels', style: TextStyle(color: Colors.black)),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTimeStep() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Select Time Range',
+          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black),
+        ),
+        SizedBox(height: 16),
+        // Start Time Selection
+        ListTile(
+          leading: Icon(Icons.access_time, color: Colors.black),
+          title: Text('Start Time', style: TextStyle(color: Colors.black)),
+          subtitle: Text(
+            startTime != null 
+                ? '${startTime!.hour.toString().padLeft(2, '0')}:${startTime!.minute.toString().padLeft(2, '0')}'
+                : 'Select start time',
+            style: TextStyle(color: Colors.grey[600]),
+          ),
+          trailing: Icon(Icons.arrow_forward_ios, color: Colors.grey),
+          onTap: () async {
+            final time = await showTimePicker(
+              context: context,
+              initialTime: startTime ?? TimeOfDay.now(),
+            );
+            if (time != null) {
+              setState(() => startTime = time);
+            }
+          },
+        ),
+        Divider(),
+        // End Time Selection
+        ListTile(
+          leading: Icon(Icons.access_time_filled, color: Colors.black),
+          title: Text('End Time', style: TextStyle(color: Colors.black)),
+          subtitle: Text(
+            endTime != null 
+                ? '${endTime!.hour.toString().padLeft(2, '0')}:${endTime!.minute.toString().padLeft(2, '0')}'
+                : 'Select end time',
+            style: TextStyle(color: Colors.grey[600]),
+          ),
+          trailing: Icon(Icons.arrow_forward_ios, color: Colors.grey),
+          onTap: () async {
+            final time = await showTimePicker(
+              context: context,
+              initialTime: endTime ?? (startTime ?? TimeOfDay.now()),
+            );
+            if (time != null) {
+              setState(() => endTime = time);
+            }
+          },
+        ),
+        SizedBox(height: 16),
+        // Quick time presets
+        Text(
+          'Quick Presets',
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.black),
+        ),
+        SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            _buildTimePreset('Morning', TimeOfDay(hour: 9, minute: 0), TimeOfDay(hour: 12, minute: 0)),
+            _buildTimePreset('Afternoon', TimeOfDay(hour: 12, minute: 0), TimeOfDay(hour: 17, minute: 0)),
+            _buildTimePreset('Evening', TimeOfDay(hour: 17, minute: 0), TimeOfDay(hour: 21, minute: 0)),
+            _buildTimePreset('Night', TimeOfDay(hour: 21, minute: 0), TimeOfDay(hour: 23, minute: 0)),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTimePreset(String label, TimeOfDay start, TimeOfDay end) {
+    final isSelected = startTime == start && endTime == end;
+    return GestureDetector(
+      onTap: () => setState(() {
+        startTime = start;
+        endTime = end;
+      }),
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected ? Colors.blue : Colors.grey[200],
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isSelected ? Colors.blue : Colors.grey[300]!,
+            width: 1,
+          ),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: isSelected ? Colors.white : Colors.black,
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ),
+    );
+  }
+
+  bool _canProceed() {
+    switch (currentStep) {
+      case 0:
+        return selectedCountry != null;
+      case 1:
+        return selectedCity != null;
+      case 2:
+        return selectedHotel != null;
+      case 3:
+        return startTime != null && endTime != null;
+      default:
+        return false;
+    }
+  }
+
+  void _nextStep() {
+    if (currentStep < 3) {
+      setState(() => currentStep++);
+    } else {
+      // Create booking and add to booking page
+      _createBooking();
+    }
+  }
+
+  void _createBooking() {
+    // Find the selected hotel
+    final hotelsAsync = ref.read(hotelProvider);
+    hotelsAsync.whenData((hotels) {
+      final selectedHotelData = hotels.firstWhere(
+        (hotel) => hotel.name == selectedHotel,
+        orElse: () => hotels.first,
+      );
+
+      // Create booking with time information
+      final checkInDateTime = DateTime.now().copyWith(
+        hour: startTime?.hour ?? 9,
+        minute: startTime?.minute ?? 0,
+      );
+      
+      final checkOutDateTime = DateTime.now().copyWith(
+        hour: endTime?.hour ?? 17,
+        minute: endTime?.minute ?? 0,
+      );
+
+      // TODO: Add booking to booking provider
+      // final booking = Booking(
+      //   hotel: selectedHotelData,
+      //   checkIn: checkInDateTime,
+      //   checkOut: checkOutDateTime,
+      //   adults: 1,
+      //   children: 0,
+      //   rooms: 1,
+      // );
+
+      // Show success message and navigate
+      Navigator.pop(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Daily booking added successfully!'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    });
+  }
+
+  // Helper function for Daily booking modal
+  List<Hotel> _filterHotelsForDailyBooking(List<Hotel> hotels, String? selectedCity, WidgetRef ref) {
+    if (selectedCity == null) return hotels;
+    
+    print('Daily Booking - Total hotels before filtering: ${hotels.length}');
+    print('Daily Booking - Selected city: $selectedCity');
+    
+    return hotels.where((hotel) {
+      // Get city ID from location data
+      final locationResponse = ref.read(locationProvider).value;
+      final selectedCityData = locationResponse?.cities
+          ?.firstWhere((c) => c.name == selectedCity, orElse: () => location_model.City());
+      final selectedCityId = selectedCityData?.id;
+      
+      print('Daily Booking - Filtering hotel: ${hotel.name}');
+      print('Daily Booking - Hotel city_id: ${hotel.cityId}');
+      print('Daily Booking - Selected city_id: $selectedCityId');
+      
+      // Match by city_id first, then fallback to name matching
+      final matches = (hotel.cityId == selectedCityId) ||
+                     (hotel.city?.toLowerCase().trim() == selectedCity.toLowerCase().trim());
+      
+      print('Daily Booking - Hotel ${hotel.name} matches: $matches');
+      return matches;
+    }).toList();
+  }
+}
+

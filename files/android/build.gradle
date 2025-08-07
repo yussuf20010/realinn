@@ -44,12 +44,18 @@ tasks.register("clean", Delete) {
     delete rootProject.buildDir
 }
 
+
+
 subprojects {
-    project.configurations.configureEach {
-        resolutionStrategy.eachDependency { details ->
-            if (details.requested.group == 'com.android.support' && !details.requested.name.contains('multidex') ) {
-                details.useVersion "27.1.1"
-            }
+    tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
+        kotlinOptions {
+            jvmTarget = "1.8"
         }
+    }
+}
+
+subprojects {
+    tasks.withType(JavaCompile).configureEach {
+        options.compilerArgs.removeAll(['-Werror'])
     }
 }

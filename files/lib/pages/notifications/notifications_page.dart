@@ -9,42 +9,23 @@ class NotificationsPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: PreferredSize(
-        preferredSize: Size.fromHeight(80),
-        child: Container(
-          decoration: BoxDecoration(
+      appBar: AppBar(
+        backgroundColor: WPConfig.primaryColor,
+        elevation: 2,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back_ios, color: Colors.white),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: Text(
+          'Notifications',
+          style: TextStyle(
             color: Colors.white,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.05),
-                blurRadius: 10,
-                offset: Offset(0, 2),
-              ),
-            ],
-          ),
-          child: SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  IconButton(
-                    onPressed: () => Navigator.pop(context),
-                    icon: Icon(Icons.arrow_back_ios, color: WPConfig.primaryColor),
-                  ),
-                  Text(
-                    'Notifications',
-                    style: TextStyle(
-                      color: WPConfig.primaryColor,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 24,
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            fontWeight: FontWeight.bold,
+            fontSize: 24,
           ),
         ),
+        centerTitle: true,
+        toolbarHeight: 80,
       ),
       body: ListView(
         padding: EdgeInsets.all(20),
