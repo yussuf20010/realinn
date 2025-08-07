@@ -1,17 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 import '../../controllers/auth/user_controller.dart';
-import '../../core/routes/app_routes.dart';
-import '../../models/profile_model.dart';
-import '../../models/member.dart';
 import '../../config/wp_config.dart';
-import '../../widgets/CustomBottomNavBar.dart';
 import 'package:easy_localization/easy_localization.dart';
 import '../../controllers/auth/auth_controller.dart';
-import '../booking/booking_page.dart';
-import '../favorites/favorites_page.dart';
-import '../home/home_page.dart';
 import '../login/pages/login_page.dart';
 
 class ProfilePage extends ConsumerStatefulWidget {
@@ -22,8 +14,6 @@ class ProfilePage extends ConsumerStatefulWidget {
 }
 
 class _ProfilePageState extends ConsumerState<ProfilePage> {
-  int _currentIndex = 3; // Profile tab is selected
-
   @override
   Widget build(BuildContext context) {
     return Consumer(
@@ -32,94 +22,106 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         final authNotifier = ref.read(authController.notifier);
         return Scaffold(
           backgroundColor: Colors.white,
-          body: CustomScrollView(
-            slivers: [
-              SliverAppBar(
-                expandedHeight: 200,
-                pinned: true,
-                backgroundColor: WPConfig.primaryColor,
-                flexibleSpace: FlexibleSpaceBar(
-                  background: Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          WPConfig.primaryColor,
-                          WPConfig.primaryColor.withOpacity(0.8),
-                        ],
-                      ),
+          appBar: AppBar(
+            backgroundColor: WPConfig.primaryColor,
+            elevation: 0,
+            automaticallyImplyLeading: false,
+            title: Text(
+              'Profile',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            centerTitle: true,
+          ),
+          body: SingleChildScrollView(
+            child: Column(
+              children: [
+                // Profile header
+                Container(
+                  height: 200,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        WPConfig.primaryColor,
+                        WPConfig.primaryColor.withOpacity(0.8),
+                      ],
                     ),
-                    child: SafeArea(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          CircleAvatar(
-                            radius: 50,
-                            backgroundColor: Colors.white,
-                            child: Icon(
-                              Icons.person,
-                              size: 50,
-                              color: WPConfig.primaryColor,
-                            ),
+                  ),
+                  child: SafeArea(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        CircleAvatar(
+                          radius: 50,
+                          backgroundColor: Colors.white,
+                          child: Icon(
+                            Icons.person,
+                            size: 50,
+                            color: WPConfig.primaryColor,
                           ),
-                          SizedBox(height: 16),
-                          userAsync.when(
-                            data: (user) {
-                              if (user != null) {
-                                return Column(
-                                  children: [
-                                    Text(
-                                      '${user.firstName} ${user.lastName}',
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 24,
-                                        fontWeight: FontWeight.bold,
-                                      ),
+                        ),
+                        SizedBox(height: 16),
+                        userAsync.when(
+                          data: (user) {
+                            if (user != null) {
+                              return Column(
+                                children: [
+                                  Text(
+                                    '${user.firstName} ${user.lastName}',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.bold,
                                     ),
-                                    SizedBox(height: 4),
-                                    Text(
-                                      user.email,
-                                      style: TextStyle(
-                                        color: Colors.white.withOpacity(0.8),
-                                        fontSize: 16,
-                                      ),
+                                  ),
+                                  SizedBox(height: 4),
+                                  Text(
+                                    user.email,
+                                    style: TextStyle(
+                                      color: Colors.white.withOpacity(0.8),
+                                      fontSize: 16,
                                     ),
-                                  ],
-                                );
-                              } else {
-                                return Column(
-                                  children: [
-                                    Text(
-                                      'Guest',
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 24,
-                                        fontWeight: FontWeight.bold,
-                                      ),
+                                  ),
+                                ],
+                              );
+                            } else {
+                              return Column(
+                                children: [
+                                  Text(
+                                    'Guest',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.bold,
                                     ),
-                                    SizedBox(height: 4),
-                                    Text(
-                                      '',
-                                      style: TextStyle(
-                                        color: Colors.white.withOpacity(0.8),
-                                        fontSize: 16,
-                                      ),
+                                  ),
+                                  SizedBox(height: 4),
+                                  Text(
+                                    '',
+                                    style: TextStyle(
+                                      color: Colors.white.withOpacity(0.8),
+                                      fontSize: 16,
                                     ),
-                                  ],
-                                );
-                              }
-                            },
-                            loading: () => CircularProgressIndicator(color: Colors.white),
-                            error: (e, _) => Text('Guest', style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
-                          ),
-                        ],
-                      ),
+                                  ),
+                                ],
+                              );
+                            }
+                          },
+                          loading: () => CircularProgressIndicator(color: Colors.white),
+                          error: (e, _) => Text('Guest', style: TextStyle(color: Colors.black, fontSize: 24, fontWeight: FontWeight.bold)),
+                        ),
+                      ],
                     ),
                   ),
                 ),
-              ),
-              SliverToBoxAdapter(
+                // Profile content
+                Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
                 child: Padding(
                   padding: const EdgeInsets.all(20),
                   child: Column(
@@ -257,47 +259,18 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                             ),
                           ),
                         ),
-                      ),
-                      SizedBox(height: 24), // Add extra padding at bottom for nav bar
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-          bottomNavigationBar: CustomBottomNavBar(
-            currentIndex: 3,
-            onTap: (index) {
-              if (index == 3) return;
-              switch (index) {
-                case 0:
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (_) => const HomePage()),
-                  );
-                  break;
-                case 1:
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (_) => const BookingPage()),
-                  );
-                  break;
-                case 2:
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (_) => const FavoritesPage()),
-                  );
-                  break;
-                case 3:
-                  // Already on ProfilePage
-                  break;
-              }
-            },
-          ),
-        );
-      },
-    );
-  }
+                                             ),
+                       SizedBox(height: 24), // Add extra padding at bottom for nav bar
+                     ],
+                   ),
+                 ),
+               ],
+             ),
+           ),
+         );
+       },
+     );
+   }
 
   Widget _buildProfileSection({
     required String title,

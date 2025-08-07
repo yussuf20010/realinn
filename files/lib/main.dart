@@ -4,6 +4,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 import 'config/wp_config.dart';
+import 'config/dynamic_config.dart';
 import 'core/localization/app_locales.dart';
 import 'core/routes/app_routes.dart';
 import 'core/routes/on_generate_route.dart';
@@ -35,6 +36,7 @@ class NewsProApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final dynamicConfig = ProviderScope.containerOf(context, listen: true).read(dynamicConfigProvider);
     // final isDarkMode = AdaptiveTheme.of(context).mode == AdaptiveThemeMode.dark;
 
     return AdaptiveTheme(
@@ -43,7 +45,7 @@ class NewsProApp extends StatelessWidget {
       initial: savedThemeMode ?? AdaptiveThemeMode.light,
       builder: (theme, darkTheme) => GlobalLoaderOverlay(
         child: MaterialApp(
-          title: WPConfig.appName,
+          title: dynamicConfig.appName ?? WPConfig.appName,
           localizationsDelegates: context.localizationDelegates,
           supportedLocales: context.supportedLocales,
           locale: context.locale,

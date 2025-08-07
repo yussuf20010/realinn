@@ -6,6 +6,7 @@ import '../../config/image_cache_config.dart';
 import '../../config/wp_config.dart';
 import '../../controllers/hotel_controller.dart';
 import '../../models/hotel.dart';
+import '../../widgets/custom_app_bar.dart';
 
 
 class AllHotelsPage extends ConsumerStatefulWidget {
@@ -173,23 +174,9 @@ class _AllHotelsPageState extends ConsumerState<AllHotelsPage> {
   Widget build(BuildContext context) {
     final hotelsAsync = ref.watch(hotelProvider);
     return Scaffold(
-      appBar: AppBar(
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Hotels', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
-            Text('Abidjan 200 hotels', style: TextStyle(color: Colors.black54, fontSize: 14)),
-          ],
-        ),
-        backgroundColor: Colors.white,
-        elevation: 0,
-        iconTheme: IconThemeData(color: Colors.black),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.person_outline, color: WPConfig.primaryColor),
-            onPressed: () {},
-          ),
-        ],
+      appBar: CustomAppBar(
+        title: 'Hotels',
+        showBackButton: true,
       ),
       body: Column(
         children: [
@@ -215,13 +202,13 @@ class _AllHotelsPageState extends ConsumerState<AllHotelsPage> {
           Expanded(
             child: hotelsAsync.when(
               data: (hotels) => ListView.builder(
-                padding: EdgeInsets.all(16),
+                padding: EdgeInsets.all(8),
                 itemCount: hotels.length,
                 itemBuilder: (context, index) {
                   final hotel = hotels[index];
                   final imageUrl = _getImageUrl(hotel);
                   return Container(
-                    margin: EdgeInsets.only(bottom: 16),
+                    margin: EdgeInsets.only(bottom: 4),
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(12),
@@ -254,7 +241,7 @@ class _AllHotelsPageState extends ConsumerState<AllHotelsPage> {
                         ),
                         Expanded(
                           child: Padding(
-                            padding: const EdgeInsets.all(12),
+                            padding: const EdgeInsets.all(10),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -282,14 +269,14 @@ class _AllHotelsPageState extends ConsumerState<AllHotelsPage> {
                                     ),
                                   ],
                                 ),
-                                SizedBox(height: 4),
+                                SizedBox(height: 3),
                                 Text(
                                   hotel.description ?? '',
                                   style: TextStyle(fontSize: 13, color: Colors.black87),
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
                                 ),
-                                SizedBox(height: 8),
+                                SizedBox(height: 6),
                                 Row(
                                   children: [
                                     Text(

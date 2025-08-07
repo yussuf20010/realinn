@@ -146,9 +146,8 @@ class _ResetPasswordFormState extends ConsumerState<ResetPasswordForm> {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                const HeadlineRow(
-                  headline: 'reset_pass',
-                  fontColor: AppColors.primary,
+                HeadlineRow(
+                  fontColor: AppColors.primary, headline: '',
                 ),
                 AppSizedBox.h16,
                 Text(

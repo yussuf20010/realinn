@@ -30,7 +30,7 @@ class ForgotPasswordPage extends StatelessWidget {
             Container(
               width: screenWidth,
               height: screenHeight,
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: [Color(0xFF2D0C4E), WPConfig.primaryColor],
                   begin: Alignment.topCenter,
@@ -133,9 +133,8 @@ class _ForgotPassFormState extends ConsumerState<ForgotPassForm> {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                const HeadlineRow(
-                  headline: 'forgot_pass',
-                  fontColor: AppColors.primary,
+                HeadlineRow(
+                  fontColor: AppColors.primary, headline: '',
                 ),
                 AppSizedBox.h16,
                 Text(

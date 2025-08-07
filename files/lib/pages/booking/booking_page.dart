@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../config/wp_config.dart';
 import '../../models/hotel.dart';
-import '../../widgets/CustomBottomNavBar.dart';
+import '../../widgets/custom_app_bar.dart';
 import '../hotel_details/hotel_details_page.dart';
-import '../home/home_page.dart';
-import '../favorites/favorites_page.dart';
-import '../profile/profile_page.dart';
+import '../notifications/notifications_page.dart';
+import '../settings/pages/customer_support_page.dart';
+import '../../widgets/vertical_hotel_card.dart';
 
 final bookingsProvider = StateNotifierProvider<BookingsNotifier, List<Booking>>((ref) {
   return BookingsNotifier();
@@ -69,6 +69,17 @@ class BookingPage extends ConsumerWidget {
     final bookings = ref.watch(bookingsProvider);
 
     return Scaffold(
+      appBar: CustomAppBar(
+        title: 'Bookings',
+        showBackButton: true,
+        onNotificationPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => NotificationsPage()),
+          );
+        },
+
+      ),
       body: bookings.isEmpty
           ? Center(
               child: Column(
@@ -100,47 +111,34 @@ class BookingPage extends ConsumerWidget {
               itemCount: bookings.length,
               itemBuilder: (context, index) {
                 final booking = bookings[index];
-                return Card(
-                  margin: EdgeInsets.only(bottom: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  elevation: 4,
-                  child: InkWell(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => HotelDetailsPage(hotel: booking.hotel),
-                        ),
-                      );
-                    },
-                    borderRadius: BorderRadius.circular(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Stack(
-                          children: [
-                            ClipRRect(
-                              borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-                              child: Image.network(
-                                booking.hotel.imageUrl ?? '',
-                                height: 200,
-                                width: double.infinity,
-                                fit: BoxFit.cover,
-                                errorBuilder: (context, error, stackTrace) {
-                                  return Container(
-                                    height: 200,
-                                    color: Colors.grey[300],
-                                    child: Icon(Icons.hotel, size: 64, color: Colors.grey[400]),
-                                  );
-                                },
-                              ),
-                            ),
-                            Positioned(
-                              top: 12,
-                              right: 12,
-                              child: Container(
+                return Column(
+                  children: [
+                    VerticalHotelCard(
+                      hotel: booking.hotel,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => HotelDetailsPage(hotel: booking.hotel),
+                          ),
+                        );
+                      },
+                      isFavorite: false,
+                    ),
+                    Container(
+                      margin: EdgeInsets.only(bottom: 20),
+                      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[50],
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Colors.grey[200]!),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Container(
                                 padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                                 decoration: BoxDecoration(
                                   color: _getStatusColor(booking.status),
@@ -155,95 +153,37 @@ class BookingPage extends ConsumerWidget {
                                   ),
                                 ),
                               ),
-                            ),
-                          ],
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Expanded(
-                                    child: Text(
-                                      booking.hotel.name ?? '',
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 18,
-                                      ),
-                                    ),
-                                  ),
-                                  IconButton(
-                                    icon: Icon(Icons.delete_outline, color: Colors.red),
-                                    onPressed: () {
-                                      ref.read(bookingsProvider.notifier).removeBooking(booking);
-                                    },
-                                  ),
-                                ],
-                              ),
-                              SizedBox(height: 8),
-                              Text(
-                                booking.hotel.location ?? '',
-                                style: TextStyle(
-                                  color: Colors.grey[600],
-                                  fontSize: 14,
-                                ),
-                              ),
-                              SizedBox(height: 16),
-                              _buildBookingInfoRow(
-                                Icons.calendar_today,
-                                'Check-in: ${_formatDate(booking.checkIn)}',
-                              ),
-                              SizedBox(height: 8),
-                              _buildBookingInfoRow(
-                                Icons.calendar_today,
-                                'Check-out: ${_formatDate(booking.checkOut)}',
-                              ),
-                              SizedBox(height: 8),
-                              _buildBookingInfoRow(
-                                Icons.people,
-                                '${booking.adults} Adults, ${booking.children} Children, ${booking.rooms} Room${booking.rooms > 1 ? 's' : ''}',
+                              Spacer(),
+                              IconButton(
+                                icon: Icon(Icons.delete_outline, color: Colors.red),
+                                onPressed: () {
+                                  ref.read(bookingsProvider.notifier).removeBooking(booking);
+                                },
                               ),
                             ],
                           ),
-                        ),
-                      ],
+                          SizedBox(height: 8),
+                          _buildBookingInfoRow(
+                            Icons.calendar_today,
+                            'Check-in: ${_formatDate(booking.checkIn)}',
+                          ),
+                          SizedBox(height: 4),
+                          _buildBookingInfoRow(
+                            Icons.calendar_today,
+                            'Check-out: ${_formatDate(booking.checkOut)}',
+                          ),
+                          SizedBox(height: 4),
+                          _buildBookingInfoRow(
+                            Icons.people,
+                            '${booking.adults} Adults, ${booking.children} Children, ${booking.rooms} Room${booking.rooms > 1 ? 's' : ''}',
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
+                  ],
                 );
               },
             ),
-      bottomNavigationBar: CustomBottomNavBar(
-        currentIndex: 1,
-        onTap: (index) {
-          if (index == 1) return;
-          switch (index) {
-            case 0:
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (_) => const HomePage()),
-              );
-              break;
-            case 1:
-              // Already on BookingPage
-              break;
-            case 2:
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (_) => const FavoritesPage()),
-              );
-              break;
-            case 3:
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (_) => const ProfilePage()),
-              );
-              break;
-          }
-        },
-      ),
     );
   }
 

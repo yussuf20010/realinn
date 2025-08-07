@@ -115,7 +115,7 @@ class AppUtil {
           showTitle: true,
           urlBarHidingEnabled: true,
         ),
-        safariVCOptions: const SafariViewControllerOptions(
+        safariVCOptions: SafariViewControllerOptions(
           barCollapsingEnabled: true,
           preferredBarTintColor: AppColors.scaffoldBackground,
           preferredControlTintColor: AppColors.primary,

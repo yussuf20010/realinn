@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'dynamic_config.dart';
 
 class WPConfig {
   /// The Name of your app
@@ -7,10 +9,17 @@ class WPConfig {
   /// The url of your app, should not inclued any '/' slash or any 'https://' or 'http://'
   /// Otherwise it may break the compaitbility, And your website must be
   /// a wordpress website.
-  static const String url = 'https://realestate.learnock.com/api/';
-  static const String siteStorageUrl = 'https://realestate.learnock.com/storage/' ;
+  static const String url = 'https://realinn.b-circles.co';
+  static const String siteStorageUrl = 'https://realinn.b-circles.co/storage/' ;
+  static const String siteSettingsApiUrl = '$url/api/site-settings';
+  static const String hotelsApiUrl = '$url/api/hotels';
+  static const String siteApiKey = 'your_secret_api_key';
   /// Primary Color of the App, must be a valid hex code after '0xFF '
-  static const Color primaryColor = Color(0xFF885ac9);
+  static Color get primaryColor {
+    final container = ProviderContainer();
+    final dynamicConfig = container.read(dynamicConfigProvider);
+    return dynamicConfig.primaryColor ?? const Color(0xFF885ac9);
+  }
   static const String apikey = '1234';
 
   /// fake order state
@@ -61,4 +70,6 @@ class WPConfig {
   static String enArticleCategoryFilterNumber = '0';
   static String arArticleCategoryFilterNumber = '1';
   static String videosCategoryFilterNumber  = '2';
+
+  static String get imageBaseUrl => siteStorageUrl;
 }

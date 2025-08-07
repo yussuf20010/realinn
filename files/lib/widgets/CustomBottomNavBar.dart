@@ -1,49 +1,47 @@
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import 'package:realinn/pages/booking/booking_page.dart';
-import 'package:realinn/pages/favorites/favorites_page.dart';
-import 'package:realinn/pages/home/home_page.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../config/dynamic_config.dart';
 
-import '../config/wp_config.dart';
-import '../core/constants/assets.dart';
-import '../pages/notifications/notifications_page.dart';
-import '../pages/profile/profile_page.dart';
-
-class CustomBottomNavBar extends StatelessWidget {
+class CustomBottomNavBar extends ConsumerWidget {
   final int currentIndex;
-  final ValueChanged<int> onTap;
+  final Function(int) onTap;
 
-  const CustomBottomNavBar({
-    Key? key,
+  CustomBottomNavBar({
     required this.currentIndex,
     required this.onTap,
-  }) : super(key: key);
+  });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final dynamicConfig = ref.watch(dynamicConfigProvider);
+    final primaryColor = dynamicConfig.primaryColor ?? Color(0xFF895ffc);
+    
     return Container(
       decoration: BoxDecoration(
-        color: WPConfig.primaryColor,
+        color: primaryColor, // Use primary color as background
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(25),
+          topRight: Radius.circular(25),
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.15),
-            blurRadius: 12,
-            offset: Offset(0, -2),
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 15,
+            offset: Offset(0, -5),
           ),
         ],
       ),
       child: SafeArea(
-        top: false,
-        child: SizedBox(
-          height: 76,
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _buildNavItem(context, 0, 'home'.tr(), AssetsManager.home),
-              _buildNavItem(context, 1, 'history'.tr(), AssetsManager.booking),
-              _buildNavItem(context, 2, 'favourite'.tr(), AssetsManager.favorites),
-              _buildNavItem(context, 3, 'profile'.tr(), AssetsManager.profile),
+              _buildNavItem(0, Icons.favorite, 'Favorites', primaryColor),
+              _buildNavItem(1, Icons.history, 'History', primaryColor),
+              _buildNavItem(2, Icons.book, 'Booking', primaryColor),
+              _buildNavItem(3, Icons.home, 'Home', primaryColor),
+              _buildNavItem(4, Icons.person, 'Profile', primaryColor),
             ],
           ),
         ),
@@ -51,43 +49,32 @@ class CustomBottomNavBar extends StatelessWidget {
     );
   }
 
-  Widget _buildNavItem(BuildContext context, int index, String label, String iconPath) {
+  Widget _buildNavItem(int index, IconData icon, String label, Color primaryColor) {
     final isSelected = currentIndex == index;
-    return InkWell(
-      onTap: () {
-        if (!isSelected) {
-          onTap(index);
-        }
-      },
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+    return GestureDetector(
+      onTap: () => onTap(index),
+      child: AnimatedContainer(
+        duration: Duration(milliseconds: 200),
+        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected ? Colors.white.withOpacity(0.2) : Colors.transparent,
+          borderRadius: BorderRadius.circular(20),
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Container(
-              padding: EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: isSelected ? Colors.yellow.withOpacity(0.2) : Colors.transparent,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: SvgPicture.asset(
-                iconPath,
-                width: 20,
-                height: 20,
-                colorFilter: ColorFilter.mode(
-                  Colors.white,
-                  BlendMode.srcIn,
-                ),
-              ),
+            Icon(
+              icon,
+              color: isSelected ? Colors.white : Colors.white.withOpacity(0.7),
+              size: 22,
             ),
-            const SizedBox(height: 2),
+            SizedBox(height: 4),
             Text(
               label,
               style: TextStyle(
-                color: isSelected ? Colors.yellow : Colors.white,
-                fontWeight: FontWeight.bold,
-                fontSize: 12,
-                letterSpacing: 0.5,
+                color: isSelected ? Colors.white : Colors.white.withOpacity(0.7),
+                fontSize: 10,
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
               ),
             ),
           ],

@@ -239,7 +239,11 @@ class AppTheme {
         AppColors.primary,
       ),
     ),
-    textTheme: ThemeData.light().textTheme.apply(fontFamily: fontName),
+    textTheme: ThemeData.light().textTheme.apply(
+      fontFamily: fontName,
+      displayColor: Colors.black,
+      bodyColor: Colors.black,
+    ),
     scaffoldBackgroundColor: AppColors.scaffoldBackground,
     cardColor: AppColors.cardColor,
     canvasColor: AppColors.cardColor,
@@ -250,7 +254,7 @@ class AppTheme {
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: AppDefaults.borderRadius,
-        borderSide: const BorderSide(
+        borderSide: BorderSide(
           color: AppColors.primary,
         ),
       ),
@@ -258,7 +262,7 @@ class AppTheme {
       filled: true,
       floatingLabelBehavior: FloatingLabelBehavior.never,
     ),
-    appBarTheme: const AppBarTheme(
+    appBarTheme: AppBarTheme(
       backgroundColor: AppColors.scaffoldBackground,
       elevation: 0,
       systemOverlayStyle: SystemUiOverlayStyle(
@@ -287,7 +291,7 @@ class AppTheme {
     outlinedButtonTheme: OutlinedButtonThemeData(
       style: OutlinedButton.styleFrom(
         foregroundColor: AppColors.primary,
-        side: const BorderSide(color: AppColors.primary),
+        side: BorderSide(color: AppColors.primary),
         padding: const EdgeInsets.all(AppDefaults.padding),
         shape: RoundedRectangleBorder(
           borderRadius: AppDefaults.borderRadius,
@@ -295,7 +299,7 @@ class AppTheme {
       ),
     ),
     tabBarTheme: TabBarTheme(
-      indicator: const UnderlineTabIndicator(
+      indicator: UnderlineTabIndicator(
         borderSide: BorderSide(
           color: AppColors.primary,
           width: 2,
@@ -308,13 +312,13 @@ class AppTheme {
       labelColor: AppColors.primary,
       unselectedLabelColor: AppColors.cardColorDark.withOpacity(0.5),
       indicatorSize: TabBarIndicatorSize.label,
-      labelStyle: const TextStyle(
+      labelStyle: TextStyle(
         fontFamily: fontName,
         fontWeight: FontWeight.bold,
       ),
-      unselectedLabelStyle: const TextStyle(fontFamily: fontName),
+      unselectedLabelStyle: TextStyle(fontFamily: fontName),
     ),
-    checkboxTheme: const CheckboxThemeData(
+    checkboxTheme: CheckboxThemeData(
       side: BorderSide(
         color: AppColors.scaffoldBackgrounDark,
       ),
@@ -330,8 +334,8 @@ class AppTheme {
     ),
     textTheme: ThemeData.dark().textTheme.apply(
       fontFamily: fontName,
-      displayColor: Colors.white,
-      bodyColor: Colors.white,
+      displayColor: Colors.black,
+      bodyColor: Colors.black,
     ),
     cardColor: AppColors.cardColorDark,
     scaffoldBackgroundColor: AppColors.scaffoldBackgrounDark,
@@ -343,20 +347,20 @@ class AppTheme {
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: AppDefaults.borderRadius,
-        borderSide: const BorderSide(
+        borderSide: BorderSide(
           color: AppColors.primary,
         ),
       ),
       fillColor: AppColors.cardColorDark,
       filled: true,
       floatingLabelBehavior: FloatingLabelBehavior.never,
-      labelStyle: const TextStyle(color: AppColors.placeholder),
+      labelStyle: TextStyle(color: AppColors.placeholder),
       iconColor: AppColors.placeholder,
-      hintStyle: const TextStyle(color: AppColors.placeholder),
+      hintStyle: TextStyle(color: AppColors.placeholder),
     ),
-    iconTheme: const IconThemeData(color: AppColors.primary),
-    listTileTheme: const ListTileThemeData(iconColor: AppColors.primary),
-    appBarTheme: const AppBarTheme(
+    iconTheme: IconThemeData(color: AppColors.primary),
+    listTileTheme: ListTileThemeData(iconColor: AppColors.primary),
+    appBarTheme: AppBarTheme(
       backgroundColor: AppColors.scaffoldBackgrounDark,
       elevation: 0,
       foregroundColor: Colors.white,
@@ -370,7 +374,7 @@ class AppTheme {
         statusBarColor: AppColors.scaffoldBackgrounDark,
       ),
       titleTextStyle: TextStyle(
-        color: Colors.white,
+        color: Colors.black,
         fontFamily: fontName,
       ),
       centerTitle: true,
@@ -388,7 +392,7 @@ class AppTheme {
     outlinedButtonTheme: OutlinedButtonThemeData(
       style: OutlinedButton.styleFrom(
         foregroundColor: AppColors.primary,
-        side: const BorderSide(color: AppColors.primary),
+        side: BorderSide(color: AppColors.primary),
         padding: const EdgeInsets.all(AppDefaults.padding),
         shape: RoundedRectangleBorder(
           borderRadius: AppDefaults.borderRadius,
@@ -396,7 +400,7 @@ class AppTheme {
       ),
     ),
     tabBarTheme: TabBarTheme(
-      indicator: const UnderlineTabIndicator(
+      indicator: UnderlineTabIndicator(
         borderSide: BorderSide(
           color: AppColors.primary,
           width: 2,
@@ -409,13 +413,13 @@ class AppTheme {
       labelColor: AppColors.primary,
       unselectedLabelColor: AppColors.cardColor.withOpacity(0.5),
       indicatorSize: TabBarIndicatorSize.label,
-      labelStyle: const TextStyle(
+      labelStyle: TextStyle(
         fontFamily: fontName,
         fontWeight: FontWeight.bold,
       ),
-      unselectedLabelStyle: const TextStyle(fontFamily: fontName),
+      unselectedLabelStyle: TextStyle(fontFamily: fontName),
     ),
-    checkboxTheme: const CheckboxThemeData(
+    checkboxTheme: CheckboxThemeData(
       side: BorderSide(
         color: AppColors.scaffoldBackground,
       ),

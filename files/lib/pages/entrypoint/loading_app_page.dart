@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../config/core_provider.dart';
 import '../../config/wp_config.dart';
-import '../home/home_page.dart';
+import '../main/main_scaffold.dart';
 import '../login/login_intro_page.dart';
 import 'components/loading_dependency.dart';
 
@@ -17,13 +17,13 @@ class LoadingAppPage extends ConsumerWidget {
         data: (initialState) {
           switch (initialState.value) {
             case AppState.loggedIn:
-              return HomePage();
+              return MainScaffold();
             case AppState.loggedOut:
               return WPConfig.forceUserToLoginEverytime
                   ? const LoginIntroPage()
-                  :  HomePage();
+                  :  MainScaffold();
             default:
-              return  HomePage();
+              return  MainScaffold();
           }
         },
         error: (t) => const Text('Unknown Error'),

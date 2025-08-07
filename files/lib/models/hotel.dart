@@ -1,3 +1,5 @@
+import '../config/wp_config.dart';
+
 class Hotel {
   final String? id;
   final String? name;
@@ -19,6 +21,22 @@ class Hotel {
   final String? category;
   final List<String>? nearbyAttractions;
   final List<String>? availableDates;
+  
+  // New location fields
+  final String? country;
+  final String? state;
+  final String? city;
+  final int? countryId;
+  final int? stateId;
+  final int? cityId;
+  
+  // Additional fields from API
+  final String? slug;
+  final int? stars;
+  final String? amenities;
+  final String? categorySlug;
+  final double? latitude;
+  final double? longitude;
 
   Hotel({
     this.id,
@@ -41,35 +59,99 @@ class Hotel {
     this.category,
     this.nearbyAttractions,
     this.availableDates,
+    this.country,
+    this.state,
+    this.city,
+    this.countryId,
+    this.stateId,
+    this.cityId,
+    this.slug,
+    this.stars,
+    this.amenities,
+    this.categorySlug,
+    this.latitude,
+    this.longitude,
   });
 
   factory Hotel.fromJson(Map<String, dynamic> json, String id) {
+    // Handle image URL
+    String? imageUrl = json['image_url'] ?? json['logo'];
+    if (imageUrl != null && !imageUrl.startsWith('http')) {
+      imageUrl = WPConfig.imageBaseUrl + imageUrl;
+    }
+    
+    // Handle price range
+    String? priceRange;
+    if (json['min_price'] != null && json['max_price'] != null) {
+      priceRange = '${json['min_price']} - ${json['max_price']}';
+    } else if (json['min_price'] != null) {
+      priceRange = json['min_price'].toString();
+    } else if (json['price_range'] != null) {
+      priceRange = json['price_range'].toString();
+    }
+    
+
+    
+    // Handle rate conversion safely
+    double? rate;
+    final rateValue = json['rate'] ?? json['average_rating'];
+    if (rateValue != null) {
+      if (rateValue is num) {
+        rate = rateValue.toDouble();
+      } else if (rateValue is String) {
+        rate = double.tryParse(rateValue);
+      }
+    }
+
+    // Handle coordinates safely
+    double? latitude;
+    double? longitude;
+    if (json['latitude'] != null) {
+      if (json['latitude'] is num) {
+        latitude = json['latitude'].toDouble();
+      } else if (json['latitude'] is String) {
+        latitude = double.tryParse(json['latitude']);
+      }
+    }
+    if (json['longitude'] != null) {
+      if (json['longitude'] is num) {
+        longitude = json['longitude'].toDouble();
+      } else if (json['longitude'] is String) {
+        longitude = double.tryParse(json['longitude']);
+      }
+    }
+
+    // Handle coordinates map
+    Map<String, double>? coordinates;
+    if (latitude != null && longitude != null) {
+      coordinates = {
+        'latitude': latitude,
+        'longitude': longitude,
+      };
+    }
+
     return Hotel(
-      id: id,
-      name: json['name'],
-      location: json['location'],
-      imageUrl: json['image_url'],
-      rate: (json['rate'] != null) ? (json['rate'] as num).toDouble() : null,
-      isOccupied: json['is_occupied'],
-      description: json['description'],
-      facilities: (json['facilities'] as List?)?.map((e) => e.toString()).toList(),
-      roomTypes: (json['room_types'] as List?)?.map((e) => e.toString()).toList(),
-      checkInTime: json['check_in_time'],
-      checkOutTime: json['check_out_time'],
-      priceRange: json['price_range'],
-      contact: (json['contact'] as Map?)?.map((k, v) => MapEntry(k.toString(), v.toString())),
-      reviews: (json['reviews'] as List?)?.map((e) => HotelReview.fromJson(e)).toList(),
-      locationCoordinates: json['location_coordinates'] != null
-          ? {
-              'latitude': (json['location_coordinates']['latitude'] as num?)?.toDouble() ?? 0.0,
-              'longitude': (json['location_coordinates']['longitude'] as num?)?.toDouble() ?? 0.0,
-            }
-          : null,
-      bookingUrl: json['booking_url'],
-      images: (json['images'] as List?)?.map((e) => e.toString()).toList(),
-      category: json['category'],
-      nearbyAttractions: (json['nearby_attractions'] as List?)?.map((e) => e.toString()).toList(),
-      availableDates: (json['available_dates'] as List?)?.map((e) => e.toString()).toList(),
+      id: id.isNotEmpty ? id : json['id']?.toString(),
+      name: json['name'] ?? json['title'],
+      location: json['location'] ?? json['categoryName'],
+      imageUrl: imageUrl,
+      rate: rate,
+      priceRange: priceRange,
+      category: json['category'] ?? json['categoryName'],
+      country: json['country'],
+      state: json['state'],
+      city: json['city'],
+      countryId: json['country_id'] is int ? json['country_id'] : (json['country_id'] is String ? int.tryParse(json['country_id']) : null),
+      stateId: json['state_id'] is int ? json['state_id'] : (json['state_id'] is String ? int.tryParse(json['state_id']) : null),
+      cityId: json['city_id'] is int ? json['city_id'] : (json['city_id'] is String ? int.tryParse(json['city_id']) : null),
+      slug: json['slug'],
+      stars: json['stars'] is int ? json['stars'] : (json['stars'] is String ? int.tryParse(json['stars']) : null),
+      amenities: json['amenities'],
+      categorySlug: json['categorySlug'],
+      latitude: latitude,
+      longitude: longitude,
+      locationCoordinates: coordinates,
+      // Map other fields as needed
     );
   }
 
@@ -95,6 +177,18 @@ class Hotel {
       'category': category,
       'nearby_attractions': nearbyAttractions,
       'available_dates': availableDates,
+      'country': country,
+      'state': state,
+      'city': city,
+      'country_id': countryId,
+      'state_id': stateId,
+      'city_id': cityId,
+      'slug': slug,
+      'stars': stars,
+      'amenities': amenities,
+      'categorySlug': categorySlug,
+      'latitude': latitude,
+      'longitude': longitude,
     };
   }
 }

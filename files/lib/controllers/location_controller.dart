@@ -2,18 +2,23 @@ import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
 import '../models/location.dart';
+import '../config/wp_config.dart';
 
-final locationProvider = FutureProvider<List<LocationModel>>((ref) async {
+final locationProvider = FutureProvider<LocationResponse>((ref) async {
+  final url = WPConfig.hotelsApiUrl; // Using the same API endpoint
+  final headers = {
+    'Content-Type': 'application/json',
+    'x-api-key': WPConfig.siteApiKey,
+  };
+  
   try {
-    final url = 'https://cloud-computing-2d51f-default-rtdb.firebaseio.com/countries.json';
     print('Fetching locations from: $url');
-    
-    final response = await http.get(Uri.parse(url));
+    final response = await http.get(Uri.parse(url), headers: headers);
     print('Response status code: ${response.statusCode}');
     print('Raw response body: ${response.body}');
     
     if (response.statusCode == 200) {
-      final dynamic decodedResponse = json.decode(response.body);
+      final decodedResponse = json.decode(response.body);
       
       if (decodedResponse == null) {
         print('API returned null response');
@@ -25,27 +30,15 @@ final locationProvider = FutureProvider<List<LocationModel>>((ref) async {
         throw Exception('Invalid response format');
       }
       
-      if (!decodedResponse.containsKey('countries')) {
-        print('Response missing "countries" key. Available keys: ${decodedResponse.keys.join(', ')}');
-        throw Exception('Response missing "countries" key');
-      }
+      final locationResponse = LocationResponse.fromJson(decodedResponse);
       
-      final countriesList = decodedResponse['countries'];
-      if (countriesList is! List) {
-        print('Invalid countries data. Expected List but got ${countriesList.runtimeType}');
-        throw Exception('Invalid countries data format');
-      }
+      print('Successfully parsed location data:');
+      print('- Countries: ${locationResponse.countries?.length ?? 0}');
+      print('- States: ${locationResponse.states?.length ?? 0}');
+      print('- Cities: ${locationResponse.cities?.length ?? 0}');
+      print('- Hotels: ${locationResponse.hotels?.length ?? 0}');
       
-      final countries = countriesList
-          .map((country) => LocationModel.fromJson(country))
-          .toList();
-      
-      print('Successfully parsed ${countries.length} countries:');
-      for (var country in countries) {
-        print('- ${country.country} (${country.numberOfHotels} hotels)');
-      }
-      
-      return countries;
+      return locationResponse;
     } else {
       print('Failed to load locations. Status code: ${response.statusCode}');
       print('Error response: ${response.body}');
@@ -54,6 +47,19 @@ final locationProvider = FutureProvider<List<LocationModel>>((ref) async {
   } catch (e, stackTrace) {
     print('Error loading locations: $e');
     print('Stack trace: $stackTrace');
-    throw Exception('Failed to load locations: $e');
+    throw Exception('Error loading locations: $e');
   }
+});
+
+// Legacy provider for backward compatibility
+final legacyLocationProvider = FutureProvider<List<LocationModel>>((ref) async {
+  final locationResponse = await ref.watch(locationProvider.future);
+
+  // Convert countries to LocationModel format for backward compatibility
+  return locationResponse.countries?.map((country) => LocationModel(
+    country: country.name,
+    numberOfHotels: 0, // This would need to be calculated based on hotels in this country
+    image: null,
+    hotels: null,
+  )).toList() ?? [];
 }); 

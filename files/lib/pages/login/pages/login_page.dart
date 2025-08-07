@@ -23,7 +23,7 @@ class LoginPage extends StatelessWidget {
             Container(
               width: screenWidth,
               height: screenHeight,
-              decoration: const BoxDecoration(
+              decoration:   BoxDecoration(
                 gradient: LinearGradient(
                   colors: [Color(0xFF2D0C4E), WPConfig.primaryColor],
                   begin: Alignment.topCenter,
@@ -227,7 +227,7 @@ class _LoginFormSectionState extends ConsumerState<LoginFormSection> {
             ),
           ),
           const SizedBox(height: 16),
-          Center(child: Text('or_sign_in_using'.tr(), style: TextStyle(color: Colors.grey, inherit: true))),
+                      Center(child: Text('or_sign_in_using'.tr(), style: TextStyle(color: Colors.black, inherit: true))),
           const SizedBox(height: 16),
           Row(
             children: [

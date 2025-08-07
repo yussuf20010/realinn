@@ -1,11 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../config/wp_config.dart';
+import '../../config/dynamic_config.dart';
 
 class AppColors {
   /* <----------- Colors ------------> */
   /// Primary Color of this App
-  static const Color primary = WPConfig.primaryColor;
+  static Color get primary {
+    final container = ProviderContainer();
+    final dynamicConfig = container.read(dynamicConfigProvider);
+    return dynamicConfig.primaryColor ?? WPConfig.primaryColor;
+  }
   static const Color primaryImportant = Colors.yellow;
 
   // Others Color

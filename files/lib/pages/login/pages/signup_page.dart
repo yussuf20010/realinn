@@ -20,7 +20,7 @@ class SignUpPage extends StatelessWidget {
             Container(
               width: screenWidth,
               height: screenHeight,
-              decoration: const BoxDecoration(
+              decoration:  BoxDecoration(
                 gradient: LinearGradient(
                   colors: [Color(0xFF2D0C4E), WPConfig.primaryColor],
                   begin: Alignment.topCenter,
@@ -242,7 +242,7 @@ class _SignupFormState extends ConsumerState<SignupForm> {
             ),
           ),
           const SizedBox(height: 16),
-          Center(child: Text('or_sign_in_using'.tr(), style: TextStyle(color: Colors.grey[700]))),
+                          Center(child: Text('or_sign_in_using'.tr(), style: TextStyle(color: Colors.black))),
           const SizedBox(height: 16),
           Row(
             children: [

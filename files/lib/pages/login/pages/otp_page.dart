@@ -33,7 +33,7 @@ class OtpPage extends StatelessWidget {
     body: Container(
           width: screenWidth,
           height: screenHeight,
-          decoration: const BoxDecoration(
+          decoration:  BoxDecoration(
             gradient: LinearGradient(
               colors: [Color(0xFF2D0C4E), WPConfig.primaryColor],
               begin: Alignment.topCenter,
