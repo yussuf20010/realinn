@@ -8,9 +8,7 @@ class AppColors {
   /* <----------- Colors ------------> */
   /// Primary Color of this App
   static Color get primary {
-    final container = ProviderContainer();
-    final dynamicConfig = container.read(dynamicConfigProvider);
-    return dynamicConfig.primaryColor ?? WPConfig.primaryColor;
+    return WPConfig.navbarColor; // Use constant color as primary color for whole app
   }
   static const Color primaryImportant = Colors.yellow;
 

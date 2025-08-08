@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../config/dynamic_config.dart';
+import '../../../config/wp_config.dart';
 import 'package:easy_localization/easy_localization.dart';
-import '../../../../config/dynamic_config.dart';
 
 class BookingTypeSelector extends ConsumerWidget {
   final VoidCallback onDailyBookingTap;
@@ -15,8 +16,7 @@ class BookingTypeSelector extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final dynamicConfig = ref.watch(dynamicConfigProvider);
-    final primaryColor = dynamicConfig.primaryColor ?? Color(0xFF895ffc);
+    final primaryColor = WPConfig.navbarColor; // Use constant color directly
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),

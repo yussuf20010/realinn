@@ -11,6 +11,7 @@ import 'package:timeago/timeago.dart' as timeago;
 import 'package:url_launcher/url_launcher.dart' as launcher;
 import 'package:url_launcher/url_launcher_string.dart';
 
+import '../../config/wp_config.dart';
 import '../constants/app_colors.dart';
 
 class AppUtil {
@@ -156,6 +157,55 @@ class AppUtil {
     final unescape = HtmlUnescape();
     final data = unescape.convert(html);
     return data;
+  }
+
+  /// Safely show snackbar to prevent unmounted widget errors
+  static void showSafeSnackBar(BuildContext context, {
+    required String message,
+    Color? backgroundColor,
+    Color? textColor,
+    String? actionLabel,
+    VoidCallback? onActionPressed,
+    Duration duration = const Duration(seconds: 2), // Reduced duration
+  }) {
+    // Check if context is still mounted before showing snackbar
+    if (!context.mounted) return;
+    
+    // Use app's primary color as default background
+    final defaultBackgroundColor = backgroundColor ?? WPConfig.navbarColor;
+    
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          message,
+          style: TextStyle(
+            color: textColor ?? Colors.white,
+            fontWeight: FontWeight.w500,
+            fontSize: 14, // Smaller font size
+          ),
+        ),
+        backgroundColor: defaultBackgroundColor,
+        duration: duration,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8), // Smaller radius
+        ),
+        margin: EdgeInsets.all(12), // Smaller margin
+        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12), // Smaller padding
+        action: actionLabel != null && onActionPressed != null
+            ? SnackBarAction(
+                label: actionLabel,
+                textColor: Colors.white,
+                onPressed: () {
+                  // Check if context is still mounted before executing action
+                  if (context.mounted) {
+                    onActionPressed();
+                  }
+                },
+              )
+            : null,
+      ),
+    );
   }
 
   static void handleUrl(String url) {

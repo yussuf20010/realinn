@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../controllers/hotel_controller.dart';
@@ -135,7 +136,7 @@ class HotelsList extends ConsumerWidget {
               print('After filtering: ${filteredHotels.length} hotels');
             }
 
-            // Debug print
+             // Debug print
             print('Selected locations: $selectedLocations');
             print('Total hotels: ${hotels.length}');
             print('Filtered hotels: ${filteredHotels.length}');
@@ -143,70 +144,62 @@ class HotelsList extends ConsumerWidget {
               print('Sample hotel data: ${hotels.first.toJson()}');
             }
 
-            // If filtered, show vertical cards in a single list
-            if (selectedLocations.isNotEmpty) {
-              print('Showing filtered hotels layout');
-              if (filteredHotels.isEmpty) {
-                print('No hotels found for selected locations');
-                return Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.hotel_outlined, size: 64, color: Colors.grey[400]),
-                      SizedBox(height: 16),
-                      Text(
-                        'No hotels found for selected locations',
-                        style: TextStyle(fontSize: 16, color: Colors.black),
-                      ),
-                      SizedBox(height: 8),
-                      Text(
-                        'Try selecting different locations',
-                        style: TextStyle(fontSize: 14, color: Colors.grey[500]),
-                      ),
-                    ],
-                  ),
-                );
-              }
-
-              // Responsive layout for tablets
-              if (screenWidth > 768) {
-                print('Using tablet grid layout');
-                // Grid layout for tablets - 2 cards per row with minimal spacing
-                return Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    for (int i = 0; i < filteredHotels.length; i += 2)
-                      Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 4, vertical: 1),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: HotelCardModern(hotel: filteredHotels[i], bookingType: bookingType),
-                            ),
-                            if (i + 1 < filteredHotels.length)
-                              Expanded(
-                                child: HotelCardModern(hotel: filteredHotels[i + 1], bookingType: bookingType),
-                              ),
-                          ],
-                        ),
-                      ),
-                  ],
-                );
-              } else {
-                print('Using phone list layout');
-                // List layout for phones
-                return Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    for (int i = 0; i < filteredHotels.length; i++)
-                      Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 8, vertical: 1),
-                        child: HotelCardModern(hotel: filteredHotels[i], bookingType: bookingType),
-                      ),
-                  ],
-                );
-              }
-            }
+             // If filtered
+             if (selectedLocations.isNotEmpty) {
+               print('Showing filtered hotels layout');
+               if (filteredHotels.isEmpty) {
+                 print('No hotels found for selected locations');
+                  return Center(
+                   child: Column(
+                     mainAxisAlignment: MainAxisAlignment.center,
+                     children: [
+                       Icon(Icons.hotel_outlined, size: 64, color: Colors.grey[400]),
+                       SizedBox(height: 16),
+                        Text(
+                          'no_hotels_found'.tr(),
+                         style: TextStyle(fontSize: 16, color: Colors.black),
+                       ),
+                       SizedBox(height: 8),
+                        Text(
+                          'try_selecting_different_locations'.tr(),
+                         style: TextStyle(fontSize: 14, color: Colors.grey[500]),
+                       ),
+                     ],
+                   ),
+                 );
+               }
+               // Tablet: show exactly two cards only
+               if (screenWidth > 768) {
+                 final toShow = filteredHotels.take(2).toList();
+                 return Padding(
+                   padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                   child: Row(
+                     children: [
+                       Expanded(child: HotelCardModern(hotel: toShow[0], bookingType: bookingType)),
+                       if (toShow.length > 1)
+                         SizedBox(width: 6),
+                       if (toShow.length > 1)
+                         Expanded(child: HotelCardModern(hotel: toShow[1], bookingType: bookingType)),
+                     ],
+                   ),
+                 );
+               }
+               // Mobile: keep horizontal scrollable layout
+               return SizedBox(
+                 height: screenHeight * 0.25,
+                 child: ListView.separated(
+                   scrollDirection: Axis.horizontal,
+                   physics: BouncingScrollPhysics(),
+                   padding: EdgeInsets.symmetric(horizontal: 8),
+                   itemCount: filteredHotels.length,
+                   separatorBuilder: (_, __) => SizedBox(width: 8),
+                   itemBuilder: (context, index) { 
+                     final hotel = filteredHotels[index];
+                     return HotelCardModern(hotel: hotel, bookingType: bookingType);
+                   },
+                 ),
+               );
+             }
 
             // If not filtered, show horizontal cards grouped by category
             print('Showing unfiltered hotels grouped by category');
@@ -235,61 +228,61 @@ class HotelsList extends ConsumerWidget {
                         category,
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
-                          fontSize: screenWidth > 768 ? 8 : 14, 
+                          fontSize: screenWidth > 768 ? 16 : 14, 
                           color: Colors.black,
                         ),
                       ),      
                     ),
 
-                    // Hotels in this category - responsive layout 
-                    screenWidth > 768
-                        ? Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              for (int i = 0; i < (categoryHotels.length > 2 ? 2 : categoryHotels.length); i += 2)
-                                Padding(
-                                  padding: EdgeInsets.symmetric(horizontal: 4, vertical: 1),
-                                  child: Row(
-                                    children: [
-                                      Expanded(
-                                        child: HotelCardModern(hotel: categoryHotels[i], bookingType: bookingType),
-                                      ),
-                                      if (i + 1 < (categoryHotels.length > 2 ? 2 : categoryHotels.length))
-                                        Expanded(
-                                          child: HotelCardModern(hotel: categoryHotels[i + 1], bookingType: bookingType),
-                                        ),
-                                    ],
-                                  ),
-                                ),
-                            ],
-                          )
-                        : SizedBox(
-                            height: screenHeight * 0.25,
-                            child: ListView.separated(
-                              scrollDirection: Axis.horizontal,
-                              physics: AlwaysScrollableScrollPhysics(),
-                              padding: EdgeInsets.symmetric(horizontal: 8),
-                              itemCount: categoryHotels.length > 2 ? 2 : categoryHotels.length,
-                              separatorBuilder: (_, __) => SizedBox(width: 8),
-                              itemBuilder: (context, index) {
-                                final hotel = categoryHotels[index];
-                                return HotelCardModern(hotel: hotel, bookingType: bookingType);
-                              },
-                            ),
-                          ),
+                     // Hotels in this category - responsive layout 
+                     screenWidth > 768
+                         ? Builder(
+                             builder: (_) {
+                               final displayHotels = categoryHotels.take(2).toList();
+                               return Padding(
+                                 padding: EdgeInsets.symmetric(horizontal: 2, vertical: 1),
+                                 child: Row(
+                                   children: [
+                                     Expanded(
+                                       child: HotelCardModern(hotel: displayHotels[0], bookingType: bookingType),
+                                     ),
+                                     if (displayHotels.length > 1) SizedBox(width: 6),
+                                     if (displayHotels.length > 1)
+                                       Expanded(
+                                         child: HotelCardModern(hotel: displayHotels[1], bookingType: bookingType),
+                                       ),
+                                   ],
+                                 ),
+                               );
+                             },
+                           )
+                         : SizedBox(
+                             height: screenHeight * 0.25,
+                             child: ListView.separated(
+                               scrollDirection: Axis.horizontal,
+                               physics: BouncingScrollPhysics(),
+                               padding: EdgeInsets.symmetric(horizontal: 8),
+                               itemCount: categoryHotels.length,
+                               separatorBuilder: (_, __) => SizedBox(width: 8),
+                               itemBuilder: (context, index) {
+                                 final hotel = categoryHotels[index];
+                                 return HotelCardModern(hotel: hotel, bookingType: bookingType);
+                               },
+                             ),
+                           ),
                     SizedBox(height: screenWidth > 768 ? 0 : 4),
                   ],
                 );
               }).toList(),
             );
           },
-          loading: () {
+          loading: () { 
             print('Hotels loading state');
             return Center(child: CircularProgressIndicator(color: primaryColor));
           },
           error: (e, _) {
             print('Hotels error state: $e');
-            return Center(child: Text('Error loading hotels: $e', style: TextStyle(color: Colors.black)));
+            return Center(child: Text('error_loading_hotels'.tr(), style: TextStyle(color: Colors.black)));
           },
         );
       },

@@ -86,8 +86,9 @@ class _CustomerSupportPageState extends ConsumerState<CustomerSupportPage> {
 
     return Scaffold(
       appBar: CustomAppBar(
-        title: 'Customer Support',
+        title: '',
         showBackButton: true,
+        backAndLogoOnly: true,
       ),
       body: Column(
         children: [

@@ -7,6 +7,8 @@ class AssetsManager {
   static const String horizontalLogoDark = 'assets/png/horizontal_logo_dark.png';
   static const String sentSuccessfully = 'assets/png/sent_sucessfully.png';
   static const String error = 'assets/png/error.png';
+  static const String appbar = 'assets/png/appbar.png';
+
 
   // jsons
   static const String loadingAnimation = 'assets/jsons/loading.json';

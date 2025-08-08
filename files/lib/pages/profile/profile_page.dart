@@ -6,6 +6,7 @@ import 'package:easy_localization/easy_localization.dart';
 import '../../controllers/auth/auth_controller.dart';
 import '../login/pages/login_page.dart';
 import '../../widgets/ProfileCompletionWidget.dart';
+import '../../widgets/custom_app_bar.dart';
 
 class ProfilePage extends ConsumerStatefulWidget {
   const ProfilePage({Key? key}) : super(key: key);
@@ -23,23 +24,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         final authNotifier = ref.read(authController.notifier);
         return Scaffold(
           backgroundColor: Colors.white,
-          appBar: AppBar(
-            backgroundColor: WPConfig.primaryColor,
-            elevation: 0,
-            automaticallyImplyLeading: false,
-            leading: IconButton(
-              icon: Icon(Icons.arrow_back, color: Colors.white),
-              onPressed: () => Navigator.of(context).pop(),
-            ),
-            title: Text(
-              'Profile',
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            centerTitle: true,
-          ),
+          appBar: CustomAppBar(title: 'Profile', showBackButton: true, backAndLogoOnly: true),
           body: SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,

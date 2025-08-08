@@ -9,6 +9,7 @@ import '../../models/location.dart';
 import '../../widgets/custom_app_bar.dart';
 import '../home/components/hotel_card.dart';
 import '../home/home_page.dart'; // Import to use _HotelCardModern
+import 'package:easy_localization/easy_localization.dart';
 
 class LocationHotelsPage extends ConsumerWidget {
   final LocationModel location;
@@ -21,7 +22,7 @@ class LocationHotelsPage extends ConsumerWidget {
     
     return Scaffold(
       appBar: CustomAppBar(
-        title: location.country ?? 'Location Hotels',
+        title: location.country ?? 'location_hotels'.tr(),
         showBackButton: true,
       ),
       body: hotelsAsync.when(
@@ -43,12 +44,12 @@ class LocationHotelsPage extends ConsumerWidget {
                   Icon(Icons.hotel_outlined, size: 64, color: Colors.grey[400]),
                   SizedBox(height: 16),
                   Text(
-                    'No hotels found in ${location.country}',
+                    'no_hotels_found_in'.tr(namedArgs: {'country': location.country ?? ''}),
                     style: TextStyle(fontSize: 16, color: Colors.black),
                   ),
                   SizedBox(height: 8),
                   Text(
-                    'Try selecting a different location',
+                    'try_selecting_different_location'.tr(),
                     style: TextStyle(fontSize: 14, color: Colors.grey[500]),
                   ),
                 ],
@@ -66,7 +67,7 @@ class LocationHotelsPage extends ConsumerWidget {
           );
         },
         loading: () => Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Error loading hotels')),
+        error: (e, _) => Center(child: Text('error_loading_hotels'.tr())),
       ),
     );
   }

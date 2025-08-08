@@ -5,6 +5,7 @@ import '../../config/wp_config.dart';
 import '../main/main_scaffold.dart';
 import '../login/login_intro_page.dart';
 import 'components/loading_dependency.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 
 class LoadingAppPage extends ConsumerWidget {
@@ -26,7 +27,7 @@ class LoadingAppPage extends ConsumerWidget {
               return  MainScaffold();
           }
         },
-        error: (t) => const Text('Unknown Error'),
+        error: (t) => Text('unknown_error'.tr()),
         loading: (t) => const LoadingDependencies());
   }
 }

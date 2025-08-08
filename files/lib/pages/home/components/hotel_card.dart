@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../models/hotel.dart';
-import '../../../../controllers/location_controller.dart';
-import '../../../../config/dynamic_config.dart';
+import '../../../config/dynamic_config.dart';
+import '../../../config/wp_config.dart';
+import '../../../controllers/location_controller.dart';
+import '../../../models/hotel.dart';
+import '../../../widgets/AppWidgets.dart';
+import '../../../core/utils/app_utils.dart';
 import 'package:easy_localization/easy_localization.dart';
 import '../../../../models/location.dart' as location_model;
 import '../../hotel_details/hotel_details_page.dart';
+import '../../favorites/favorites_page.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class HotelCardModern extends ConsumerWidget {
   final Hotel hotel;
@@ -30,33 +35,33 @@ class HotelCardModern extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final dynamicConfig = ref.watch(dynamicConfigProvider);
-    final primaryColor = dynamicConfig.primaryColor ?? Color(0xFF895ffc);
+    final primaryColor = WPConfig.navbarColor; // Use constant color directly
     final screenWidth = MediaQuery.of(context).size.width;
 
-    final isTablet = screenWidth > 768;
+    final isTablet = screenWidth >= 768;
 
     double cardWidth = (screenWidth - 24) / 2;
-    double imageHeight = cardWidth * 0.6;
+    // Reduce image height on tablets so text area gets more space
+    double imageHeight = cardWidth * (isTablet ? 0.48 : 0.6);
     
     // Different paddings and spacings based on device
-    final contentPadding = EdgeInsets.all(isTablet ? 8 : 8);
-    final cardMargin = EdgeInsets.only(bottom: isTablet ? 1 : 4, right: isTablet ? 1 : 2);
-    final borderRadius = isTablet ? 8.0 : 20.0;
-    final shadowBlur = isTablet ? 2.0 : 20.0;
-    final shadowOffset = isTablet ? 0.5 : 8.0;
+    final contentPadding = EdgeInsets.all(isTablet ? 10 : 8);
+    final cardMargin = EdgeInsets.only(bottom: isTablet ? 6 : 4, right: isTablet ? 6 : 2);
+    final borderRadius = isTablet ? 12.0 : 20.0;
+    final shadowBlur = isTablet ? 6.0 : 20.0;
+    final shadowOffset = isTablet ? 2.0 : 8.0;
     
     // Font sizes - decreased
-    final titleFontSize = isTablet ? 10.0 : 16.0;
-    final subtitleFontSize = isTablet ? 8.0 : 14.0;
-    final smallFontSize = isTablet ? 6.0 : 12.0;
-    final microFontSize = isTablet ? 4.0 : 10.0;
+    final titleFontSize = isTablet ? 14.0 : 16.0;
+    final subtitleFontSize = isTablet ? 12.0 : 14.0;
+    final smallFontSize = isTablet ? 11.0 : 12.0;
+    final microFontSize = isTablet ? 10.0 : 10.0;
     
     // Icon sizes
-    final smallIconSize = isTablet ? 4.0 : 14.0;
+    final smallIconSize = isTablet ? 14.0 : 14.0;
     
     // Spacings
-    final smallSpacing = isTablet ? 2.0 : 4.0;
+    final smallSpacing = isTablet ? 4.0 : 4.0;
 
     return GestureDetector(
       onTap: () { 
@@ -90,29 +95,107 @@ class HotelCardModern extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Image section
-            ClipRRect(
-              borderRadius: BorderRadius.vertical(top: Radius.circular(borderRadius)),
-              child: SizedBox(
-                width: cardWidth,
-                height: imageHeight,
-                child: hotel.imageUrl != null && hotel.imageUrl!.isNotEmpty
-                    ? Image.network(
-                        hotel.imageUrl!, 
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) => Container(
-                          color: Colors.grey[200],
-                          child: Icon(Icons.hotel, color: Colors.grey[400], size: isTablet ? 16 : 48),
+            // Image section with favorite button overlay
+            Stack(
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(borderRadius)),
+                  child: SizedBox(
+                    width: cardWidth,
+                    height: imageHeight,
+                    child: hotel.imageUrl != null && hotel.imageUrl!.isNotEmpty
+                        ? Image.network(
+                            hotel.imageUrl!, 
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) => Container(
+                              color: Colors.grey[200],
+                              child: Icon(Icons.hotel, color: Colors.grey[400], size: isTablet ? 40 : 48),
+                            ),
+                          )
+                        : Container(
+                            color: Colors.grey[200],
+                            child: Icon(Icons.hotel, color: Colors.grey[400], size: isTablet ? 40 : 48),
+                          ),
+                  ),
+                ),
+                // Favorite button
+                Positioned(
+                  top: isTablet ? 8 : 8,
+                  right: isTablet ? 8 : 8,
+                  child: Consumer(
+                    builder: (context, ref, child) {
+                      final favoritesNotifier = ref.watch(favoritesProvider.notifier);
+                      final isFavorite = favoritesNotifier.isFavorite(hotel);
+                      
+                      return Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          onTap: () async {
+                            if (isFavorite) {
+                              favoritesNotifier.removeHotel(hotel);
+                              // Small delay to ensure widget is still mounted
+                              await Future.delayed(Duration(milliseconds: 100));
+                              if (context.mounted) {
+                                  AppUtil.showSafeSnackBar(
+                                  context,
+                                    message: 'removed_from_favorites'.tr(),
+                                    actionLabel: 'view_favorites'.tr(),
+                                  onActionPressed: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(builder: (_) => FavoritesPage()),
+                                    );
+                                  },
+                                );
+                              }
+                            } else {
+                              favoritesNotifier.addHotel(hotel);
+                              // Small delay to ensure widget is still mounted
+                              await Future.delayed(Duration(milliseconds: 100));
+                              if (context.mounted) {
+                                  AppUtil.showSafeSnackBar(
+                                  context,
+                                    message: 'added_to_favorites'.tr(),
+                                    actionLabel: 'view_favorites'.tr(),
+                                  onActionPressed: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(builder: (_) => FavoritesPage()),
+                                    );
+                                  },
+                                );
+                              }
+                            }
+                          },
+                          borderRadius: BorderRadius.circular(20),
+                          child: Container(
+                            padding: EdgeInsets.all(isTablet ? 6 : 6),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              shape: BoxShape.circle,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.2),
+                                  blurRadius: 4,
+                                  offset: Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: Icon(
+                              isFavorite ? Icons.favorite : Icons.favorite_border,
+                              color: isFavorite ? Colors.red : primaryColor,
+                              size: isTablet ? 18 : 18,
+                            ),
+                          ),
                         ),
-                      )
-                    : Container(
-                        color: Colors.grey[200],
-                        child: Icon(Icons.hotel, color: Colors.grey[400], size: isTablet ? 16 : 48),
-                      ),
-              ),
+                      );
+                    },
+                  ),
+                ),
+              ],
             ),
             // Content section
-            Expanded(
+            Flexible(
               child: Padding(
                 padding: contentPadding,
                 child: Column(
@@ -130,11 +213,11 @@ class HotelCardModern extends ConsumerWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    SizedBox(height: 1),
+                    SizedBox(height: smallSpacing),
                     // Rating only
                     if (hotel.rate != null)
                       Container(
-                        padding: EdgeInsets.symmetric(horizontal: isTablet ? 2 : 4, vertical: isTablet ? 1 : 1),
+                        padding: EdgeInsets.symmetric(horizontal: isTablet ? 4 : 4, vertical: isTablet ? 2 : 1),
                         decoration: BoxDecoration(
                           color: Colors.blue,
                           borderRadius: BorderRadius.circular(4),
@@ -148,7 +231,7 @@ class HotelCardModern extends ConsumerWidget {
                           ),
                         ),
                       ),
-                    SizedBox(height: 1),
+                    SizedBox(height: smallSpacing),
                     // Location with city and country from location data
                     Consumer(
                       builder: (context, ref, child) {
@@ -193,7 +276,7 @@ class HotelCardModern extends ConsumerWidget {
                                         color: Colors.black,
                                         size: smallIconSize,
                                       ),
-                                      SizedBox(width: 2),
+                                       SizedBox(width: smallSpacing),
                                       Expanded(
                                         child: Text(
                                           locationText,
@@ -216,7 +299,7 @@ class HotelCardModern extends ConsumerWidget {
                               color: Colors.black,
                               size: smallIconSize,
                             ),
-                            SizedBox(width: 2),
+                            SizedBox(width: smallSpacing),
                             Expanded(
                               child: Text(
                                 '${hotel.country ?? ''}${hotel.city != null ? ', ${hotel.city}' : ''}',
@@ -238,7 +321,7 @@ class HotelCardModern extends ConsumerWidget {
                               color: Colors.black,
                               size: smallIconSize,
                             ),
-                            SizedBox(width: 2),
+                            SizedBox(width: smallSpacing),
                             Expanded(
                               child: Text(
                                 '${hotel.country ?? ''}${hotel.city != null ? ', ${hotel.city}' : ''}',
@@ -260,8 +343,8 @@ class HotelCardModern extends ConsumerWidget {
                     if (hotel.dealLabel != null && hotel.dealLabel!.isNotEmpty)
                       Container(
                         padding: EdgeInsets.symmetric(
-                          horizontal: isTablet ? 3 : 4,
-                          vertical: isTablet ? 2 : 4
+                          horizontal: isTablet ? 6 : 4,
+                          vertical: isTablet ? 3 : 4
                         ), 
                         decoration: BoxDecoration(
                           color: Colors.green,
@@ -304,6 +387,386 @@ class HotelCardModern extends ConsumerWidget {
                     ),
                   ],
                 ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class HotelCardVertical extends ConsumerWidget {
+  final Hotel hotel;
+  final int bookingType; // 0: يومي، 1: شهري
+  
+  const HotelCardVertical({required this.hotel, this.bookingType = 0});
+
+  String getBookingPrice() {
+    double? price;
+    try {
+      price = hotel.priceRange != null ? double.tryParse(hotel.priceRange!) : null;
+    } catch (_) {
+      price = null;
+    }
+    if (bookingType == 1 && price != null) {
+      return '4${(price * 30 * 0.7).toStringAsFixed(0)} / شهر';
+    } else if (price != null) {
+      return '4${price.toStringAsFixed(0)} / يوم';
+    }
+    return '';
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final primaryColor = WPConfig.navbarColor;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isTablet = screenWidth > 768;
+
+    return GestureDetector(
+      onTap: () { 
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => HotelDetailsPage(hotel: hotel),
+          ),
+        );
+      },
+      child: Container(
+        margin: EdgeInsets.only(bottom: 16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: primaryColor.withOpacity(0.1),
+              blurRadius: 12,
+              offset: Offset(0, 4),
+            ),
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 6,
+              offset: Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Image section with favorite button overlay
+            Stack(
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+                  child: SizedBox(
+                    width: double.infinity,
+                    height: 200,
+                    child: hotel.imageUrl != null && hotel.imageUrl!.isNotEmpty
+                        ? Image.network(
+                            hotel.imageUrl!, 
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) => Container(
+                              color: Colors.grey[200],
+                              child: Icon(Icons.hotel, color: Colors.grey[400], size: 48),
+                            ),
+                          )
+                        : Container(
+                            color: Colors.grey[200],
+                            child: Icon(Icons.hotel, color: Colors.grey[400], size: 48),
+                          ),
+                  ),
+                ),
+                // Favorite button
+                Positioned(
+                  top: 12,
+                  right: 12,
+                  child: Consumer(
+                    builder: (context, ref, child) {
+                      final favoritesNotifier = ref.watch(favoritesProvider.notifier);
+                      final isFavorite = favoritesNotifier.isFavorite(hotel);
+                      
+                      return Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          onTap: () async {
+                            if (isFavorite) {
+                              favoritesNotifier.removeHotel(hotel);
+                              // Small delay to ensure widget is still mounted
+                              await Future.delayed(Duration(milliseconds: 100));
+                              if (context.mounted) {
+                                AppUtil.showSafeSnackBar(
+                                  context,
+                                  message: 'Removed from favorites',
+                                  actionLabel: 'View Favorites',
+                                  onActionPressed: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(builder: (_) => FavoritesPage()),
+                                    );
+                                  },
+                                );
+                              }
+                            } else {
+                              favoritesNotifier.addHotel(hotel);
+                              // Small delay to ensure widget is still mounted
+                              await Future.delayed(Duration(milliseconds: 100));
+                              if (context.mounted) {
+                                AppUtil.showSafeSnackBar(
+                                  context,
+                                  message: 'Added to favorites!',
+                                  actionLabel: 'View Favorites',
+                                  onActionPressed: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(builder: (_) => FavoritesPage()),
+                                    );
+                                  },
+                                );
+                              }
+                            }
+                          },
+                          borderRadius: BorderRadius.circular(20),
+                          child: Container(
+                            padding: EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              shape: BoxShape.circle,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.2),
+                                  blurRadius: 4,
+                                  offset: Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: Icon(
+                              isFavorite ? Icons.favorite : Icons.favorite_border,
+                              color: isFavorite ? Colors.red : primaryColor,
+                              size: 20,
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+            // Content section
+            Padding(
+              padding: EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Hotel name and rating
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          hotel.name ?? '',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 18,
+                            color: Colors.black,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      if (hotel.rate != null) ...[
+                        Icon(Icons.star, color: Colors.amber, size: 16),
+                        SizedBox(width: 4),
+                        Text(
+                          hotel.rate!.toStringAsFixed(1),
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                  SizedBox(height: 8),
+                  // Location
+                  Consumer(
+                    builder: (context, ref, child) {
+                      final locationResponse = ref.watch(locationProvider);
+                      return locationResponse.when(
+                        data: (locationData) {
+                          String locationText = '';
+                          
+                          if (hotel.cityId != null) {
+                            final city = locationData.cities?.firstWhere(
+                              (c) => c.id == hotel.cityId,
+                              orElse: () => location_model.City(),
+                            );
+                            if (city?.name != null) {
+                              locationText = city!.name!;
+                            }
+                          }
+                          
+                          if (hotel.countryId != null) {
+                            final country = locationData.countries?.firstWhere(
+                              (c) => c.id == hotel.countryId,
+                              orElse: () => location_model.Country(),
+                            );
+                            if (country?.name != null) {
+                              locationText = locationText.isNotEmpty 
+                                  ? '$locationText, ${country!.name}'
+                                  : country!.name!;
+                            }
+                          }
+                          
+                          if (locationText.isEmpty) {
+                            locationText = '${hotel.country ?? ''}${hotel.city != null ? ', ${hotel.city}' : ''}';
+                          }
+                          
+                          return Row(
+                            children: [
+                              Icon(
+                                Icons.location_on,
+                                color: Colors.grey[600],
+                                size: 16,
+                              ),
+                              SizedBox(width: 4),
+                              Expanded(
+                                child: Text(
+                                  locationText,
+                                  style: TextStyle(
+                                    color: Colors.grey[600],
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          );
+                        },
+                        loading: () => Row(
+                          children: [
+                            Icon(
+                              Icons.location_on,
+                              color: Colors.grey[600],
+                              size: 16,
+                            ),
+                            SizedBox(width: 4),
+                            Expanded(
+                              child: Text(
+                                '${hotel.country ?? ''}${hotel.city != null ? ', ${hotel.city}' : ''}',
+                                style: TextStyle(
+                                  color: Colors.grey[600],
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                        error: (e, _) => Row(
+                          children: [
+                            Icon(
+                              Icons.location_on,
+                              color: Colors.grey[600],
+                              size: 16,
+                            ),
+                            SizedBox(width: 4),
+                            Expanded(
+                              child: Text(
+                                '${hotel.country ?? ''}${hotel.city != null ? ', ${hotel.city}' : ''}',
+                                style: TextStyle(
+                                  color: Colors.grey[600],
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }, 
+                  ),
+                  SizedBox(height: 8),
+                  // Deal label
+                  if (hotel.dealLabel != null && hotel.dealLabel!.isNotEmpty)
+                    Container(
+                      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.green,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        hotel.dealLabel!, 
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
+                  SizedBox(height: 12),
+                  // Price and action button
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            if (hotel.oldPrice != null && hotel.oldPrice != hotel.priceRange)
+                              Text(
+                                hotel.oldPrice!,
+                                style: TextStyle(
+                                  color: Colors.red,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500,
+                                  decoration: TextDecoration.lineThrough,
+                                ),
+                              ),
+                            Text(
+                              hotel.priceRange ?? '',
+                              style: TextStyle(
+                                color: Colors.black,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 20,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      ElevatedButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => HotelDetailsPage(hotel: hotel),
+                            ),
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: primaryColor,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        ),
+                        child: Text(
+                          'book_now'.tr(),
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
           ],

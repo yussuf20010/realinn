@@ -14,8 +14,10 @@ class HotelsSectionHeader extends ConsumerWidget {
     final primaryColor = dynamicConfig.primaryColor ?? Color(0xFF895ffc);
     final selectedLocations = ref.watch(selectedLocationsProvider);
 
+    final isTablet = MediaQuery.of(context).size.width >= 768;
+    
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      padding: EdgeInsets.symmetric(horizontal: isTablet ? 8 : 16, vertical: isTablet ? 8 : 16),
       child: Row(
         children: [
           Container(

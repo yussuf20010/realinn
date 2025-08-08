@@ -5,6 +5,10 @@ import '../../../../controllers/location_controller.dart';
 import '../../../../models/hotel.dart';
 import '../../../../models/location.dart' as location_model;
 import '../../../../config/dynamic_config.dart';
+import '../../booking/booking_page.dart';
+import '../../../config/wp_config.dart';
+import '../../../core/utils/app_utils.dart';
+import '../components/hotels_list.dart';
 
 class DailyBookingModal extends ConsumerStatefulWidget {
   @override
@@ -22,7 +26,7 @@ class _DailyBookingModalState extends ConsumerState<DailyBookingModal> {
 
   @override
   Widget build(BuildContext context) {
-    final primaryColor = ref.watch(dynamicConfigProvider).primaryColor ?? Color(0xFF895ffc);
+    final primaryColor = ref.watch(dynamicConfigProvider).primaryColor;
     
     return Container(
       height: MediaQuery.of(context).size.height * 0.8,
@@ -682,24 +686,37 @@ class _DailyBookingModalState extends ConsumerState<DailyBookingModal> {
         minute: endTime?.minute ?? 0,
       );
 
-      // TODO: Add booking to booking provider
-      // final booking = Booking(
-      //   hotel: selectedHotelData,
-      //   checkIn: checkInDateTime,
-      //   checkOut: checkOutDateTime,
-      //   adults: 1,
-      //   children: 0,
-      //   rooms: 1,
-      // );
-
-      // Show success message and navigate
-      Navigator.pop(context);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Daily booking added successfully!'),
-          backgroundColor: Colors.green,
-        ),
+      // Create and add booking to provider
+      final booking = Booking(
+        hotel: selectedHotelData,
+        checkIn: checkInDateTime,
+        checkOut: checkOutDateTime,
+        adults: 1,
+        children: 0,
+        rooms: 1,
+        status: 'upcoming',
       );
+
+      // Add booking to provider
+      ref.read(bookingsProvider.notifier).addBooking(booking);
+
+      // Show success message and navigate to booking page
+      Navigator.pop(context);
+      // Small delay to ensure widget is still mounted
+      Future.delayed(Duration(milliseconds: 100));
+      if (context.mounted) {
+        AppUtil.showSafeSnackBar(
+          context,
+          message: 'Daily booking added successfully!',
+          actionLabel: 'View Bookings',
+          onActionPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => BookingPage()),
+            );
+          },
+        );
+      }
     });
   }
 

@@ -10,10 +10,10 @@ class WPConfig {
   static const String hotelsApiUrl = '$url/api/hotels';
   static const String siteApiKey = 'your_secret_api_key';
   static Color get primaryColor {
-    final container = ProviderContainer();
-    final dynamicConfig = container.read(dynamicConfigProvider);
-    return dynamicConfig.primaryColor ?? const Color(0xFF7371FC);
+    return navbarColor; // Use constant color as primary color for whole app
   }
+  // Constant navbar color that doesn't depend on site configuration
+  static const Color navbarColor = Color(0xFF7371FC);
   static const String apikey = '1234';
   static const int orderState = 3;
   static const bool forceUserToLoginEverytime = false;

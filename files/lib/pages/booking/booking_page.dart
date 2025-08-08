@@ -114,7 +114,7 @@ class BookingPage extends ConsumerWidget {
                 final booking = bookings[index];
                 return Column(
                   children: [
-                    HotelCardModern(
+                    HotelCardVertical(
                       hotel: booking.hotel,
                       bookingType: 0,
                     ),

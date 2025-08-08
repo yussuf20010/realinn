@@ -60,6 +60,16 @@ class NewsProApp extends StatelessWidget {
           locale: context.locale,
           theme: theme,
           darkTheme: darkTheme,
+          builder: (context, child) {
+            final mediaQuery = MediaQuery.of(context);
+            final width = mediaQuery.size.width;
+            final isTablet = width >= 768;
+            final textScale = isTablet ? 1.15 : 1.0;
+            return MediaQuery(
+              data: mediaQuery.copyWith(textScaleFactor: textScale),
+              child: child ?? const SizedBox.shrink(),
+            );
+          },
           onGenerateRoute: RouteGenerator.onGenerate,
           onUnknownRoute: (_) => RouteGenerator.errorRoute(),
           debugShowCheckedModeBanner: false,

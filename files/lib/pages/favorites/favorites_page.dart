@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../../models/hotel.dart';
 import '../../widgets/custom_app_bar.dart';
 import '../hotel_details/hotel_details_page.dart';
@@ -39,15 +40,9 @@ class FavoritesPage extends ConsumerWidget {
 
     return Scaffold(
       appBar: CustomAppBar(
-        title: 'Favorites',
+        title: 'favorites'.tr(),
         showBackButton: true,
-        onNotificationPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => NotificationsPage()),
-          );
-        },
-
+        backAndLogoOnly: true,
       ),
       body: favorites.isEmpty
           ? Center(
@@ -57,7 +52,7 @@ class FavoritesPage extends ConsumerWidget {
                   Icon(Icons.favorite_border, size: 64, color: Colors.grey[400]),
                   SizedBox(height: 16),
                   Text(
-                    'No favorites yet',
+                    'no_favorites_yet'.tr(),
                     style: TextStyle(
                       color: Colors.grey[600],
                       fontSize: 18,
@@ -66,7 +61,7 @@ class FavoritesPage extends ConsumerWidget {
                   ),
                   SizedBox(height: 8),
                   Text(
-                    'Add hotels to your favorites to see them here',
+                    'add_hotels_to_favorites'.tr(),
                     style: TextStyle(
                       color: Colors.grey[500],
                       fontSize: 14,
@@ -80,7 +75,7 @@ class FavoritesPage extends ConsumerWidget {
               itemCount: favorites.length,
               itemBuilder: (context, index) {
                 final hotel = favorites[index];
-                return HotelCardModern(
+                return HotelCardVertical(
                   hotel: hotel,
                   bookingType: 0,
                 );
