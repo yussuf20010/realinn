@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import '../../../../config/dynamic_config.dart';
-import '../modals/location_filter_modal.dart';
 import '../providers/home_providers.dart';
 
 class HotelsSectionHeader extends ConsumerWidget {
@@ -38,56 +37,8 @@ class HotelsSectionHeader extends ConsumerWidget {
             ),
           ),
           Spacer(),
-          Row(
-            children: [
-              ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: selectedLocations.isNotEmpty ? Colors.orange : primaryColor,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  minimumSize: Size(0, 36),
-                ),
-                icon: Icon(Icons.filter_list, size: 18),
-                label: Text(
-                  selectedLocations.isNotEmpty
-                    ? 'filtered'.tr(namedArgs: {'count': selectedLocations.length.toString()})
-                    : 'filter'.tr(),
-                  style: TextStyle(fontSize: 12),
-                ),
-                onPressed: () async {
-                  final selected = await showModalBottomSheet<List<String>>(
-                    context: context,
-                    isScrollControlled: true,
-                    builder: (context) => LocationFilterModal(),
-                  );
-                  if (selected != null) {
-                    ref.read(selectedLocationsProvider.notifier).state = selected;
-                  }
-                },
-              ),
-              SizedBox(width: 8),
-              if (selectedLocations.isNotEmpty)
-                ElevatedButton.icon(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.red,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    minimumSize: Size(0, 36),
-                  ),
-                  icon: Icon(Icons.clear, size: 18),
-                  label: Text('clear'.tr(), style: TextStyle(fontSize: 12)),
-                  onPressed: () {
-                    ref.read(selectedLocationsProvider.notifier).state = [];
-                  },
-                ),
-            ],
-          ),
+          // Removed filter UI as requested
+          SizedBox.shrink(),
         ],
       ),
     );

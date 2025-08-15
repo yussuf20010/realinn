@@ -8,6 +8,8 @@ import 'components/promotional_cards.dart';
 import 'components/more_for_you_section.dart';
 import 'components/hotels_section_header.dart';
 import 'components/hotels_list.dart';
+import 'components/mobile_search_card.dart';
+import 'components/tablet_search_card.dart';
 import 'modals/daily_booking_modal.dart';
 import 'modals/monthly_booking_modal.dart';
 import 'providers/home_providers.dart';
@@ -68,17 +70,37 @@ class HomePage extends ConsumerWidget {
     
     return Column(
       children: [
-        // Booking type selector
+        // Booking type selector (move to top)
         BookingTypeSelector(
           onDailyBookingTap: () {
             print('Daily booking tapped');
-            _showDailyBookingModal(context, ref);
+            ref.read(selectedBookingTypeProvider.notifier).state = 0; // Daily
           },
           onMonthlyBookingTap: () {
             print('Monthly booking tapped');
-            _showMonthlyBookingModal(context, ref);
+            ref.read(selectedBookingTypeProvider.notifier).state = 1; // Monthly
           },
-        ), 
+        ),
+
+        // Search card (responsive)
+        if (isTablet)
+          TabletSearchCard(
+            onDailyBookingTap: () {
+              ref.read(selectedBookingTypeProvider.notifier).state = 0;
+            },
+            onMonthlyBookingTap: () {
+              ref.read(selectedBookingTypeProvider.notifier).state = 1;
+            },
+          )
+        else
+          MobileSearchCard(
+            onDailyBookingTap: () {
+              ref.read(selectedBookingTypeProvider.notifier).state = 0;
+            },
+            onMonthlyBookingTap: () {
+              ref.read(selectedBookingTypeProvider.notifier).state = 1;
+            },
+          ),
 
         // Promotional cards
         PromotionalCards(),

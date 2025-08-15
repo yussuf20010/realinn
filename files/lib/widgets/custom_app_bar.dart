@@ -35,7 +35,7 @@ class CustomAppBar extends ConsumerStatefulWidget implements PreferredSizeWidget
 }
 
 class _CustomAppBarState extends ConsumerState<CustomAppBar> {
-  void _toggleLanguage() async {
+   void _toggleLanguage() async {
     final currentLocale = context.locale;
     final newLocale = currentLocale.languageCode == 'ar'
         ? Locale('en', 'US')
@@ -86,7 +86,7 @@ class _CustomAppBarState extends ConsumerState<CustomAppBar> {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final isTablet = screenWidth >= 768;
-    final toolbarHeight = isTablet ? 80.0 : 70.0;
+    final toolbarHeight = isTablet ? 80.0 : 64.0;
     final horizontalIconSpacing = isTablet ? 8.0 : 0.0;
     final dynamicConfig = ref.watch(dynamicConfigProvider);
     final primaryColor = WPConfig.navbarColor; // Use constant color directly
@@ -108,7 +108,7 @@ class _CustomAppBarState extends ConsumerState<CustomAppBar> {
           margin: EdgeInsets.only(top: 8),
             child: Image.asset(
             AssetsManager.appbar,
-            height: isTablet ? 64 : 50,
+            height: isTablet ? 64 : 40,
             fit: BoxFit.contain,
           ),
         ),
@@ -149,7 +149,12 @@ class _CustomAppBarState extends ConsumerState<CustomAppBar> {
       elevation: 2,
       shadowColor: Colors.black.withOpacity(0.1),
       toolbarHeight: toolbarHeight,
-      leading: null,
+      leading: widget.showBackButton
+          ? IconButton(
+              icon: Icon(Icons.arrow_back, color: Colors.white),
+              onPressed: () => Navigator.of(context).maybePop(),
+            )
+          : null,
       title: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -161,7 +166,7 @@ class _CustomAppBarState extends ConsumerState<CustomAppBar> {
                 icon: Icon(
                   Icons.person_outline,
                   color: Colors.white,
-                  size: isTablet ? 32 : 27,
+                  size: isTablet ? 30 : 22,
                 ),
                 onPressed: widget.onProfilePressed ?? _openProfile,
               ),
@@ -170,7 +175,7 @@ class _CustomAppBarState extends ConsumerState<CustomAppBar> {
                 icon: Icon(
                   Icons.chat_bubble_outline,
                   color: Colors.white,
-                  size: isTablet ? 32 : 27,
+                  size: isTablet ? 30 : 22,
                 ),
                 onPressed: widget.onChatPressed ?? _openCustomerSupport,
               ),
@@ -187,7 +192,7 @@ class _CustomAppBarState extends ConsumerState<CustomAppBar> {
                       margin: EdgeInsets.only(top: 8), // Move logo down
                       child: Image.asset(
                         AssetsManager.appbar,
-                        height: isTablet ? 64 : 50, // Bigger logo
+                        height: isTablet ? 55 : 40, // Smaller on mobile for consistency
                         fit: BoxFit.contain,
                       ),
                     );
@@ -249,7 +254,7 @@ class _CustomAppBarState extends ConsumerState<CustomAppBar> {
                   icon: Icon(
                     Icons.notifications_outlined,
                     color: Colors.white,
-                      size: isTablet ? 32 : 27,
+                      size: isTablet ? 30 : 22,
                   ),
                   onPressed: widget.onNotificationPressed,
                   ),

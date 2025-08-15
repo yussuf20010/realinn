@@ -13,8 +13,27 @@ final bookingsProvider = StateNotifierProvider<BookingsNotifier, List<Booking>>(
   return BookingsNotifier();
 });
 
+class SelectedRoom {
+  final String name;
+  final double pricePerNight;
+  final int maxAdults;
+  final int maxChildren;
+  final String imageUrl;
+  final List<String> amenities;
+
+  const SelectedRoom({
+    required this.name,
+    required this.pricePerNight,
+    required this.maxAdults,
+    required this.maxChildren,
+    required this.imageUrl,
+    this.amenities = const [],
+  });
+}
+
 class Booking {
   final Hotel hotel;
+  final SelectedRoom selectedRoom;
   final DateTime checkIn;
   final DateTime checkOut;
   final int adults;
@@ -24,6 +43,7 @@ class Booking {
 
   Booking({
     required this.hotel,
+    required this.selectedRoom,
     required this.checkIn,
     required this.checkOut,
     required this.adults,
@@ -49,6 +69,7 @@ class BookingsNotifier extends StateNotifier<List<Booking>> {
       if (b.hotel.id == booking.hotel.id) {
         return Booking(
           hotel: b.hotel,
+          selectedRoom: b.selectedRoom,
           checkIn: b.checkIn,
           checkOut: b.checkOut,
           adults: b.adults,
@@ -117,6 +138,7 @@ class BookingPage extends ConsumerWidget {
                     HotelCardVertical(
                       hotel: booking.hotel,
                       bookingType: 0,
+                      showBookNowButton: false,
                     ),
                     Container(
                       margin: EdgeInsets.only(bottom: 20),
@@ -156,6 +178,11 @@ class BookingPage extends ConsumerWidget {
                             ],
                           ),
                           SizedBox(height: 8),
+                          _buildBookingInfoRow(
+                            Icons.meeting_room,
+                            'Room: ${booking.selectedRoom.name} · ${booking.selectedRoom.pricePerNight.toStringAsFixed(0)} per night',
+                          ),
+                          SizedBox(height: 4),
                           _buildBookingInfoRow(
                             Icons.calendar_today,
                             'Check-in: ${_formatDate(booking.checkIn)}',

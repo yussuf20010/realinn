@@ -228,7 +228,7 @@ class HotelsList extends ConsumerWidget {
                         category,
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
-                          fontSize: screenWidth > 768 ? 16 : 14, 
+                          fontSize: screenWidth > 768 ? 18 : 13, 
                           color: Colors.black,
                         ),
                       ),      
@@ -256,7 +256,7 @@ class HotelsList extends ConsumerWidget {
                                );
                              },
                            )
-                         : SizedBox(
+                          : SizedBox(
                              height: screenHeight * 0.25,
                              child: ListView.separated(
                                scrollDirection: Axis.horizontal,

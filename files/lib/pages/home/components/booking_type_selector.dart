@@ -17,6 +17,9 @@ class BookingTypeSelector extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final primaryColor = WPConfig.navbarColor; // Use constant color directly
+    final bool isTablet = MediaQuery.of(context).size.width >= 768;
+    final double fontSize = isTablet ? 16 : 13; // smaller on mobile
+    final double vPadding = isTablet ? 14 : 10;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -26,7 +29,7 @@ class BookingTypeSelector extends ConsumerWidget {
             child: GestureDetector(
               onTap: onDailyBookingTap,
               child: Container(
-                padding: EdgeInsets.symmetric(vertical: 12),
+                padding: EdgeInsets.symmetric(vertical: vPadding),
                 decoration: BoxDecoration(
                   color: primaryColor,
                   borderRadius: BorderRadius.circular(16),
@@ -45,7 +48,7 @@ class BookingTypeSelector extends ConsumerWidget {
                     style: TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
-                      fontSize: 14,
+                      fontSize: fontSize,
                     ),
                   ),
                 ),
@@ -57,7 +60,7 @@ class BookingTypeSelector extends ConsumerWidget {
             child: GestureDetector(
               onTap: onMonthlyBookingTap,
               child: Container(
-                padding: EdgeInsets.symmetric(vertical: 12),
+                padding: EdgeInsets.symmetric(vertical: vPadding),
                 decoration: BoxDecoration(
                   color: primaryColor,
                   borderRadius: BorderRadius.circular(16),
@@ -76,7 +79,7 @@ class BookingTypeSelector extends ConsumerWidget {
                     style: TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
-                      fontSize: 14,
+                      fontSize: fontSize,
                     ),
                   ),
                 ),

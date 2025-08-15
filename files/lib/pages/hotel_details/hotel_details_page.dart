@@ -9,6 +9,8 @@ import '../../models/hotel.dart';
 import '../../models/location.dart' as location_model;
 import '../../core/utils/app_utils.dart';
 import '../booking/booking_page.dart';
+import '../booking/book_now_page.dart' as booking;
+import '../home/providers/home_providers.dart';
 import '../service_providers/service_providers_page.dart';
 import '../favorites/favorites_page.dart';
 
@@ -30,6 +32,34 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage>
   late AnimationController _slideController;
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
+  final List<Map<String, dynamic>> roomOptions = const [
+    {
+      'name': 'Standard Room',
+      'price': 80.0,
+      'maxAdults': 2,
+      'maxChildren': 1,
+      'amenities': ['Free WiFi', 'TV', 'Air Conditioning'],
+    },
+    {
+      'name': 'Deluxe Room',
+      'price': 120.0,
+      'maxAdults': 3,
+      'maxChildren': 2,
+      'amenities': ['Free WiFi', 'Smart TV', 'Mini Bar', 'City View'],
+    },
+    {
+      'name': 'Suite',
+      'price': 200.0,
+      'maxAdults': 4,
+      'maxChildren': 2,
+      'amenities': ['Free WiFi', 'Living Area', 'Kitchenette', 'Balcony'],
+    },
+  ];
+  final Map<String, String> roomImageUrls = const {
+    'Standard Room': 'https://images.unsplash.com/photo-1502673530728-f79b4cab31b1?auto=format&fit=crop&w=1200&q=60',
+    'Deluxe Room': 'https://images.unsplash.com/photo-1554995207-c18c203602cb?auto=format&fit=crop&w=1200&q=60',
+    'Suite': 'https://images.unsplash.com/photo-1505691723518-36a5ac3b2ae9?auto=format&fit=crop&w=1200&q=60',
+  };
 
   @override
   void initState() {
@@ -251,7 +281,7 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage>
                           widget.hotel.name ?? '',
                           style: TextStyle(
                             color: Colors.white,
-                            fontSize: 26,
+                            fontSize: 20,
                             fontWeight: FontWeight.bold,
                             shadows: [
                               Shadow(
@@ -326,7 +356,7 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage>
                                             locationText,
                                             style: TextStyle(
                                               color: Colors.white,
-                                              fontSize: 14,
+                                              fontSize: 12,
                                               fontWeight: FontWeight.w600,
                                             ),
                                             maxLines: 1,
@@ -427,6 +457,10 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage>
                           // Enhanced amenities section
                           _buildAmenitiesSection(),
                           SizedBox(height: 20),
+
+                          // Rooms section
+                          _buildRoomsSection(),
+                          SizedBox(height: 20),
                           
                           // Enhanced services section
                           _buildServicesSection(),
@@ -474,17 +508,28 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage>
                     style: TextStyle(
                       color: WPConfig.primaryColor,
                       fontWeight: FontWeight.bold,
-                      fontSize: 20,
+                      fontSize: 16,
                     ),
                   ),
                 ],
               ),
-              SizedBox(width: 20),
+              SizedBox(width: 180),
               Expanded(
                 child: Container(
                   height: 50,
                   child: ElevatedButton(
-                    onPressed: () => _showBookingDialog(context, ref),
+                    onPressed: () {
+                      final int bookingType = ref.read(selectedBookingTypeProvider);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => booking.BookNowPage(
+                            hotel: widget.hotel,
+                            bookingType: bookingType,
+                          ),
+                        ),
+                      );
+                    },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: WPConfig.primaryColor,
                       shape: RoundedRectangleBorder(
@@ -503,15 +548,14 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage>
                           style: TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
-                            fontSize: 16,
+                            fontSize: 12,
                           ),
                         ),
                       ],
-                    ),
-                  ),
+                    ), 
                 ),
               ),
-            ],
+              )],
           ),
         ),
       ),
@@ -554,8 +598,8 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage>
                   widget.hotel.rate?.toStringAsFixed(1) ?? '4.5',
                   style: TextStyle(
                     color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 14,
                   ),
                 ),
               ],
@@ -571,7 +615,7 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage>
                   'Per Night',
                   style: TextStyle(
                     color: Colors.grey[600],
-                    fontSize: 12,
+                    fontSize: 11,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -579,8 +623,8 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage>
                   _formatPrice(widget.hotel.priceRange),
                   style: TextStyle(
                     color: WPConfig.primaryColor,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 16,
                   ),
                 ),
               ],
@@ -635,9 +679,10 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage>
               Text(
                 'About This Hotel',
                 style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 16,
                   color: Colors.black87,
+                  letterSpacing: 0.2,
                 ),
               ),
             ],
@@ -647,8 +692,8 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage>
             widget.hotel.description ?? 'Experience luxury and comfort in this beautiful hotel. Our dedicated staff ensures your stay is memorable with world-class amenities and exceptional service.',
             style: TextStyle(
               color: Colors.grey[700],
-              fontSize: 14,
-              height: 1.6,
+              fontSize: 13,
+              height: 1.55,
             ),
           ),
         ],
@@ -687,17 +732,22 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage>
               Text(
                 'Amenities',
                 style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 16,
                   color: Colors.black87,
+                  letterSpacing: 0.2,
                 ),
               ),
             ],
           ),
           SizedBox(height: 16),
-          Wrap(
-            spacing: 12,
-            runSpacing: 12,
+          GridView.count(
+            crossAxisCount: 2,
+            crossAxisSpacing: 12,
+            mainAxisSpacing: 12,
+            childAspectRatio: 4.2,
+            shrinkWrap: true,
+            physics: NeverScrollableScrollPhysics(),
             children: [
               _buildAmenity(Icons.wifi, 'Free WiFi'),
               _buildAmenity(Icons.pool, 'Swimming Pool'),
@@ -743,11 +793,11 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage>
           SizedBox(width: 8),
           Text(
             label,
-            style: TextStyle(
-              color: Colors.grey[700],
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-            ),
+             style: TextStyle(
+               color: Colors.grey[700],
+               fontSize: 11,
+               fontWeight: FontWeight.w600,
+             ),
           ),
         ],
       ),
@@ -788,9 +838,10 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage>
                   Text(
                     'Hotel Services',
                     style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 16,
                       color: Colors.black87,
+                      letterSpacing: 0.2,
                     ),
                   ),
                 ],
@@ -808,8 +859,9 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage>
                   'View All',
                   style: TextStyle(
                     color: WPConfig.primaryColor,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.2,
                   ),
                 ),
               ),
@@ -978,9 +1030,10 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage>
                     Text(
                       title,
                       style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 13,
                         color: Colors.black87,
+                        letterSpacing: 0.2,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -991,7 +1044,7 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage>
                         subtitle,
                         style: TextStyle(
                           color: Colors.grey[600],
-                          fontSize: 12,
+                          fontSize: 11,
                           height: 1.4,
                         ),
                         maxLines: 2,
@@ -1008,12 +1061,13 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage>
     );
   }
 
-  void _showBookingDialog(BuildContext context, WidgetRef ref) {
+  void _showBookingDialog(BuildContext context, WidgetRef ref, {int preselectedRoomIndex = 0}) {
     DateTime checkIn = DateTime.now();
     DateTime checkOut = DateTime.now().add(Duration(days: 1));
     int adults = 1;
     int children = 0;
     int rooms = 1;
+    int selectedRoomIndex = preselectedRoomIndex;
 
     showDialog(
       context: context,
@@ -1034,8 +1088,8 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage>
               Text(
                 'Book Now', 
                 style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 20,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 18,
                   color: Colors.black87,
                 )
               ),
@@ -1045,6 +1099,104 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage>
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
+                // Room selection
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'Select Room',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 14,
+                      color: Colors.black87,
+                    ),
+                  ),
+                ),
+                SizedBox(height: 8),
+                StatefulBuilder(
+                  builder: (context, setRoomsState) => Column(
+                    children: List.generate(roomOptions.length, (index) {
+                      final room = roomOptions[index];
+                      final selected = index == selectedRoomIndex;
+                      return Container(
+                        margin: EdgeInsets.only(bottom: 8),
+                        decoration: BoxDecoration(
+                          color: selected ? WPConfig.primaryColor.withOpacity(0.06) : Colors.grey[50],
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: selected ? WPConfig.primaryColor : Colors.grey[300]!,
+                          ),
+                        ),
+                        child: RadioListTile<int>(
+                          value: index,
+                          groupValue: selectedRoomIndex,
+                          onChanged: (v) => setRoomsState(() => selectedRoomIndex = v ?? 0),
+                          activeColor: WPConfig.primaryColor,
+                          title: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  room['name'],
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w700,
+                                    color: Colors.black87,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              SizedBox(width: 8),
+                              Text(
+                                '\$${(room['price'] as double).toStringAsFixed(0)} / night',
+                                style: TextStyle(
+                                  color: WPConfig.primaryColor,
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
+                          ),
+                          subtitle: Builder(
+                            builder: (context) {
+                              final List<Widget> amenityChips = [
+                                ...List<String>.from(room['amenities']).map(
+                                  (a) => Container(
+                                    padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                    decoration: BoxDecoration(
+                                      color: Colors.grey[200],
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    child: Text(
+                                      a,
+                                      style: TextStyle(fontSize: 10, color: Colors.grey[700]),
+                                    ),
+                                  ),
+                                ),
+                                Container(
+                                  padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey[200],
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: Text(
+                                    'Max ${room['maxAdults']} adults, ${room['maxChildren']} children',
+                                    style: TextStyle(fontSize: 10, color: Colors.grey[700]),
+                                  ),
+                                ),
+                              ];
+                              return Wrap(
+                                spacing: 6,
+                                runSpacing: 6,
+                                children: amenityChips,
+                              );
+                            },
+                          ),
+                        ),
+                      );
+                    }),
+                  ),
+                ),
+                SizedBox(height: 12),
                 _buildDatePicker(
                   dialogContext,
                   'Check-in Date',
@@ -1086,7 +1238,7 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage>
                 'Cancel', 
                 style: TextStyle(
                   color: Colors.grey[600],
-                  fontSize: 16,
+                  fontSize: 11,
                   fontWeight: FontWeight.w500,
                 )
               ),
@@ -1095,9 +1247,18 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage>
               height: 45,
               child: ElevatedButton(
                 onPressed: () async {
+                  final selectedRoom = roomOptions[selectedRoomIndex];
                   ref.read(bookingsProvider.notifier).addBooking(
                     Booking(
                       hotel: widget.hotel,
+                      selectedRoom: SelectedRoom(
+                        name: selectedRoom['name'] as String,
+                        pricePerNight: selectedRoom['price'] as double,
+                        maxAdults: selectedRoom['maxAdults'] as int,
+                        maxChildren: selectedRoom['maxChildren'] as int,
+                        imageUrl: (selectedRoom['image'] as String?) ?? 'https://source.unsplash.com/featured/?hotel,room&sig=999',
+                        amenities: List<String>.from(selectedRoom['amenities'] as List),
+                      ),
                       checkIn: checkIn,
                       checkOut: checkOut,
                       adults: adults,
@@ -1106,7 +1267,7 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage>
                     ),
                   );
                   Navigator.pop(dialogContext);
-                  // Small delay to ensure widget is still mounted
+                  // Small delay to ensure widget is still mounted 
                   await Future.delayed(Duration(milliseconds: 100));
                   if (context.mounted) {
                     AppUtil.showSafeSnackBar(
@@ -1117,23 +1278,199 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage>
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: WPConfig.primaryColor,
+                  foregroundColor: Colors.white,
+                  textStyle: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.2,
+                  ),
+                  minimumSize: Size(120, 45),
+                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
                   elevation: 0,
                 ),
-                child: Text(
-                  'Confirm Booking',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white,
-                  ),
-                ),
+                child: Text('Confirm Booking'),
               ),
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildRoomsSection() {
+    // Static image mapping is used for consistent visuals
+    return Container(
+      padding: EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 15,
+            offset: Offset(0, 5),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: WPConfig.primaryColor.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(Icons.meeting_room, color: WPConfig.primaryColor, size: 20),
+              ),
+              SizedBox(width: 12),
+              Text(
+                'Rooms',
+                style: TextStyle(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 16,
+                  color: Colors.black87,
+                  letterSpacing: 0.2,
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 16),
+          Column(
+            children: List.generate(roomOptions.length, (index) {
+              final option = roomOptions[index];
+              final imageUrl = roomImageUrls[option['name'] as String] ?? widget.hotel.imageUrl ?? '';
+              return Container(
+                height: 200,
+                margin: EdgeInsets.only(bottom: 12),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.05),
+                      blurRadius: 10,
+                      offset: Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(16),
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      Image.network(
+                        imageUrl,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) => Container(
+                          color: Colors.grey[200],
+                          child: Icon(Icons.bed, color: Colors.grey[500], size: 40),
+                        ),
+                      ),
+                      Container(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [
+                              Colors.black.withOpacity(0.05),
+                              Colors.black.withOpacity(0.3),
+                            ],
+                          ),
+                        ),
+                      ),
+                      Positioned(
+                        top: 10,
+                        right: 10,
+                        child: Container(
+                          padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.9),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Text(
+                            '\$${(option['price'] as double).toStringAsFixed(0)} / night',
+                            style: TextStyle(
+                              color: WPConfig.primaryColor,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ),
+                      ),
+                      Positioned(
+                        left: 12,
+                        right: 12,
+                        bottom: 12,
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    option['name'] as String,
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w800,
+                                      fontSize: 16,
+                                      letterSpacing: 0.2,
+                                    ),
+                                  ),
+                                  SizedBox(height: 6),
+                                  Builder(
+                                    builder: (context) {
+                                      final amenities = List<String>.from(option['amenities']).take(3).toList();
+                                      final List<Widget> children = [
+                                        ...amenities.map(
+                                          (a) => Container(
+                                            padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                            decoration: BoxDecoration(
+                                              color: Colors.white.withOpacity(0.85),
+                                              borderRadius: BorderRadius.circular(10),
+                                            ),
+                                            child: Text(a, style: TextStyle(fontSize: 10, color: Colors.black87)),
+                                          ),
+                                        ),
+                                        Container(
+                                          padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                          decoration: BoxDecoration(
+                                            color: Colors.white.withOpacity(0.85),
+                                            borderRadius: BorderRadius.circular(10),
+                                          ),
+                                          child: Text(
+                                            'Max ${option['maxAdults']} adults, ${option['maxChildren']} children',
+                                            style: TextStyle(fontSize: 10, color: Colors.black87),
+                                          ),
+                                        ),
+                                      ];
+                                      return Wrap(
+                                        spacing: 6,
+                                        runSpacing: 6,
+                                        children: children,
+                                      );
+                                    },
+                                  ),
+                                ],
+                              ),
+                            ),
+
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }),
+          ),
+        ],
       ),
     );
   }

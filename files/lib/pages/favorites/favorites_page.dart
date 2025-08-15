@@ -41,8 +41,8 @@ class FavoritesPage extends ConsumerWidget {
     return Scaffold(
       appBar: CustomAppBar(
         title: 'favorites'.tr(),
-        showBackButton: true,
-        backAndLogoOnly: true,
+        showBackButton: false,
+        backAndLogoOnly: false,
       ),
       body: favorites.isEmpty
           ? Center(

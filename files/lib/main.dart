@@ -21,7 +21,7 @@ void main() async {
   
   AppUtil.setDisplayToHighRefreshRate();
   print('Display refresh rate set');
-  
+
   final savedThemeMode = await AdaptiveTheme.getThemeMode();
   print('Saved theme mode: $savedThemeMode');
 

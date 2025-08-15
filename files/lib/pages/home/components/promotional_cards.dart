@@ -11,6 +11,9 @@ class PromotionalCards extends ConsumerWidget {
     final dynamicConfig = ref.watch(dynamicConfigProvider);
     final primaryColor = dynamicConfig.primaryColor;
     final isTablet = MediaQuery.of(context).size.width >= 768;
+    final screenWidth = MediaQuery.of(context).size.width;
+    // Make card height relative to screen to avoid overflow and keep equal size
+    final double cardHeight = isTablet ? screenWidth * 0.18 : screenWidth * 0.32;
 
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: isTablet ? 8 : 16, vertical: 8),
@@ -37,13 +40,16 @@ class PromotionalCards extends ConsumerWidget {
               Expanded(
                 child: Container(
                   margin: EdgeInsets.only(right: isTablet ? 4 : 8),
+                  height: cardHeight,
                   padding: EdgeInsets.all(isTablet ? 12 : 16),
                   decoration: BoxDecoration(
                     color: primaryColor,
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Column(
+                    mainAxisSize: MainAxisSize.max,
                     crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
                         'Genius',
@@ -53,13 +59,14 @@ class PromotionalCards extends ConsumerWidget {
                           fontSize: isTablet ? 14 : 16,
                         ),
                       ),
-                      SizedBox(height: 4),
                       Text(
                         'Nelson, you\'re at Genius Level 2 in our loyalty program',
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: isTablet ? 12 : 14,
                         ),
+                        maxLines: 3,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ],
                   ),
@@ -70,6 +77,7 @@ class PromotionalCards extends ConsumerWidget {
               Expanded(
                 child: Container(
                   margin: EdgeInsets.only(left: isTablet ? 4 : 8),
+                  height: cardHeight,
                   padding: EdgeInsets.all(isTablet ? 12 : 16),
                   decoration: BoxDecoration(
                     color: Colors.white,
@@ -77,7 +85,9 @@ class PromotionalCards extends ConsumerWidget {
                     border: Border.all(color: Colors.grey.shade300),
                   ),
                   child: Column(
+                    mainAxisSize: MainAxisSize.max,
                     crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
                         '10%-15% discounts',
@@ -87,13 +97,14 @@ class PromotionalCards extends ConsumerWidget {
                           fontSize: isTablet ? 14 : 16,
                         ),
                       ),
-                      SizedBox(height: 4),
                       Text(
                         'Enjoy discounts at participating properties worldwide',
                         style: TextStyle(
                           color: Colors.black87,
                           fontSize: isTablet ? 12 : 14,
                         ),
+                        maxLines: 3,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ],
                   ),

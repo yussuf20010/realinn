@@ -23,6 +23,30 @@ class _MonthlyBookingModalState extends ConsumerState<MonthlyBookingModal> {
   String? selectedCity;
   String? selectedHotel;
   String locationSearchQuery = '';
+  int selectedRoomIndex = 0;
+  final List<Map<String, dynamic>> roomOptions = const [
+    {
+      'name': 'Studio',
+      'price': 70.0,
+      'maxAdults': 2,
+      'maxChildren': 1,
+      'amenities': ['WiFi', 'Kitchenette']
+    },
+    {
+      'name': 'One-Bedroom Suite',
+      'price': 95.0,
+      'maxAdults': 3,
+      'maxChildren': 2,
+      'amenities': ['WiFi', 'Kitchen', 'Washer']
+    },
+    {
+      'name': 'Two-Bedroom Apartment',
+      'price': 140.0,
+      'maxAdults': 4,
+      'maxChildren': 3,
+      'amenities': ['WiFi', 'Full Kitchen', 'Balcony']
+    },
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -66,7 +90,7 @@ class _MonthlyBookingModalState extends ConsumerState<MonthlyBookingModal> {
           Container(
             padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Row(
-              children: List.generate(4, (index) => Expanded(
+              children: List.generate(5, (index) => Expanded(
                 child: Container(
                   height: 4,
                   margin: EdgeInsets.symmetric(horizontal: 4),
@@ -111,7 +135,7 @@ class _MonthlyBookingModalState extends ConsumerState<MonthlyBookingModal> {
                       backgroundColor: primaryColor,
                       foregroundColor: Colors.white,
                     ),
-                    child: Text(currentStep == 3 ? 'Finish' : 'Next'),
+                    child: Text(currentStep == 4 ? 'Finish' : 'Next'),
                   ),
                 ),
               ],
@@ -132,6 +156,8 @@ class _MonthlyBookingModalState extends ConsumerState<MonthlyBookingModal> {
         return _buildCityStep();
       case 3:
         return _buildHotelStep();
+      case 4:
+        return _buildRoomStep();
       default:
         return Container();
     }
@@ -595,13 +621,15 @@ class _MonthlyBookingModalState extends ConsumerState<MonthlyBookingModal> {
         return selectedCity != null;
       case 3:
         return selectedHotel != null;
+      case 4:
+        return true; // default selection exists
       default:
         return false;
     }
   }
 
   void _nextStep() {
-    if (currentStep < 3) {
+    if (currentStep < 4) {
       setState(() => currentStep++);
     } else {
       // Create booking and add to booking page
@@ -618,9 +646,19 @@ class _MonthlyBookingModalState extends ConsumerState<MonthlyBookingModal> {
         orElse: () => hotels.first,
       );
 
-      // Create and add booking to provider
+      // Prepare selected room from options
+      final int seed = (selectedHotelData.id?.hashCode ?? selectedHotelData.name?.hashCode ?? 0).abs();
+      final selectedRoom = roomOptions[selectedRoomIndex];
       final booking = Booking(
         hotel: selectedHotelData,
+        selectedRoom: SelectedRoom(
+          name: selectedRoom['name'] as String,
+          pricePerNight: selectedRoom['price'] as double,
+          maxAdults: selectedRoom['maxAdults'] as int,
+          maxChildren: selectedRoom['maxChildren'] as int,
+          imageUrl: 'https://source.unsplash.com/featured/?hotel,monthly&sig=${seed + 21 + selectedRoomIndex}',
+          amenities: List<String>.from(selectedRoom['amenities'] as List),
+        ),
         checkIn: startDate!,
         checkOut: endDate!,
         adults: 1,
@@ -674,6 +712,61 @@ class _MonthlyBookingModalState extends ConsumerState<MonthlyBookingModal> {
       print('Monthly Booking - Hotel ${hotel.name} matches: $matches');
       return matches;
     }).toList();
+  }
+
+  Widget _buildRoomStep() {
+    final primaryColor = ref.watch(dynamicConfigProvider).primaryColor;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Select Room',
+          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black),
+        ),
+        SizedBox(height: 12),
+        ...List.generate(roomOptions.length, (index) {
+          final option = roomOptions[index];
+          final isSelected = index == selectedRoomIndex;
+          return Container(
+            margin: EdgeInsets.only(bottom: 8),
+            decoration: BoxDecoration(
+              color: isSelected ? primaryColor.withOpacity(0.06) : Colors.grey[50],
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: isSelected ? primaryColor : Colors.grey[300]!),
+            ),
+            child: RadioListTile<int>(
+              value: index,
+              groupValue: selectedRoomIndex,
+              onChanged: (v) => setState(() => selectedRoomIndex = v ?? 0),
+              activeColor: primaryColor,
+              title: Text(option['name'] as String, style: TextStyle(fontWeight: FontWeight.w600, color: Colors.black)),
+              subtitle: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(height: 4),
+                  Text(
+                    'USD ${(option['price'] as double).toStringAsFixed(0)} / night',
+                    style: TextStyle(color: Colors.black87),
+                  ),
+                  SizedBox(height: 4),
+                  Wrap(
+                    spacing: 6,
+                    runSpacing: -6,
+                    children: List<Widget>.from(
+                      (option['amenities'] as List).map((a) => Chip(
+                        label: Text(a, style: TextStyle(fontSize: 10)),
+                        visualDensity: VisualDensity.compact,
+                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      )),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        })
+      ],
+    );
   }
 }
 

@@ -9,7 +9,9 @@ import '../../controllers/hotel_controller.dart';
 import '../../models/hotel.dart';
 import '../../widgets/custom_app_bar.dart';
 import '../../core/utils/app_utils.dart';
+import '../booking/book_now_page.dart';
 import '../favorites/favorites_page.dart';
+import '../booking/book_now_page.dart' as booking;
 
 
 class AllHotelsPage extends ConsumerStatefulWidget {
@@ -367,7 +369,17 @@ class _AllHotelsPageState extends ConsumerState<AllHotelsPage> {
                                     ),
                                     Spacer(),
                                     ElevatedButton(
-                                      onPressed: () {}, 
+                                      onPressed: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (_) => booking.BookNowPage(
+                                              hotel: hotel,
+                                              bookingType: 0,
+                                            ),
+                                          ),
+                                        );
+                                      }, 
                                       style: ElevatedButton.styleFrom(
                                         backgroundColor: WPConfig.primaryColor,
                                         shape: RoundedRectangleBorder(

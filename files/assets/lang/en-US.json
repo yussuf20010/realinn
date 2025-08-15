@@ -77,6 +77,7 @@
     "update_language": "Update Language",
     "search_field": "Search Anything...",
     "search": "Search",
+  "search_where_to_go_hint": "Where are you going? (City or hotel)",
     "search_hint": "Type your search here",
     "recent_search": "Recent Search",
     "more_related_posts": "More Related Posts",
