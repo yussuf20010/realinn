@@ -70,7 +70,7 @@ class NotificationsPage extends ConsumerWidget {
           borderRadius: BorderRadius.circular(16),
           onTap: () {},
           child: Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(12),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -108,7 +108,7 @@ class NotificationsPage extends ConsumerWidget {
                         time,
                         style: TextStyle(
                           color: Colors.grey[500],
-                          fontSize: 12,
+                          fontSize: 14,
                         ),
                       ),
                     ],

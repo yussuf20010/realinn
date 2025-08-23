@@ -17,13 +17,14 @@ class ImageCacheConfig {
     BorderRadius? borderRadius,
     Widget? placeholder,
     Widget? errorWidget,
+    String? hotelName,
   }) {
     if (imageUrl.isEmpty) {
-      return Container(
+      return _buildHotelPlaceholder(
         width: width,
         height: height,
-        color: Colors.grey[300],
-        child: Icon(Icons.error, color: Colors.grey[400]),
+        borderRadius: borderRadius,
+        hotelName: hotelName,
       );
     }
 
@@ -59,19 +60,72 @@ class ImageCacheConfig {
           ),
         ),
       ),
-      errorWidget: (context, url, error) => Container(
+      errorWidget: (context, url, error) => _buildHotelPlaceholder(
         width: width,
         height: height,
-        color: Colors.grey[300],
+        borderRadius: borderRadius,
+        hotelName: hotelName,
+      ),
+    );
+  }
+
+  static Widget _buildHotelPlaceholder({
+    double? width,
+    double? height,
+    BorderRadius? borderRadius,
+    String? hotelName,
+  }) {
+    return Container(
+      width: width,
+      height: height,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Colors.grey[200]!,
+            Colors.grey[300]!,
+          ],
+        ),
+        borderRadius: borderRadius,
+      ),
+      child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.error, color: Colors.grey[400]),
-            SizedBox(height: 4),
-            Text(
-              'Failed to load image',
-              style: TextStyle(color: Colors.grey[600], fontSize: 12),
+            Container(
+              padding: EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.8),
+                borderRadius: BorderRadius.circular(30),
+              ),
+              child: Icon(
+                Icons.hotel,
+                color: Colors.grey[600],
+                size: width != null && width < 100 ? 20 : 28,
+              ),
             ),
+            if (hotelName != null && hotelName.isNotEmpty) ...[
+              SizedBox(height: 8),
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.8),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  hotelName.split(' ').take(2).join(' '),
+                  style: TextStyle(
+                    color: Colors.grey[700],
+                    fontSize: width != null && width < 100 ? 10 : 12,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  textAlign: TextAlign.center,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
           ],
         ),
       ),

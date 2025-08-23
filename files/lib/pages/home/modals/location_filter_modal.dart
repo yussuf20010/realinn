@@ -41,7 +41,7 @@ class _LocationFilterModalState extends ConsumerState<LocationFilterModal> {
                 ),
               ],
             ),
-            SizedBox(height: 16),
+            SizedBox(height: 12),
             locationResponseAsync.when(
               data: (locationResponse) {
                 final countries = locationResponse.countries ?? [];
@@ -198,9 +198,9 @@ class _LocationFilterModalState extends ConsumerState<LocationFilterModal> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(Icons.error_outline, size: 48, color: Colors.red),
-                  SizedBox(height: 16),
+                  SizedBox(height: 12),
                   Text('Error loading locations: $e'),
-                  SizedBox(height: 16),
+                  SizedBox(height: 12),
                   ElevatedButton(
                     onPressed: () => ref.refresh(locationProvider),
                     child: Text('Retry'),
@@ -208,7 +208,7 @@ class _LocationFilterModalState extends ConsumerState<LocationFilterModal> {
                 ],
               ),
             ),
-            SizedBox(height: 16),
+            SizedBox(height: 12),
             Row(
               children: [
                 Expanded(

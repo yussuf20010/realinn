@@ -231,7 +231,7 @@ import '../utils/ui_helper.dart';
 class AppTheme {
   /// Add your custom font name here, which you added in [pubspec.yaml] file
   static const fontName = 'Montserrat';
-  static const Color kPrimary = Color(0xFF7371FC);
+  static const Color kPrimary = Color(0xFFa93ae2);
 
   /// A light theme for NewsPro
   static ThemeData get lightTheme => ThemeData(
@@ -250,13 +250,13 @@ class AppTheme {
       headlineSmall: TextStyle(fontFamily: fontName, fontSize: 14, fontWeight: FontWeight.bold, color: kPrimary),
       titleLarge: TextStyle(fontFamily: fontName, fontSize: 16, fontWeight: FontWeight.w500, color: kPrimary), // Details
       titleMedium: TextStyle(fontFamily: fontName, fontSize: 14, fontWeight: FontWeight.w500, color: kPrimary),
-      titleSmall: TextStyle(fontFamily: fontName, fontSize: 12, fontWeight: FontWeight.w500, color: kPrimary),
-      bodyLarge: TextStyle(fontFamily: fontName, fontSize: 14, color: kPrimary), // Normal text
-      bodyMedium: TextStyle(fontFamily: fontName, fontSize: 12, color: kPrimary), // Sub/explanatory text
-      bodySmall: TextStyle(fontFamily: fontName, fontSize: 10, color: kPrimary),
+      titleSmall: TextStyle(fontFamily: fontName, fontSize: 14, fontWeight: FontWeight.w500, color: kPrimary),
+      bodyLarge: TextStyle(fontFamily: fontName, fontSize: 16, color: kPrimary), // Normal text
+      bodyMedium: TextStyle(fontFamily: fontName, fontSize: 14, color: kPrimary), // Sub/explanatory text
+      bodySmall: TextStyle(fontFamily: fontName, fontSize: 14, color: kPrimary),
       labelLarge: TextStyle(fontFamily: fontName, fontSize: 16, fontWeight: FontWeight.w500, color: kPrimary), // Buttons
       labelMedium: TextStyle(fontFamily: fontName, fontSize: 14, fontWeight: FontWeight.w500, color: kPrimary),
-      labelSmall: TextStyle(fontFamily: fontName, fontSize: 12, color: kPrimary),
+      labelSmall: TextStyle(fontFamily: fontName, fontSize: 14, color: kPrimary),
     ),
     scaffoldBackgroundColor: AppColors.scaffoldBackground,
     cardColor: AppColors.cardColor,
@@ -293,18 +293,20 @@ class AppTheme {
         backgroundColor: kPrimary,
         foregroundColor: Colors.white,
         padding: const EdgeInsets.all(AppDefaults.padding),
+        elevation: 4,
+        shadowColor: kPrimary.withOpacity(0.3),
         shape: RoundedRectangleBorder(
-          borderRadius: AppDefaults.borderRadius,
+          borderRadius: BorderRadius.circular(16),
         ),
       ),
     ),
     outlinedButtonTheme: OutlinedButtonThemeData(
       style: OutlinedButton.styleFrom(
         foregroundColor: kPrimary,
-        side: BorderSide(color: kPrimary),
+        side: BorderSide(color: kPrimary, width: 2),
         padding: const EdgeInsets.all(AppDefaults.padding),
         shape: RoundedRectangleBorder(
-          borderRadius: AppDefaults.borderRadius,
+          borderRadius: BorderRadius.circular(16),
         ),
       ),
     ),

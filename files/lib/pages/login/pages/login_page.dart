@@ -145,7 +145,7 @@ class _LoginFormSectionState extends ConsumerState<LoginFormSection> {
             autofillHints: const [AutofillHints.email],
             textInputAction: TextInputAction.next,
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
           TextFormField(
             controller: _pass,
             obscureText: !showPassword,
@@ -182,7 +182,7 @@ class _LoginFormSectionState extends ConsumerState<LoginFormSection> {
               ),
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
           Container(
             width: double.infinity,
             decoration: BoxDecoration(
@@ -226,9 +226,9 @@ class _LoginFormSectionState extends ConsumerState<LoginFormSection> {
               ),
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
                       Center(child: Text('or_sign_in_using'.tr(), style: TextStyle(color: Colors.black, inherit: true))),
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
           Row(
             children: [
               Expanded(
@@ -256,7 +256,7 @@ class _LoginFormSectionState extends ConsumerState<LoginFormSection> {
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
           Text.rich(
                 TextSpan(
                   text: 'terms'.tr(),

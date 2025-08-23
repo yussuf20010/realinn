@@ -71,7 +71,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     elevation: 2,
                     child: Padding(
-                      padding: const EdgeInsets.all(16),
+                      padding: const EdgeInsets.all(12),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -104,7 +104,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     elevation: 2,
                     child: Padding(
-                      padding: const EdgeInsets.all(16),
+                      padding: const EdgeInsets.all(12),
                       child: Row(
                         children: [
                           Icon(Icons.card_giftcard, color: Colors.blue, size: 32),
@@ -119,39 +119,41 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   ),
                 ),
                 // Profile completion card
+
+                // Login Button
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  child: Card(
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    elevation: 2,
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () => _navigateToLogin('your account'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: WPConfig.primaryColor,
+                        foregroundColor: Colors.white,
+                        padding: EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        elevation: 2,
+                      ),
                       child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text('Complete your profile', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                                SizedBox(height: 4),
-                                Text('Complete your profile and use this information for your next booking', style: TextStyle(fontSize: 13, color: Colors.grey[700])),
-                              ],
+                          Icon(Icons.login, size: 20),
+                          SizedBox(width: 8),
+                          Text(
+                            'Sign in to access all features',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
                             ),
-                          ),
-                          ElevatedButton(
-                            onPressed: () {},
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: WPConfig.primaryColor,
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                            ),
-                            child: Text('Complete now'),
                           ),
                         ],
                       ),
                     ),
                   ),
                 ),
-                // Section: Payment information
+
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   child: Text('Payment information', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
@@ -165,13 +167,13 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                       ListTile(
                         leading: Icon(Icons.wallet_giftcard, color: WPConfig.primaryColor),
                         title: Text('Rewards & Wallet'),
-                        onTap: () {},
+                        onTap: () => _navigateToLogin('Rewards & Wallet'),
                       ),
                       Divider(height: 1),
                       ListTile(
                         leading: Icon(Icons.payment, color: WPConfig.primaryColor),
                         title: Text('Payment methods'),
-                        onTap: () {},
+                        onTap: () => _navigateToLogin('Payment methods'),
                       ),
                     ],
                   ),
@@ -190,19 +192,19 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                       ListTile(
                         leading: Icon(Icons.person_outline, color: WPConfig.primaryColor),
                         title: Text('Personal details'),
-                        onTap: () {},
+                        onTap: () => _navigateToLogin('Personal details'),
                       ),
                       Divider(height: 1),
                       ListTile(
                         leading: Icon(Icons.lock_outline, color: WPConfig.primaryColor),
                         title: Text('Security settings'),
-                        onTap: () {},
+                        onTap: () => _navigateToLogin('Security settings'),
                       ),
                       Divider(height: 1),
                       ListTile(
                         leading: Icon(Icons.group_outlined, color: WPConfig.primaryColor),
                         title: Text('Other travellers'),
-                        onTap: () {},
+                        onTap: () => _navigateToLogin('Other travellers'),
                       ),
                     ],
                   ),
@@ -221,19 +223,19 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                       ListTile(
                         leading: Icon(Icons.devices_other, color: WPConfig.primaryColor),
                         title: Text('Device preferences'),
-                        onTap: () {},
+                        onTap: () => _navigateToLogin('Device preferences'),
                       ),
                       Divider(height: 1),
                       ListTile(
                         leading: Icon(Icons.flight, color: WPConfig.primaryColor),
                         title: Text('Travel preferences'),
-                        onTap: () {},
+                        onTap: () => _navigateToLogin('Travel preferences'),
                       ),
                       Divider(height: 1),
                       ListTile(
                         leading: Icon(Icons.email_outlined, color: WPConfig.primaryColor),
                         title: Text('Email preferences'),
-                        onTap: () {},
+                        onTap: () => _navigateToLogin('Email preferences'),
                       ),
                       Divider(height: 1),
                       ListTile(
@@ -257,6 +259,23 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           ),
         );
       },
+    );
+  }
+
+  void _navigateToLogin(String feature) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Please log in to access $feature'),
+        backgroundColor: WPConfig.primaryColor,
+        duration: Duration(seconds: 2),
+      ),
+    );
+    
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => LoginPage(),
+      ),
     );
   }
 
@@ -300,7 +319,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             fontWeight: FontWeight.bold,
           ),
         ),
-        SizedBox(height: 16),
+        SizedBox(height: 12),
         Container(
           decoration: BoxDecoration(
             color: Colors.white,
@@ -332,7 +351,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       child: InkWell(
         onTap: onTap,
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(12),
           child: Row(
             children: [
               Container(

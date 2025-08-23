@@ -9,11 +9,11 @@ class ServiceDetailPage extends StatelessWidget {
   final double price;
 
   const ServiceDetailPage({
-    Key? key,
+    Key? key, 
     required this.title,
     required this.description,
     required this.icon,
-    required this.features,
+    required this.features, 
     required this.price,
   }) : super(key: key);
 

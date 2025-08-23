@@ -42,7 +42,7 @@ class LocationHotelsPage extends ConsumerWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(Icons.hotel_outlined, size: 64, color: Colors.grey[400]),
-                  SizedBox(height: 16),
+                  SizedBox(height: 12),
                   Text(
                     'no_hotels_found_in'.tr(namedArgs: {'country': location.country ?? ''}),
                     style: TextStyle(fontSize: 16, color: Colors.black),
@@ -58,7 +58,7 @@ class LocationHotelsPage extends ConsumerWidget {
           }
 
           return ListView.builder(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(12),
             itemCount: filteredHotels.length,
             itemBuilder: (context, index) {
               final hotel = filteredHotels[index];

@@ -11,20 +11,18 @@ class HistoryPage extends ConsumerWidget {
     return Scaffold(
       appBar: CustomAppBar(
         title: 'history'.tr(),
-        showBackButton: true,
+        showBackButton: false,
         onNotificationPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => NotificationsPage()),
-          );
-        },
-        onProfilePressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => CustomerSupportPage(),
+          Navigator.push(context, MaterialPageRoute(
+            builder: (_) => Scaffold(
+              appBar: CustomAppBar(
+                title: 'notifications'.tr(),
+                showBackButton: true,
+                backAndLogoOnly: true,
+              ),
+              body: NotificationsPage(),
             ),
-          );
+          ));
         },
       ),
       body: Center(

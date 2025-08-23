@@ -1,30 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../config/wp_config.dart';
-import '../../models/hotel.dart';
-import '../../config/image_cache_config.dart';
-import '../../config/wp_config.dart';
-import '../../controllers/location_controller.dart';
-import '../../models/location.dart' as location_model;
-import '../../widgets/custom_app_bar.dart';
-import '../booking/booking_page.dart';
-import '../notifications/notifications_page.dart';
 import 'package:easy_localization/easy_localization.dart';
+import '../../config/dynamic_config.dart';
+import '../../models/hotel.dart';
+import '../../models/location.dart' as location_model;
 
 class BookNowPage extends ConsumerStatefulWidget {
   final Hotel hotel;
-  final int bookingType; // 0: daily (time), 1: monthly (dates)
-  final DateTimeRange? dateRangeFromSearch;
-  final TimeOfDay? startTimeFromSearch;
-  final TimeOfDay? endTimeFromSearch;
+  final DateTimeRange? dateRange;
+  final TimeOfDay? startTime;
+  final TimeOfDay? endTime;
+  final int adults;
+  final int children;
+  final int rooms;
 
   const BookNowPage({
     Key? key,
     required this.hotel,
-    required this.bookingType,
-    this.dateRangeFromSearch,
-    this.startTimeFromSearch,
-    this.endTimeFromSearch,
+    this.dateRange,
+    this.startTime,
+    this.endTime,
+    this.adults = 2,
+    this.children = 0,
+    this.rooms = 1,
   }) : super(key: key);
 
   @override
@@ -33,217 +31,459 @@ class BookNowPage extends ConsumerStatefulWidget {
 
 class _BookNowPageState extends ConsumerState<BookNowPage> {
   int selectedRoomIndex = 0;
-  DateTimeRange? selectedDateRange;
-  TimeOfDay? selectedStartTime;
-  TimeOfDay? selectedEndTime;
-  
-  String _normalizeImageUrl(String raw) {
-    if (raw.isEmpty) return raw;
-    if (raw.startsWith('http')) return raw;
-    if (!raw.startsWith('/')) raw = '/'+raw;
-    return WPConfig.siteStorageUrl + raw.replaceFirst(RegExp(r'^/+'), '');
-  }
-
-  String _resolveHeaderImageUrl() {
-    try {
-      final images = widget.hotel.images;
-      if (images != null && images.isNotEmpty) {
-        return _normalizeImageUrl(images.first);
-      }
-    } catch (_) {}
-    return widget.hotel.imageUrl != null ? _normalizeImageUrl(widget.hotel.imageUrl!) : '';
-  }
-
-  final List<Map<String, dynamic>> roomOptions = const [
-    {
-      'name': 'Standard Room',
-      'price': 60.0,
-      'maxAdults': 2,
-      'maxChildren': 1,
-      'amenities': ['Free WiFi', 'TV']
-    },
-    {
-      'name': 'Deluxe Room',
-      'price': 85.0,
-      'maxAdults': 3,
-      'maxChildren': 2,
-      'amenities': ['Free WiFi', 'Smart TV', 'Mini Bar']
-    },
-    {
-      'name': 'Suite',
-      'price': 120.0,
-      'maxAdults': 4,
-      'maxChildren': 2,
-      'amenities': ['Free WiFi', 'Living Area', 'Kitchenette', 'Balcony']
-    },
-  ];
-
-  @override
-  void initState() {
-    super.initState();
-    if (widget.bookingType == 1 && widget.dateRangeFromSearch != null) {
-      selectedDateRange = widget.dateRangeFromSearch;
-    }
-    if (widget.bookingType == 0) {
-      selectedStartTime = widget.startTimeFromSearch;
-      selectedEndTime = widget.endTimeFromSearch;
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
-    final primary = WPConfig.navbarColor;
+    final dynamicConfig = ref.watch(dynamicConfigProvider);
+    final primaryColor = dynamicConfig.primaryColor;
+    final isTablet = MediaQuery.of(context).size.width >= 768;
+
+    // Mock room data - replace with your dynamic data
+    final rooms = [
+      {
+        'name': 'Deluxe Queen Room',
+        'beds': '1 queen bed',
+        'size': '40 m²',
+        'amenities': ['Air conditioning', 'Private bathroom', 'Internet', 'Balcony', 'Flat-screen TV', 'View'],
+        'image': widget.hotel.images?.isNotEmpty == true ? widget.hotel.images!.first : null,
+        'originalPrice': 30.0,
+        'discountedPrice': 26.0,
+        'taxes': 3.87,
+        'availability': 2,
+        'cancellationDate': '23 Aug 2025',
+        'mealPlan': 'Breakfast included',
+        'lunchPrice': 10.0,
+        'dinnerPrice': 10.0,
+        'discount': 14,
+      },
+      {
+        'name': 'Double Room',
+        'beds': '2 twin beds',
+        'size': '45 m²',
+        'amenities': ['Air conditioning', 'Private bathroom', 'Internet', 'Balcony', 'Flat-screen TV', 'View'],
+        'image': widget.hotel.images?.isNotEmpty == true ? widget.hotel.images!.first : null,
+        'originalPrice': 32.0,
+        'discountedPrice': 28.0,
+        'taxes': 4.13,
+        'availability': 1,
+        'cancellationDate': '23 Aug 2025',
+        'mealPlan': 'Half board included',
+        'lunchPrice': 10.0,
+        'dinnerPrice': 10.0,
+        'discount': 14,
+      },
+    ];
 
     return Scaffold(
-      appBar: CustomAppBar(
-        title: 'book_now'.tr(),
-        showBackButton: true,
-        // Show profile, chat, logo, lang, notification like other main pages
-        onNotificationPressed: () => Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => const NotificationsPage()),
-        ),
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: primaryColor,
+        foregroundColor: Colors.white,
+        title: Column(
           children: [
-            _buildHotelHeader(),
-            const SizedBox(height: 12),
-            _buildIntervalCard(primary),
-            const SizedBox(height: 12),
-            _buildRoomsCard(primary),
+            Text(
+              widget.hotel.name ?? 'Hotel Name',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: isTablet ? 18 : 16,
+              ),
+            ),
+            if (widget.dateRange != null)
+              Text(
+                '${DateFormat('dd MMM').format(widget.dateRange!.start)} - ${DateFormat('dd MMM').format(widget.dateRange!.end)}',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: isTablet ? 14 : 12,
+                ),
+              ),
           ],
         ),
-      ),
-      bottomNavigationBar: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-          child: SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: _canConfirm() ? _confirmBooking : null,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: primary,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              ),
-              child: Text('confirm'.tr(), style: const TextStyle(fontWeight: FontWeight.bold)),
-            ),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.currency_exchange),
+            onPressed: () {
+              // Handle currency exchange
+            },
           ),
-        ),
+          IconButton(
+            icon: Icon(Icons.share),
+            onPressed: () {
+              // Handle share
+            },
+          ),
+        ],
       ),
-    );
-  }
-
-  Widget _buildHotelHeader() {
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            // Availability banner
+            Container(
+              width: double.infinity,
+              padding: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+              color: Colors.red,
+              child: Text(
+                'Only ${rooms[0]['availability']} rooms left on RealInn',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+            
+            // Rooms list
+            Padding(
+              padding: EdgeInsets.all(12),
+              child: Column(
+                children: rooms.asMap().entries.map((entry) {
+                  final index = entry.key;
+                  final room = entry.value;
+                  final isSelected = index == selectedRoomIndex;
+                  
     return Container(
+                    margin: EdgeInsets.only(bottom: 24),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: isSelected ? primaryColor : Colors.grey.shade200,
+                        width: isSelected ? 2 : 1,
+                      ),
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 12, offset: const Offset(0, 4)),
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.05),
+                          blurRadius: 8,
+                          offset: Offset(0, 2),
+                        ),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          ClipRRect(
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-            child: SizedBox(
-              height: 180,
-              width: double.infinity,
-              child: Builder(builder: (context) {
-                final url = _resolveHeaderImageUrl();
-                if (url.isEmpty) {
-                  return Container(color: Colors.grey[200], child: const Icon(Icons.hotel, size: 56, color: Colors.grey));
-                }
-                return ImageCacheConfig.buildCachedImage(
-                  imageUrl: url,
-                  fit: BoxFit.cover,
-                );
-              }),
-            ),
-          ),
+                        // Room header
           Padding(
-            padding: const EdgeInsets.all(12),
+                          padding: EdgeInsets.all(12),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(widget.hotel.name ?? '', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                const SizedBox(height: 4),
-                Consumer(
-                  builder: (context, ref, _) {
-                    final locationResponse = ref.watch(locationProvider);
-                    return locationResponse.when(
-                      data: (locationData) {
-                        String locationText = '';
-                        if (widget.hotel.cityId != null) {
-                          final city = locationData.cities?.firstWhere(
-                            (c) => c.id == widget.hotel.cityId,
-                            orElse: () => location_model.City(),
-                          );
-                          if (city?.name != null) locationText = city!.name!;
-                        }
-                        if (widget.hotel.countryId != null) {
-                          final country = locationData.countries?.firstWhere(
-                            (c) => c.id == widget.hotel.countryId,
-                            orElse: () => location_model.Country(),
-                          );
-                          if (country?.name != null) {
-                            locationText = locationText.isNotEmpty ? '$locationText, ${country!.name}' : country!.name!;
-                          }
-                        }
-                        if (locationText.isEmpty) {
-                          locationText = '${widget.hotel.city ?? ''}${widget.hotel.country != null ? ', ${widget.hotel.country}' : ''}';
-                        }
+                                    Text(
+                                      room['name'] as String,
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: isTablet ? 18 : 16,
+                                        color: primaryColor,
+                                      ),
+                                    ),
+                                    SizedBox(height: 8),
+                                    Row(
+                                      children: [
+                                        Icon(Icons.bed, color: Colors.grey[600], size: 16),
+                                        SizedBox(width: 4),
+                                        Text(
+                                          room['beds'] as String,
+                                          style: TextStyle(
+                                            fontSize: isTablet ? 14 : 12,
+                                            color: Colors.black87,
+                                          ),
+                                        ),
+                                        SizedBox(width: 16),
+                                        Icon(Icons.aspect_ratio, color: Colors.grey[600], size: 16),
+                                        SizedBox(width: 4),
+                                        Text(
+                                          'Room size: ${room['size']}',
+                                          style: TextStyle(
+                                            fontSize: isTablet ? 14 : 12,
+                                            color: Colors.black87,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              // Room image
+                              Container(
+                                width: isTablet ? 100 : 80,
+                                height: isTablet ? 100 : 80,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(8),
+                                  color: Colors.grey[200],
+                                ),
+                                child: room['image'] != null
+                                    ? ClipRRect(
+                                        borderRadius: BorderRadius.circular(8),
+                                        child: Image.network(
+                                          room['image'] as String,
+                                          fit: BoxFit.cover,
+                                          errorBuilder: (context, error, stackTrace) {
+                                            return _buildPlaceholderImage();
+                                          },
+                                        ),
+                                      )
+                                    : _buildPlaceholderImage(),
+                              ),
+                            ],
+                          ),
+                        ),
+                        
+                        // Amenities
+                        Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 16),
+                          child: Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            children: (room['amenities'] as List<String>).map((amenity) {
                         return Row(
+                                mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Icon(Icons.location_on, size: 14, color: Colors.black54),
-                            const SizedBox(width: 4),
-                            Expanded(
-                              child: Text(
-                                locationText,
-                                style: const TextStyle(color: Colors.black54, fontSize: 12),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
+                                  Icon(
+                                    _getAmenityIcon(amenity),
+                                    color: Colors.grey[600],
+                                    size: 16,
+                                  ),
+                                  SizedBox(width: 4),
+                                  Text(
+                                    amenity,
+                                    style: TextStyle(
+                                      fontSize: isTablet ? 14 : 12,
+                                      color: Colors.black87,
                               ),
                             ),
                           ],
                         );
-                      },
-                      loading: () => Row(
+                            }).toList(),
+                          ),
+                        ),
+                        
+                        SizedBox(height: 12),
+                        
+                        // Booking details
+                        Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 16),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Icon(Icons.people, color: Colors.grey[600], size: 20),
+                                  SizedBox(width: 8),
+                                  Text(
+                                    'Price for ${widget.adults} adults',
+                                    style: TextStyle(
+                                      fontSize: isTablet ? 16 : 14,
+                                      color: Colors.black87,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              
+                              SizedBox(height: 12),
+                              
+                              // Booking policies
+                              _buildPolicyRow('Free cancellation before 6:00 PM on ${room['cancellationDate']}'),
+                              _buildPolicyRow('No prepayment needed - pay at the property'),
+                              _buildPolicyRow('No credit card needed'),
+                              
+                              SizedBox(height: 12),
+                              
+                              // Meal plan
+                              Row(
                         children: [
-                          const Icon(Icons.location_on, size: 14, color: Colors.black54),
-                          const SizedBox(width: 4),
-                          Expanded(
+                                  Icon(Icons.coffee, color: Colors.grey[600], size: 20),
+                                  SizedBox(width: 8),
+                                  Text(
+                                    room['mealPlan'] as String,
+                                    style: TextStyle(
+                                      fontSize: isTablet ? 16 : 14,
+                                      color: Colors.black87,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              
+                              if (room['lunchPrice'] != null)
+                                Padding(
+                                  padding: EdgeInsets.only(left: 28, top: 4),
+                                  child: Text(
+                                    'Lunch US\$${room['lunchPrice']}',
+                                    style: TextStyle(
+                                      fontSize: isTablet ? 14 : 12,
+                                      color: Colors.black87,
+                                    ),
+                                  ),
+                                ),
+                              
+                              if (room['dinnerPrice'] != null)
+                                Padding(
+                                  padding: EdgeInsets.only(left: 28, top: 4),
                             child: Text(
-                              '${widget.hotel.city ?? ''}${widget.hotel.country != null ? ', ${widget.hotel.country}' : ''}',
-                              style: const TextStyle(color: Colors.black54, fontSize: 12),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
+                                    'Dinner US\$${room['dinnerPrice']}',
+                                    style: TextStyle(
+                                      fontSize: isTablet ? 14 : 12,
+                                      color: Colors.black87,
+                                    ),
+                                  ),
+                                ),
+                              
+                              SizedBox(height: 12),
+                              
+                              // Discount information
+                              Row(
+                                children: [
+                                  Icon(Icons.check_circle, color: Colors.amber, size: 20),
+                                  SizedBox(width: 8),
+                                  Text(
+                                    'Genius ${room['discount']}% discount',
+                                    style: TextStyle(
+                                      fontSize: isTablet ? 16 : 14,
+                                      color: Colors.black87,
                             ),
                           ),
                         ],
                       ),
-                      error: (e, __) => Row(
+                              
+                              Padding(
+                                padding: EdgeInsets.only(left: 28, top: 4),
+                                child: Text(
+                                  'Applied to the price before taxes and fees',
+                                  style: TextStyle(
+                                    fontSize: isTablet ? 12 : 10,
+                                    color: Colors.grey[600],
+                                  ),
+                                ),
+                              ),
+                              
+                              SizedBox(height: 12),
+                              
+                              // Discount badges
+                              Row(
                         children: [
-                          const Icon(Icons.location_on, size: 14, color: Colors.black54),
-                          const SizedBox(width: 4),
-                          Expanded(
+                                  Container(
+                                    padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                    decoration: BoxDecoration(
+                                      color: Colors.green,
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: Text(
+                                      '${room['discount']}% off',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(width: 8),
+                                  Container(
+                                    padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                    decoration: BoxDecoration(
+                                      color: primaryColor,
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
                             child: Text(
-                              '${widget.hotel.city ?? ''}${widget.hotel.country != null ? ', ${widget.hotel.country}' : ''}',
-                              style: const TextStyle(color: Colors.black54, fontSize: 12),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
+                                      'Genius Discount',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.bold,
+                                      ),
                             ),
                           ),
                         ],
                       ),
-                    );
-                  },
+                              
+                              SizedBox(height: 12),
+                              
+                              // Pricing
+                              Text(
+                                'Price for 1 night (${DateFormat('dd MMM').format(widget.dateRange?.start ?? DateTime.now())} - ${DateFormat('dd MMM').format(widget.dateRange?.end ?? DateTime.now().add(Duration(days: 1)))})',
+                                style: TextStyle(
+                                  fontSize: isTablet ? 14 : 12,
+                                  color: Colors.black87,
+                                ),
+                              ),
+                              
+                              SizedBox(height: 8),
+                              
+                              Row(
+                                children: [
+                                  Text(
+                                    'US\$${room['originalPrice']}',
+                                    style: TextStyle(
+                                      fontSize: isTablet ? 16 : 14,
+                                      color: Colors.red,
+                                      decoration: TextDecoration.lineThrough,
+                                    ),
+                                  ),
+                                  SizedBox(width: 8),
+                                  Text(
+                                    'US\$${room['discountedPrice']}',
+                                    style: TextStyle(
+                                      fontSize: isTablet ? 18 : 16,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.black,
+                                    ),
+                                  ),
+                                  SizedBox(width: 4),
+                                  Icon(Icons.info, color: Colors.blue, size: 16),
+                                ],
+                              ),
+                              
+                              SizedBox(height: 4),
+                              
+                              Text(
+                                '+US\$${room['taxes']} taxes and fees',
+                                style: TextStyle(
+                                  fontSize: isTablet ? 12 : 10,
+                                  color: Colors.grey[600],
+                                ),
+                              ),
+                              
+                              SizedBox(height: 20),
+                              
+                              // Select button
+                              SizedBox(
+                                width: double.infinity,
+                                child: OutlinedButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      selectedRoomIndex = index;
+                                    });
+                                  },
+                                  style: OutlinedButton.styleFrom(
+                                    side: BorderSide(color: isSelected ? primaryColor : Colors.grey.shade300),
+                                    backgroundColor: isSelected ? primaryColor.withOpacity(0.1) : Colors.transparent,
+                                    padding: EdgeInsets.symmetric(vertical: 12),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                  ),
+                                  child: Text(
+                                    isSelected ? 'Selected' : 'Select',
+                                    style: TextStyle(
+                                      color: isSelected ? primaryColor : Colors.grey[600],
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              
+                              SizedBox(height: 8),
+                              
+                              // Availability warning
+                              Text(
+                                'Only ${room['availability']} rooms left on RealInn',
+                                style: TextStyle(
+                                  fontSize: isTablet ? 12 : 10,
+                                  color: Colors.red,
+                                ),
+                                textAlign: TextAlign.center,
                 ),
               ],
             ),
@@ -251,202 +491,130 @@ class _BookNowPageState extends ConsumerState<BookNowPage> {
         ],
       ),
     );
-  }
-
-  Widget _buildIntervalCard(Color primary) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 12, offset: const Offset(0, 4)),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(color: primary.withOpacity(0.1), borderRadius: BorderRadius.circular(10)),
-                child: Icon(widget.bookingType == 0 ? Icons.access_time : Icons.calendar_today, color: primary, size: 18),
+                }).toList(),
               ),
-              const SizedBox(width: 8),
-              Text(widget.bookingType == 0 ? 'Daily time'.tr() : 'Dates'.tr(), style: const TextStyle(fontWeight: FontWeight.w700)),
-            ],
-          ),
-          const SizedBox(height: 12),
-          if (widget.bookingType == 0) ...[
-            _intervalTile(
-              icon: Icons.access_time,
-              title: 'Start time'.tr(),
-              subtitle: selectedStartTime != null ? _formatTime(selectedStartTime!) : 'Select start time'.tr(),
-              onTap: () async {
-                final picked = await showTimePicker(context: context, initialTime: selectedStartTime ?? TimeOfDay.now());
-                if (picked != null) setState(() => selectedStartTime = picked);
-              },
             ),
-            const Divider(height: 1),
-            _intervalTile(
-              icon: Icons.access_time,
-              title: 'End time'.tr(),
-              subtitle: selectedEndTime != null ? _formatTime(selectedEndTime!) : 'Select end time'.tr(),
-              onTap: () async {
-                final picked = await showTimePicker(context: context, initialTime: selectedEndTime ?? (selectedStartTime ?? TimeOfDay.now()));
-                if (picked != null) setState(() => selectedEndTime = picked);
-              },
-            ),
-          ] else ...[
-            _intervalTile(
-              icon: Icons.calendar_today,
-              title: 'Date range'.tr(),
-              subtitle: selectedDateRange != null
-                  ? '${DateFormat('yMMMd').format(selectedDateRange!.start)} - ${DateFormat('yMMMd').format(selectedDateRange!.end)}'
-                  : 'Select dates'.tr(),
-              onTap: () async {
-                final now = DateTime.now();
-                final picked = await showDateRangePicker(context: context, firstDate: now, lastDate: now.add(const Duration(days: 365)));
-                if (picked != null) setState(() => selectedDateRange = picked);
-              },
-            ),
+            
+            SizedBox(height: 100), // Space for bottom button
           ],
-        ],
+        ),
       ),
-    );
-  }
-
-  Widget _intervalTile({required IconData icon, required String title, required String subtitle, required VoidCallback onTap}) {
-    return ListTile(
-      contentPadding: EdgeInsets.zero,
-      leading: Icon(icon, color: Colors.black87),
-      title: Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
-      subtitle: Text(subtitle),
-      trailing: const Icon(Icons.chevron_right),
-      onTap: onTap,
-    );
-  }
-
-  Widget _buildRoomsCard(Color primary) {
-    return Container(
-      padding: const EdgeInsets.all(12),
+      
+      // Bottom action button
+      bottomNavigationBar: Container(
+        padding: EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 12, offset: const Offset(0, 4)),
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 8,
+              offset: Offset(0, -2),
+            ),
         ],
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
         children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(color: primary.withOpacity(0.1), borderRadius: BorderRadius.circular(10)),
-                child: Icon(Icons.meeting_room, color: primary, size: 18),
+            Text(
+              'You won\'t be charged yet',
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey[600],
               ),
-              const SizedBox(width: 8),
-              Text('Select Room'.tr(), style: const TextStyle(fontWeight: FontWeight.w700)),
-            ],
-          ),
-          const SizedBox(height: 12),
-          ...List.generate(roomOptions.length, (index) {
-            final option = roomOptions[index];
-            final isSelected = index == selectedRoomIndex;
-            return Container(
-              margin: const EdgeInsets.only(bottom: 8),
-              decoration: BoxDecoration(
-                color: isSelected ? primary.withOpacity(0.06) : Colors.grey[50],
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: isSelected ? primary : Colors.grey[300]!),
-              ),
-              child: RadioListTile<int>(
-                value: index,
-                groupValue: selectedRoomIndex,
-                onChanged: (v) => setState(() => selectedRoomIndex = v ?? 0),
-                activeColor: primary,
-                title: Text(option['name'] as String, style: const TextStyle(fontWeight: FontWeight.w600)),
-                subtitle: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(height: 4),
-                    Text('USD ${(option['price'] as double).toStringAsFixed(0)} / night'),
-                    const SizedBox(height: 4),
-                    Wrap(
-                      spacing: 6,
-                      runSpacing: -6,
-                      children: List<Widget>.from(
-                        (option['amenities'] as List).map((a) => Chip(
-                          label: Text(a, style: const TextStyle(fontSize: 10)),
-                          visualDensity: VisualDensity.compact,
-                          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                        )),
+            ),
+            SizedBox(height: 8),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: selectedRoomIndex >= 0 ? () => _proceedToBooking() : null,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: primaryColor,
+                  foregroundColor: Colors.white,
+                  padding: EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                child: Text(
+                  'Continue to booking',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
                       ),
                     ),
                   ],
                 ),
               ),
             );
-          })
+  }
+
+  Widget _buildPolicyRow(String text) {
+    return Padding(
+      padding: EdgeInsets.only(bottom: 8),
+      child: Row(
+        children: [
+          Icon(Icons.check_circle, color: Colors.green, size: 20),
+          SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              text,
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.green,
+              ),
+            ),
+          ),
         ],
       ),
     );
   }
 
-  bool _canConfirm() {
-    if (widget.bookingType == 0) {
-      return selectedStartTime != null && selectedEndTime != null;
+  IconData _getAmenityIcon(String amenity) {
+    switch (amenity.toLowerCase()) {
+      case 'air conditioning':
+        return Icons.ac_unit;
+      case 'private bathroom':
+        return Icons.bathtub;
+      case 'internet':
+        return Icons.wifi;
+      case 'balcony':
+        return Icons.check_circle;
+      case 'flat-screen tv':
+        return Icons.tv;
+      case 'view':
+        return Icons.landscape;
+      default:
+        return Icons.check_circle;
     }
-    return selectedDateRange != null;
   }
 
-  void _confirmBooking() {
-    final selectedRoom = roomOptions[selectedRoomIndex];
-    final DateTime checkIn;
-    final DateTime checkOut;
-    if (widget.bookingType == 0) {
-      final now = DateTime.now();
-      checkIn = DateTime(now.year, now.month, now.day, selectedStartTime!.hour, selectedStartTime!.minute);
-      checkOut = DateTime(now.year, now.month, now.day, selectedEndTime!.hour, selectedEndTime!.minute);
-    } else {
-      checkIn = selectedDateRange!.start;
-      checkOut = selectedDateRange!.end;
-    }
-
-    final int seed = (widget.hotel.id?.hashCode ?? widget.hotel.name?.hashCode ?? 0).abs();
-    final booking = Booking(
-      hotel: widget.hotel,
-      selectedRoom: SelectedRoom(
-        name: selectedRoom['name'] as String,
-        pricePerNight: selectedRoom['price'] as double,
-        maxAdults: selectedRoom['maxAdults'] as int,
-        maxChildren: selectedRoom['maxChildren'] as int,
-        imageUrl: 'https://source.unsplash.com/featured/?hotel,room&sig=${seed + 900 + selectedRoomIndex}',
-        amenities: List<String>.from(selectedRoom['amenities'] as List),
+  Widget _buildPlaceholderImage() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.grey[300],
+        borderRadius: BorderRadius.circular(8),
       ),
-      checkIn: checkIn,
-      checkOut: checkOut,
-      adults: 1,
-      children: 0,
-      rooms: 1,
-      status: 'upcoming',
+      child: Icon(
+        Icons.hotel,
+        color: Colors.grey[600],
+        size: 32,
+      ),
     );
+  }
 
-    ref.read(bookingsProvider.notifier).addBooking(booking);
-
+  void _proceedToBooking() {
+    // Navigate to final booking confirmation page
+    // This should integrate with your booking system
     Navigator.pop(context);
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('booking_confirmed'.tr()))
+      SnackBar(
+        content: Text('Booking process initiated!'),
+        backgroundColor: Colors.green,
+      ),
     );
-  }
-
-  String _formatTime(TimeOfDay time) {
-    final h = time.hour.toString().padLeft(2, '0');
-    final m = time.minute.toString().padLeft(2, '0');
-    return '$h:$m';
   }
 }
 

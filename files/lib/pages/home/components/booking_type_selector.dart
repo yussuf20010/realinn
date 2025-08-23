@@ -16,9 +16,9 @@ class BookingTypeSelector extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final primaryColor = WPConfig.navbarColor; // Use constant color directly
+    final primaryColor = WPConfig.navbarColor;
     final bool isTablet = MediaQuery.of(context).size.width >= 768;
-    final double fontSize = isTablet ? 16 : 13; // smaller on mobile
+    final double fontSize = isTablet ? 16 : 13;
     final double vPadding = isTablet ? 14 : 10;
 
     return Padding(
@@ -44,7 +44,7 @@ class BookingTypeSelector extends ConsumerWidget {
                 ),
                 child: Center(
                   child: Text(
-                    'daily_booking'.tr(),
+                    'Daily Booking',
                     style: TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
@@ -62,12 +62,12 @@ class BookingTypeSelector extends ConsumerWidget {
               child: Container(
                 padding: EdgeInsets.symmetric(vertical: vPadding),
                 decoration: BoxDecoration(
-                  color: primaryColor,
+                  color: Colors.white,
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(color: primaryColor, width: 2),
                   boxShadow: [
                     BoxShadow(
-                      color: primaryColor.withOpacity(0.2),
+                      color: primaryColor.withOpacity(0.1),
                       blurRadius: 8,
                       offset: Offset(0, 2),
                     ),
@@ -75,9 +75,9 @@ class BookingTypeSelector extends ConsumerWidget {
                 ),
                 child: Center(
                   child: Text(
-                    'monthly_booking'.tr(),
+                    'Monthly Booking',
                     style: TextStyle(
-                      color: Colors.white,
+                      color: primaryColor,
                       fontWeight: FontWeight.bold,
                       fontSize: fontSize,
                     ),

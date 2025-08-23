@@ -7,11 +7,11 @@ import '../../config/image_cache_config.dart';
 import '../../config/wp_config.dart';
 import '../../controllers/hotel_controller.dart';
 import '../../models/hotel.dart';
+import '../../providers/favorites_provider.dart';
 import '../../widgets/custom_app_bar.dart';
 import '../../core/utils/app_utils.dart';
 import '../booking/book_now_page.dart';
 import '../favorites/favorites_page.dart';
-import '../booking/book_now_page.dart' as booking;
 
 
 class AllHotelsPage extends ConsumerStatefulWidget {
@@ -245,6 +245,7 @@ class _AllHotelsPageState extends ConsumerState<AllHotelsPage> {
                                   topLeft: Radius.circular(12),
                                   bottomLeft: Radius.circular(12),
                                 ),
+                                hotelName: hotel.name,
                               ),
                             ),
                             // Favorite button
@@ -253,8 +254,9 @@ class _AllHotelsPageState extends ConsumerState<AllHotelsPage> {
                               right: 4,
                               child: Consumer(
                                 builder: (context, ref, child) {
-                                  final favoritesNotifier = ref.watch(favoritesProvider.notifier);
-                                  final isFavorite = favoritesNotifier.isFavorite(hotel);
+                                  final favorites = ref.watch(favoritesProvider);
+                                  final favoritesNotifier = ref.read(favoritesProvider.notifier);
+                                  final isFavorite = favorites.any((h) => h.id == hotel.id);
                                   
                                   return Material(
                                     color: Colors.transparent,
@@ -349,7 +351,7 @@ class _AllHotelsPageState extends ConsumerState<AllHotelsPage> {
                                     SizedBox(width: 4),
                                     Text(
                                       'reviews'.tr() + ' (${hotel.reviews?.length ?? 0})',
-                                      style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                                      style: TextStyle(color: Colors.grey[600], fontSize: 14),
                                     ),
                                   ],
                                 ),
@@ -373,9 +375,8 @@ class _AllHotelsPageState extends ConsumerState<AllHotelsPage> {
                                         Navigator.push(
                                           context,
                                           MaterialPageRoute(
-                                            builder: (_) => booking.BookNowPage(
+                                            builder: (_) => BookNowPage(
                                               hotel: hotel,
-                                              bookingType: 0,
                                             ),
                                           ),
                                         );
@@ -402,7 +403,7 @@ class _AllHotelsPageState extends ConsumerState<AllHotelsPage> {
                 },
               ),
               loading: () => ListView.builder(
-                padding: EdgeInsets.all(16),
+                padding: EdgeInsets.all(12),
                 itemCount: 5,
                 itemBuilder: (context, index) => _ShimmerHotelCard(),
               ),
@@ -432,7 +433,7 @@ class _ShimmerHotelCard extends StatelessWidget {
             borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
           ),
           Padding(
-            padding: EdgeInsets.all(16),
+            padding: EdgeInsets.all(12),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -461,7 +462,7 @@ class _ShimmerHotelCard extends StatelessWidget {
                     ),
                   ),
                 ),
-                SizedBox(height: 16),
+                SizedBox(height: 12),
                 Shimmer.fromColors(
                   baseColor: Colors.grey[300]!,
                   highlightColor: Colors.grey[100]!,
@@ -474,7 +475,7 @@ class _ShimmerHotelCard extends StatelessWidget {
                     ),
                   ),
                 ),
-                SizedBox(height: 16),
+                SizedBox(height: 12),
                 Row(
                   children: [
                     for (int i = 0; i < 3; i++)

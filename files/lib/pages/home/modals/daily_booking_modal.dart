@@ -62,7 +62,7 @@ class _DailyBookingModalState extends ConsumerState<DailyBookingModal> {
         children: [
           // Header
           Container(
-            padding: EdgeInsets.all(16),
+            padding: EdgeInsets.all(12),
             decoration: BoxDecoration(
               color: primaryColor,
               borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
@@ -106,14 +106,14 @@ class _DailyBookingModalState extends ConsumerState<DailyBookingModal> {
           // Content
           Flexible(
             child: Padding(
-              padding: EdgeInsets.all(16),
+              padding: EdgeInsets.all(12),
               child: _buildStepContent(),
             ),
           ),
           
           // Navigation buttons
           Container(
-            padding: EdgeInsets.all(16),
+            padding: EdgeInsets.all(12),
             child: Row(
               children: [
                 if (currentStep > 0)
@@ -171,7 +171,7 @@ class _DailyBookingModalState extends ConsumerState<DailyBookingModal> {
           'Select Country',
           style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black),
         ),
-        SizedBox(height: 16),
+        SizedBox(height: 12),
         // Search field
         TextField(
           decoration: InputDecoration(
@@ -184,7 +184,7 @@ class _DailyBookingModalState extends ConsumerState<DailyBookingModal> {
           ),
           onChanged: (value) => setState(() => locationSearchQuery = value.toLowerCase()),
         ),
-        SizedBox(height: 16),
+        SizedBox(height: 12),
         Flexible(
           child: Consumer(
             builder: (context, ref, child) {
@@ -247,7 +247,7 @@ class _DailyBookingModalState extends ConsumerState<DailyBookingModal> {
                                       style: TextStyle(
                                         color: Colors.blue,
                                         fontWeight: FontWeight.bold,
-                                        fontSize: 12,
+                                        fontSize: 14,
                                       ),
                                     ),
                                   ],
@@ -289,7 +289,7 @@ class _DailyBookingModalState extends ConsumerState<DailyBookingModal> {
               style: TextStyle(fontSize: 14, color: Colors.black),
             ),
           ),
-        SizedBox(height: 16),
+        SizedBox(height: 12),
         // Search field
         TextField(
           decoration: InputDecoration(
@@ -302,7 +302,7 @@ class _DailyBookingModalState extends ConsumerState<DailyBookingModal> {
           ),
           onChanged: (value) => setState(() => locationSearchQuery = value.toLowerCase()),
         ),
-        SizedBox(height: 16),
+        SizedBox(height: 12),
         Flexible(
           child: Consumer(
             builder: (context, ref, child) {
@@ -376,7 +376,7 @@ class _DailyBookingModalState extends ConsumerState<DailyBookingModal> {
                                         style: TextStyle(
                                           color: Colors.blue,
                                           fontWeight: FontWeight.bold,
-                                          fontSize: 12,
+                                          fontSize: 14,
                                         ),
                                       ),
                                     ],
@@ -396,7 +396,7 @@ class _DailyBookingModalState extends ConsumerState<DailyBookingModal> {
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Icon(Icons.location_city_outlined, size: 64, color: Colors.grey[400]),
-                                SizedBox(height: 16),
+                                SizedBox(height: 12),
                                 Text(
                                   'No cities found in $selectedCountry',
                                   style: TextStyle(fontSize: 16, color: Colors.black),
@@ -440,7 +440,7 @@ class _DailyBookingModalState extends ConsumerState<DailyBookingModal> {
               style: TextStyle(fontSize: 14, color: Colors.black),
             ),
           ),
-        SizedBox(height: 16),
+        SizedBox(height: 12),
         Flexible(
           child: Consumer(
             builder: (context, ref, child) {
@@ -456,7 +456,7 @@ class _DailyBookingModalState extends ConsumerState<DailyBookingModal> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Icon(Icons.hotel_outlined, size: 64, color: Colors.grey[400]),
-                          SizedBox(height: 16),
+                          SizedBox(height: 12),
                           Text(
                             selectedCity != null 
                                 ? 'No hotels found in $selectedCity'
@@ -472,9 +472,9 @@ class _DailyBookingModalState extends ConsumerState<DailyBookingModal> {
                             SizedBox(height: 8),
                             Text(
                               'Try selecting a different city or check if hotels have location data',
-                              style: TextStyle(fontSize: 12, color: Colors.grey[500]),
+                              style: TextStyle(fontSize: 14, color: Colors.grey[500]),
                             ),
-                            SizedBox(height: 16),
+                            SizedBox(height: 12),
                             ElevatedButton(
                               onPressed: () => setState(() => selectedCity = null),
                               child: Text('Show All Hotels'),
@@ -574,7 +574,7 @@ class _DailyBookingModalState extends ConsumerState<DailyBookingModal> {
           'Select Time Range',
           style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black),
         ),
-        SizedBox(height: 16),
+        SizedBox(height: 12),
         // Start Time Selection
         ListTile(
           leading: Icon(Icons.access_time, color: Colors.black),
@@ -618,7 +618,7 @@ class _DailyBookingModalState extends ConsumerState<DailyBookingModal> {
             }
           },
         ),
-        SizedBox(height: 16),
+        SizedBox(height: 12),
         // Quick time presets
         Text(
           'Quick Presets',
@@ -660,7 +660,7 @@ class _DailyBookingModalState extends ConsumerState<DailyBookingModal> {
           label,
           style: TextStyle(
             color: isSelected ? Colors.white : Colors.black,
-            fontSize: 12,
+            fontSize: 14,
             fontWeight: FontWeight.w500,
           ),
         ),

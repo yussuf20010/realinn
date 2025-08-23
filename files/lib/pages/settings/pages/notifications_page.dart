@@ -13,7 +13,7 @@ class NotificationsPage extends StatelessWidget {
         iconTheme: const IconThemeData(color: Colors.black),
       ),
       body: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(12),
         children: [
           _NotificationCard(
             message: 'Your room booking in Heden golf has been successful',
@@ -40,7 +40,7 @@ class _NotificationCard extends StatelessWidget {
       margin: const EdgeInsets.symmetric(vertical: 8),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(12),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -48,7 +48,7 @@ class _NotificationCard extends StatelessWidget {
             const SizedBox(height: 8),
             Align(
               alignment: Alignment.bottomRight,
-              child: Text(date, style: TextStyle(color: Colors.grey[600], fontSize: 12)),
+              child: Text(date, style: TextStyle(color: Colors.grey[600], fontSize: 14)),
             ),
           ],
         ),

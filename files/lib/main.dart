@@ -12,20 +12,10 @@ import 'core/themes/theme_constants.dart';
 import 'core/utils/app_utils.dart';
 
 void main() async {
-  print('=== APP STARTUP ===');
   WidgetsFlutterBinding.ensureInitialized();
-  print('WidgetsFlutterBinding initialized');
-  
   await EasyLocalization.ensureInitialized();
-  print('EasyLocalization initialized');
-  
   AppUtil.setDisplayToHighRefreshRate();
-  print('Display refresh rate set');
-
   final savedThemeMode = await AdaptiveTheme.getThemeMode();
-  print('Saved theme mode: $savedThemeMode');
-
-  print('Starting app with ProviderScope');
   runApp(
     ProviderScope(
       child: EasyLocalization(

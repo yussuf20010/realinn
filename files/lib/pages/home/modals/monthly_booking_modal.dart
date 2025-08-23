@@ -62,7 +62,7 @@ class _MonthlyBookingModalState extends ConsumerState<MonthlyBookingModal> {
         children: [
           // Header
           Container(
-            padding: EdgeInsets.all(16),
+            padding: EdgeInsets.all(12),
             decoration: BoxDecoration(
               color: primaryColor,
               borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
@@ -106,14 +106,14 @@ class _MonthlyBookingModalState extends ConsumerState<MonthlyBookingModal> {
           // Content
           Flexible(
             child: Padding(
-              padding: EdgeInsets.all(16),
+              padding: EdgeInsets.all(12),
               child: _buildStepContent(),
             ),
           ),
           
           // Navigation buttons
           Container(
-            padding: EdgeInsets.all(16),
+            padding: EdgeInsets.all(12),
             child: Row(
               children: [
                 if (currentStep > 0)
@@ -171,7 +171,7 @@ class _MonthlyBookingModalState extends ConsumerState<MonthlyBookingModal> {
           'Select Dates',
           style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black),
         ),
-        SizedBox(height: 16),
+        SizedBox(height: 12),
         ListTile(
           leading: Icon(Icons.calendar_today, color: Colors.black),
           title: Text('Start Date', style: TextStyle(color: Colors.black)),
@@ -216,7 +216,7 @@ class _MonthlyBookingModalState extends ConsumerState<MonthlyBookingModal> {
           'Select Country',
           style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black),
         ),
-        SizedBox(height: 16),
+        SizedBox(height: 12),
         // Search field
         TextField(
           decoration: InputDecoration(
@@ -229,7 +229,7 @@ class _MonthlyBookingModalState extends ConsumerState<MonthlyBookingModal> {
           ),
           onChanged: (value) => setState(() => locationSearchQuery = value.toLowerCase()),
         ),
-        SizedBox(height: 16),
+        SizedBox(height: 12),
         Flexible(
           child: Consumer(
             builder: (context, ref, child) {
@@ -292,7 +292,7 @@ class _MonthlyBookingModalState extends ConsumerState<MonthlyBookingModal> {
                                       style: TextStyle(
                                         color: Colors.blue,
                                         fontWeight: FontWeight.bold,
-                                        fontSize: 12,
+                                        fontSize: 14,
                                       ),
                                     ),
                                   ],
@@ -334,7 +334,7 @@ class _MonthlyBookingModalState extends ConsumerState<MonthlyBookingModal> {
               style: TextStyle(fontSize: 14, color: Colors.black),
             ),
           ),
-        SizedBox(height: 16),
+        SizedBox(height: 12),
         // Search field
         TextField(
           decoration: InputDecoration( 
@@ -347,7 +347,7 @@ class _MonthlyBookingModalState extends ConsumerState<MonthlyBookingModal> {
           ),
           onChanged: (value) => setState(() => locationSearchQuery = value.toLowerCase()),
         ),
-        SizedBox(height: 16),
+        SizedBox(height: 12),
         Expanded(
           child: Consumer(
             builder: (context, ref, child) {
@@ -421,7 +421,7 @@ class _MonthlyBookingModalState extends ConsumerState<MonthlyBookingModal> {
                                         style: TextStyle(
                                           color: Colors.blue,
                                           fontWeight: FontWeight.bold,
-                                          fontSize: 12,
+                                          fontSize: 14,
                                         ),
                                       ),
                                     ],
@@ -441,7 +441,7 @@ class _MonthlyBookingModalState extends ConsumerState<MonthlyBookingModal> {
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Icon(Icons.location_city_outlined, size: 64, color: Colors.grey[400]),
-                                SizedBox(height: 16),
+                                SizedBox(height: 12),
                                 Text(
                                   'No cities found in $selectedCountry',
                                   style: TextStyle(fontSize: 16, color: Colors.black),
@@ -485,7 +485,7 @@ class _MonthlyBookingModalState extends ConsumerState<MonthlyBookingModal> {
               style: TextStyle(fontSize: 14, color: Colors.black),
             ),
           ),
-        SizedBox(height: 16),
+        SizedBox(height: 12),
         Flexible(
           child: Consumer(
             builder: (context, ref, child) {
@@ -501,7 +501,7 @@ class _MonthlyBookingModalState extends ConsumerState<MonthlyBookingModal> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Icon(Icons.hotel_outlined, size: 64, color: Colors.grey[400]),
-                          SizedBox(height: 16),
+                          SizedBox(height: 12),
                           Text(
                             selectedCity != null 
                                 ? 'No hotels found in $selectedCity'
@@ -517,9 +517,9 @@ class _MonthlyBookingModalState extends ConsumerState<MonthlyBookingModal> {
                             SizedBox(height: 8),
                             Text(
                               'Try selecting a different city or check if hotels have location data',
-                              style: TextStyle(fontSize: 12, color: Colors.grey[500]),
+                              style: TextStyle(fontSize: 14, color: Colors.grey[500]),
                             ),
-                            SizedBox(height: 16),
+                            SizedBox(height: 12),
                             ElevatedButton(
                               onPressed: () => setState(() => selectedCity = null),
                               child: Text('Show All Hotels'),

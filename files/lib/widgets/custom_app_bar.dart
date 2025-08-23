@@ -103,14 +103,10 @@ class _CustomAppBarState extends ConsumerState<CustomAppBar> {
                 onPressed: () => Navigator.of(context).maybePop(),
               )
             : null,
-        title: Container(
-          padding: EdgeInsets.all(4),
-          margin: EdgeInsets.only(top: 8),
-            child: Image.asset(
-            AssetsManager.appbar,
-            height: isTablet ? 64 : 40,
-            fit: BoxFit.contain,
-          ),
+                title: Image.asset(
+          AssetsManager.appbar,
+          height: isTablet ? 64 : 40, 
+          fit: BoxFit.contain,
         ),
         centerTitle: true,
       );
@@ -154,117 +150,38 @@ class _CustomAppBarState extends ConsumerState<CustomAppBar> {
               icon: Icon(Icons.arrow_back, color: Colors.white),
               onPressed: () => Navigator.of(context).maybePop(),
             )
-          : null,
-      title: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          // Left side: Profile and Chat
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              IconButton(
-                icon: Icon(
-                  Icons.person_outline,
-                  color: Colors.white,
-                  size: isTablet ? 30 : 22,
-                ),
-                onPressed: widget.onProfilePressed ?? _openProfile,
-              ),
-              SizedBox(width: horizontalIconSpacing),
-              IconButton(
-                icon: Icon(
-                  Icons.chat_bubble_outline,
-                  color: Colors.white,
-                  size: isTablet ? 30 : 22,
-                ),
-                onPressed: widget.onChatPressed ?? _openCustomerSupport,
-              ),
-            ],
-          ),
-          // Center: Title or Logo
-          Expanded(
-            child: Center(
-              child: Builder(
-                builder: (context) {
-                  if (dynamicConfig.logoUrl != null && dynamicConfig.logoUrl!.isNotEmpty) {
-                    return Container(
-                      padding: EdgeInsets.all(4),
-                      margin: EdgeInsets.only(top: 8), // Move logo down
-                      child: Image.asset(
-                        AssetsManager.appbar,
-                        height: isTablet ? 55 : 40, // Smaller on mobile for consistency
-                        fit: BoxFit.contain,
-                      ),
-                    );
-                  }  else {
-                    return Container(
-                      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.1), // Transparent background
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        widget.title,
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: isTablet ? 26 : 20,
-                        ),
-                      ),
-                    );
-                  }
-                },
-              ),
-            ),
-          ),
-          // Right side: Language and Notification
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                margin: EdgeInsets.symmetric(horizontal: 4),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.white.withOpacity(0.3)),
-                ),
-                child: Material(
-                  color: Colors.transparent,
-                  child: InkWell(
-                    borderRadius: BorderRadius.circular(8),
-                    onTap: _toggleLanguage,
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                      child: Text(
-                        context.locale.languageCode == 'ar' ? 'AR' : 'EN',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: isTablet ? 18 : 14,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              if (widget.onNotificationPressed != null)
-                ...[
-                  SizedBox(width: horizontalIconSpacing),
+          : !widget.showBackButton ? Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
                 IconButton(
-                  icon: Icon(
-                    Icons.notifications_outlined,
-                    color: Colors.white,
-                      size: isTablet ? 30 : 22,
-                  ),
-                  onPressed: widget.onNotificationPressed,
-                  ),
-                ],
-            ],
-          ),
-        ],
+                  icon: Icon(Icons.person_outline, color: Colors.white, size: isTablet ? 24 : 20),
+                  onPressed: _openProfile,
+                ),
+                IconButton(
+                  icon: Icon(Icons.support_agent_outlined, color: Colors.white, size: isTablet ? 24 : 20),
+                  onPressed: _openCustomerSupport,
+                ),
+              ],
+            ) : null,
+      leadingWidth: widget.showBackButton ? null : (isTablet ? 120 : 100),
+      title: Image.asset(
+        AssetsManager.appbar,
+        height: isTablet ? 55 : 40,
+        fit: BoxFit.contain,
       ),
       centerTitle: true,
-      actions: [SizedBox(width: 8)],
+      actions: widget.showBackButton ? null : [
+        // Show action icons only when there's no back button
+        IconButton(
+          icon: Icon(Icons.language, color: Colors.white, size: isTablet ? 24 : 20),
+          onPressed: _toggleLanguage,
+        ),
+        if (widget.onNotificationPressed != null)
+          IconButton(
+            icon: Icon(Icons.notifications_outlined, color: Colors.white, size: isTablet ? 24 : 20),
+            onPressed: widget.onNotificationPressed,
+          ),
+      ],
     );
   }
 } 

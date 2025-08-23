@@ -28,11 +28,11 @@ class AppColors {
   static const Color colorE5D1B2 = Color(0xFFE5D1B2);
 
   static const colors = [
-    Color(0xA2210A79), // Base color
-    Color(0xA2C620C4), // Slightly lighter shade
-    Color(0xFF8D2FC5), // Medium shade
-    Color(0xFFC04BFF), // Lighter shade
-    Color(0xFFC582EF), // Lightest shade
+    Color(0xFFa93ae2), // Base color
+    Color(0xFFb84de8), // Slightly lighter shade
+    Color(0xFFc760ee), // Medium shade
+    Color(0xFFd673f4), // Lighter shade
+    Color(0xFFe586fa), // Lightest shade
   ];
 
 }

@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../config/wp_config.dart';
@@ -93,14 +94,19 @@ class BookingPage extends ConsumerWidget {
     return Scaffold(
       appBar: CustomAppBar(
         title: 'Bookings',
-        showBackButton: true,
+        showBackButton: false,
         onNotificationPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => NotificationsPage()),
-          );
+          Navigator.push(context, MaterialPageRoute(
+            builder: (_) => Scaffold(
+              appBar: CustomAppBar(
+                title: 'notifications'.tr(),
+                showBackButton: true,
+                backAndLogoOnly: true,
+              ),
+              body: NotificationsPage(),
+            ),
+          ));
         },
-
       ),
       body: bookings.isEmpty
           ? Center(
@@ -108,7 +114,7 @@ class BookingPage extends ConsumerWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(Icons.calendar_today, size: 64, color: Colors.grey[400]),
-                  SizedBox(height: 16),
+                  SizedBox(height: 12),
                   Text(
                     'No bookings yet',
                     style: TextStyle(
@@ -129,16 +135,18 @@ class BookingPage extends ConsumerWidget {
               ),
             )
           : ListView.builder(
-              padding: EdgeInsets.all(16),
+              padding: EdgeInsets.all(12),
               itemCount: bookings.length,
               itemBuilder: (context, index) {
                 final booking = bookings[index];
                 return Column(
                   children: [
-                    HotelCardVertical(
+                    HotelCard(
                       hotel: booking.hotel,
-                      bookingType: 0,
-                      showBookNowButton: false,
+                      city: null,
+                      country: null,
+                      onFavoriteTap: null,
+                      isFavorite: false,
                     ),
                     Container(
                       margin: EdgeInsets.only(bottom: 20),
@@ -164,7 +172,7 @@ class BookingPage extends ConsumerWidget {
                                   style: TextStyle(
                                     color: Colors.white,
                                     fontWeight: FontWeight.bold,
-                                    fontSize: 12,
+                                    fontSize: 14,
                                   ),
                                 ),
                               ),

@@ -133,7 +133,7 @@ class _SignupFormState extends ConsumerState<SignupForm> {
             validator: (v) => v == null || v.isEmpty ? 'full_name_required'.tr() : null,
             textInputAction: TextInputAction.next,
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
           TextFormField(
             controller: _email,
             decoration: AppStyles.inputDecoration(
@@ -144,7 +144,7 @@ class _SignupFormState extends ConsumerState<SignupForm> {
             keyboardType: TextInputType.emailAddress,
             textInputAction: TextInputAction.next,
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
           Row(
             children: [
               Container(
@@ -182,7 +182,7 @@ class _SignupFormState extends ConsumerState<SignupForm> {
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
           TextFormField(
             controller: _pass,
             obscureText: !showPassword,
@@ -241,9 +241,9 @@ class _SignupFormState extends ConsumerState<SignupForm> {
               ),
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
                           Center(child: Text('or_sign_in_using'.tr(), style: TextStyle(color: Colors.black))),
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
           Row(
             children: [
               Expanded(
@@ -271,7 +271,7 @@ class _SignupFormState extends ConsumerState<SignupForm> {
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
           Text.rich(
                 TextSpan(
                   text: 'terms'.tr(),

@@ -3,33 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import '../../models/hotel.dart';
 import '../../widgets/custom_app_bar.dart';
+import '../../providers/favorites_provider.dart';
 import '../hotel_details/hotel_details_page.dart';
 import '../notifications/notifications_page.dart';
 import '../settings/pages/customer_support_page.dart';
-import '../home/components/hotel_card.dart'; // Import to use HotelCardModern
-
-
-final favoritesProvider = StateNotifierProvider<FavoritesNotifier, List<Hotel>>((ref) {
-  return FavoritesNotifier();
-});
-
-class FavoritesNotifier extends StateNotifier<List<Hotel>> {
-  FavoritesNotifier() : super([]);
-
-  void addHotel(Hotel hotel) {
-    if (!state.contains(hotel)) {
-      state = [...state, hotel];
-    }
-  }
-
-  void removeHotel(Hotel hotel) {
-    state = state.where((h) => h.id != hotel.id).toList();
-  }
-
-  bool isFavorite(Hotel hotel) {
-    return state.any((h) => h.id == hotel.id);
-  }
-}
+import '../home/components/hotel_card.dart';
 
 class FavoritesPage extends ConsumerWidget {
   const FavoritesPage({Key? key}) : super(key: key);
@@ -42,7 +20,18 @@ class FavoritesPage extends ConsumerWidget {
       appBar: CustomAppBar(
         title: 'favorites'.tr(),
         showBackButton: false,
-        backAndLogoOnly: false,
+        onNotificationPressed: () {
+          Navigator.push(context, MaterialPageRoute(
+            builder: (_) => Scaffold(
+              appBar: CustomAppBar(
+                title: 'notifications'.tr(),
+                showBackButton: true,
+                backAndLogoOnly: true,
+              ),
+              body: NotificationsPage(),
+            ),
+          ));
+        },
       ),
       body: favorites.isEmpty
           ? Center(
@@ -50,7 +39,7 @@ class FavoritesPage extends ConsumerWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(Icons.favorite_border, size: 64, color: Colors.grey[400]),
-                  SizedBox(height: 16),
+                  SizedBox(height: 12),
                   Text(
                     'no_favorites_yet'.tr(),
                     style: TextStyle(
@@ -71,13 +60,18 @@ class FavoritesPage extends ConsumerWidget {
               ),
             )
           : ListView.builder(
-              padding: EdgeInsets.all(16),
+              padding: EdgeInsets.all(12),
               itemCount: favorites.length,
               itemBuilder: (context, index) {
                 final hotel = favorites[index];
-                return HotelCardVertical(
+                return HotelCard(
                   hotel: hotel,
-                  bookingType: 0,
+                  city: null,
+                  country: null,
+                  onFavoriteTap: () {
+                    ref.read(favoritesProvider.notifier).removeHotel(hotel);
+                  },
+                  isFavorite: true,
                 );
               },
             ),

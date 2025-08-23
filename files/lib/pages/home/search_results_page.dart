@@ -147,13 +147,12 @@ class SearchResultsPage extends ConsumerWidget {
                     return ListView.builder(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       itemCount: results.length,
-                      itemBuilder: (_, index) => HotelCardVertical(
+                      itemBuilder: (_, index) => HotelCard(
                         hotel: results[index],
-                        bookingType: bookingType,
-                        dateRangeFromSearch: dateRange,
-                        startTimeFromSearch: startTime,
-                        endTimeFromSearch: endTime,
-                        isSearchContext: true,
+                        city: null,
+                        country: null,
+                        onFavoriteTap: null,
+                        isFavorite: false,
                       ),
                     );
                   },
@@ -209,7 +208,7 @@ class _SearchSummaryChips extends StatelessWidget {
   Widget _chip(IconData icon, String label) {
     return Chip(
       avatar: Icon(icon, size: 14),
-      label: Text(label, style: const TextStyle(fontSize: 12)),
+      label: Text(label, style: const TextStyle(fontSize: 14)),
       visualDensity: VisualDensity.compact,
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 0),

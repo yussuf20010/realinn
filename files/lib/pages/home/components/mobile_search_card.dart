@@ -24,7 +24,7 @@ class MobileSearchCard extends ConsumerStatefulWidget {
 
 class _MobileSearchCardState extends ConsumerState<MobileSearchCard> {
   final TextEditingController _destinationController = TextEditingController();
-  int _adults = 1;
+  int _adults = 2;
   int _children = 0;
   int _rooms = 1;
   DateTimeRange? _dateRange;
@@ -34,6 +34,17 @@ class _MobileSearchCardState extends ConsumerState<MobileSearchCard> {
   String _countrySearchQuery = '';
   String? _selectedCity;
   String _citySearchQuery = '';
+  int _selectedBookingType = 0; // 0: daily, 1: monthly
+
+  @override
+  void initState() {
+    super.initState();
+    // Set default date range to next weekend
+    final now = DateTime.now();
+    final nextSaturday = now.add(Duration(days: (6 - now.weekday) % 7));
+    final nextSunday = nextSaturday.add(Duration(days: 1));
+    _dateRange = DateTimeRange(start: nextSaturday, end: nextSunday);
+  }
 
   @override
   void dispose() {
@@ -46,28 +57,35 @@ class _MobileSearchCardState extends ConsumerState<MobileSearchCard> {
     final dynamicConfig = ref.watch(dynamicConfigProvider);
     final Color primaryColor = dynamicConfig.primaryColor ?? const Color(0xFF895ffc);
     final bool isTablet = MediaQuery.of(context).size.width >= 768;
-    final double baseFont = isTablet ? 16 : 14; // smaller fonts on mobile
-    final int bookingType = ref.watch(selectedBookingTypeProvider); // 0: daily, 1: monthly
 
-    return Container(
+    return TweenAnimationBuilder<double>(
+      duration: const Duration(milliseconds: 800),
+      tween: Tween(begin: 0.0, end: 1.0),
+      builder: (context, value, child) {
+        return Transform.translate(
+          offset: Offset(0, 30 * (1 - value)),
+          child: Opacity(
+            opacity: value,
+            child: Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: primaryColor, width: 2),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.grey.shade100, width: 1),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.08),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
+            color: primaryColor.withOpacity(0.1),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+            spreadRadius: 2,
           ),
         ],
       ),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(12),
         child: Column(
           children: [
-            // Destination field
+            // Booking type selector
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
               decoration: BoxDecoration(
@@ -75,16 +93,97 @@ class _MobileSearchCardState extends ConsumerState<MobileSearchCard> {
               ),
               child: Row(
                 children: [
-                  Icon(Icons.search, color: Colors.grey.shade600, size: isTablet ? 20 : 18),
+                  Icon(Icons.calendar_today, color: Colors.grey.shade600, size: 20),
                   const SizedBox(width: 12),
+                  Expanded(
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                _selectedBookingType = 0;
+                              });
+                            },
+                            child: Container(
+                              padding: EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                              decoration: BoxDecoration(
+                                color: _selectedBookingType == 0 ? primaryColor : Colors.transparent,
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(
+                                  color: _selectedBookingType == 0 ? primaryColor : Colors.grey.shade300,
+                                ),
+                              ),
+                              child: Center(
+                                child: Text(
+                                  'Daily',
+                                  style: TextStyle(
+                                    color: _selectedBookingType == 0 ? Colors.white : Colors.grey.shade600,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        SizedBox(width: 8),
+                        Expanded(
+                          child: GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                _selectedBookingType = 1;
+                              });
+                            },
+                            child: Container(
+                              padding: EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                              decoration: BoxDecoration(
+                                color: _selectedBookingType == 1 ? primaryColor : Colors.transparent,
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(
+                                  color: _selectedBookingType == 1 ? primaryColor : Colors.grey.shade300,
+                                ),
+                              ),
+                              child: Center(
+                                child: Text(
+                                  'Monthly',
+                                  style: TextStyle(
+                                    color: _selectedBookingType == 1 ? Colors.white : Colors.grey.shade600,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // Destination field
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+              decoration: BoxDecoration(
+                border: Border(bottom: BorderSide(color: Colors.grey.shade200)),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.search, color: Colors.grey.shade600, size: 24),
+                  const SizedBox(width: 16),
                   Expanded(
                     child: TextField(
                       controller: _destinationController,
-                      style: TextStyle(fontSize: baseFont.toDouble(), color: Colors.black87),
+                      style: TextStyle(fontSize: 18, color: Colors.black87, fontWeight: FontWeight.w500),
+                      textAlign: TextAlign.center,
                       decoration: InputDecoration(
-                        isDense: true,
-                        hintText: 'search_where_to_go_hint'.tr(),
-                        hintStyle: TextStyle(fontSize: baseFont.toDouble(), color: Colors.grey.shade600),
+                        isDense: false,
+                        contentPadding: EdgeInsets.symmetric(vertical: 8),
+                        hintText: 'Enter destination',
+                        hintStyle: TextStyle(fontSize: 18, color: Colors.grey.shade500, fontWeight: FontWeight.normal),
                         border: InputBorder.none,
                       ),
                       textInputAction: TextInputAction.search,
@@ -95,17 +194,17 @@ class _MobileSearchCardState extends ConsumerState<MobileSearchCard> {
               ),
             ),
 
-       
-            if (bookingType == 0)
+            // Date/Time selector based on booking type
+            if (_selectedBookingType == 0)
               // Daily: show time range selectors
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
                 decoration: BoxDecoration(
                   border: Border(bottom: BorderSide(color: Colors.grey.shade200)),
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.access_time, color: Colors.grey.shade600, size: isTablet ? 20 : 18),
+                    Icon(Icons.access_time, color: Colors.grey.shade600, size: 20),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Row(
@@ -115,9 +214,9 @@ class _MobileSearchCardState extends ConsumerState<MobileSearchCard> {
                               onTap: _pickStartTime,
                               child: Text(
                                 _startTime == null
-                                    ? 'Start time'.tr()
+                                    ? 'Start time'
                                     : _formatTime(_startTime!),
-                                style: TextStyle(fontSize: baseFont.toDouble(), color: Colors.black87),
+                                style: TextStyle(fontSize: 16, color: Colors.black87),
                               ),
                             ),
                           ),
@@ -129,9 +228,9 @@ class _MobileSearchCardState extends ConsumerState<MobileSearchCard> {
                               onTap: _pickEndTime,
                               child: Text(
                                 _endTime == null
-                                    ? 'End time'.tr()
+                                    ? 'End time'
                                     : _formatTime(_endTime!),
-                                style: TextStyle(fontSize: baseFont.toDouble(), color: Colors.black87),
+                                style: TextStyle(fontSize: 16, color: Colors.black87),
                               ),
                             ),
                           ),
@@ -144,22 +243,22 @@ class _MobileSearchCardState extends ConsumerState<MobileSearchCard> {
             else
               // Monthly: show date range selector
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
                 decoration: BoxDecoration(
                   border: Border(bottom: BorderSide(color: Colors.grey.shade200)),
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.calendar_today, color: Colors.grey.shade600, size: isTablet ? 20 : 18),
+                    Icon(Icons.calendar_today, color: Colors.grey.shade600, size: 20),
                     const SizedBox(width: 12),
                     Expanded(
                       child: GestureDetector(
                         onTap: _pickDateRange,
                         child: Text(
-                          _dateRange == null
-                              ? 'select_date_time'.tr()
-                              : '${DateFormat('yMMMd').format(_dateRange!.start)} - ${DateFormat('yMMMd').format(_dateRange!.end)}',
-                          style: TextStyle(fontSize: baseFont.toDouble(), color: Colors.black87),
+                          _dateRange != null
+                              ? '${DateFormat('EEE, d MMM').format(_dateRange!.start)} - ${DateFormat('EEE, d MMM').format(_dateRange!.end)}'
+                              : 'Select dates',
+                          style: TextStyle(fontSize: 16, color: Colors.black87),
                         ),
                       ),
                     ),
@@ -169,17 +268,17 @@ class _MobileSearchCardState extends ConsumerState<MobileSearchCard> {
 
             // Guests/Rooms selector
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
               child: Row(
                 children: [
-                  Icon(Icons.person, color: Colors.grey.shade600, size: isTablet ? 20 : 18),
+                  Icon(Icons.person, color: Colors.grey.shade600, size: 20),
                   const SizedBox(width: 12),
                   Expanded(
                     child: GestureDetector(
                       onTap: _pickGuests,
                       child: Text(
-                        '${_rooms} ${'rooms'.tr()} · ${_adults} ${'adults'.tr()} · ${_children} ${'children'.tr()}',
-                        style: TextStyle(fontSize: baseFont.toDouble(), color: Colors.black87),
+                        '${_rooms} room · ${_adults} adults · ${_children} children',
+                        style: TextStyle(fontSize: 16, color: Colors.black87),
                       ),
                     ),
                   ),
@@ -187,46 +286,63 @@ class _MobileSearchCardState extends ConsumerState<MobileSearchCard> {
               ),
             ),
 
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
 
-            // Search + Clear buttons
-            Row(
-              children: [
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: _onSearchAndNavigate,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: primaryColor,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                    ),
-                    child: Text(
-                      'search'.tr(),
-                      style: TextStyle(fontSize: baseFont.toDouble(), fontWeight: FontWeight.bold),
-                    ),
+            // Search button
+            SizedBox(
+              width: double.infinity,
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  gradient: LinearGradient(
+                    colors: [primaryColor, primaryColor.withOpacity(0.9)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                   ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: primaryColor.withOpacity(0.25),
+                      blurRadius: 8,
+                      offset: const Offset(0, 4),
+                      spreadRadius: 0,
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 8),
-                ElevatedButton(
-                  onPressed: () {
-                    _destinationController.clear();
-                    ref.read(selectedLocationsProvider.notifier).state = [];
-                    setState(() {});
-                  },
+                child: ElevatedButton(
+                  onPressed: _onSearchAndNavigate,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.grey.shade200,
-                    foregroundColor: Colors.black87,
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    backgroundColor: Colors.transparent,
+                    foregroundColor: Colors.white,
+                    shadowColor: Colors.transparent,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    minimumSize: Size(double.infinity, 40),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ),
-                  child: Text('clear'.tr(), style: TextStyle(fontSize: baseFont.toDouble() - 2)),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.search, size: 20, color: Colors.white),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Search Hotels',
+                        style: TextStyle(
+                          fontSize: 14, 
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 0.3,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ],
+              ),
             ),
           ],
         ),
       ),
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -236,6 +352,7 @@ class _MobileSearchCardState extends ConsumerState<MobileSearchCard> {
       context: context,
       firstDate: now,
       lastDate: now.add(const Duration(days: 365)),
+      initialDateRange: _dateRange,
     );
     if (picked != null) {
       setState(() => _dateRange = picked);
@@ -268,136 +385,6 @@ class _MobileSearchCardState extends ConsumerState<MobileSearchCard> {
     return '$h:$m';
   }
 
-  Future<void> _pickCountry() async {
-    await showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      builder: (_) {
-        return StatefulBuilder(
-          builder: (_, setModal) {
-            final locationAsync = ref.watch(locationProvider);
-            return SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    TextField(
-                      decoration: InputDecoration(
-                        hintText: 'Search country'.tr(),
-                        prefixIcon: const Icon(Icons.search),
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                      ),
-                      onChanged: (v) => setModal(() => _countrySearchQuery = v.trim().toLowerCase()),
-                    ),
-                    const SizedBox(height: 12),
-                    Expanded(
-                      child: locationAsync.when(
-                        data: (data) {
-                          final countries = (data.countries ?? [])
-                              .where((c) => _countrySearchQuery.isEmpty || (c.name ?? '').toLowerCase().contains(_countrySearchQuery))
-                              .toList();
-                          return ListView.builder(
-                            itemCount: countries.length,
-                            itemBuilder: (_, i) {
-                              final name = countries[i].name ?? '';
-                              return ListTile(
-                                leading: CircleAvatar(
-                                  backgroundImage: AssetImage(AssetsManager.logo),
-                                ),
-                                title: Text(name),
-                                onTap: () {
-                                  Navigator.pop(context);
-                                  setState(() => _selectedCountry = name);
-                                  setState(() => _selectedCity = null);
-                                },
-                              );
-                            },
-                          );
-                        },
-                        loading: () => const Center(child: CircularProgressIndicator()),
-                        error: (e, __) => Center(child: Text('Error loading countries'.tr())),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          },
-        );
-      },
-    );
-  }
-
-  Future<void> _pickCity() async {
-    await showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      builder: (_) {
-        return StatefulBuilder(
-          builder: (_, setModal) {
-            final locationAsync = ref.watch(locationProvider);
-            return SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    TextField(
-                      decoration: InputDecoration(
-                        hintText: 'Search city'.tr(),
-                        prefixIcon: const Icon(Icons.search),
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                      ),
-                      onChanged: (v) => setModal(() => _citySearchQuery = v.trim().toLowerCase()),
-                    ),
-                    const SizedBox(height: 12),
-                    Expanded(
-                      child: locationAsync.when(
-                        data: (data) {
-                          final countries = data.countries ?? [];
-                          final citiesAll = data.cities ?? [];
-                          int? selectedCountryId;
-                          if (_selectedCountry != null) {
-                            selectedCountryId = countries
-                                .firstWhere((c) => (c.name ?? '') == _selectedCountry, orElse: () => location_model.Country())
-                                .id;
-                          }
-                          final cities = citiesAll
-                              .where((c) => (selectedCountryId == null || c.countryId == selectedCountryId))
-                              .where((c) => _citySearchQuery.isEmpty || (c.name ?? '').toLowerCase().contains(_citySearchQuery))
-                              .toList();
-                          return ListView.builder(
-                            itemCount: cities.length,
-                            itemBuilder: (_, i) {
-                              final name = cities[i].name ?? '';
-                              return ListTile(
-                                leading: CircleAvatar(
-                                  backgroundImage: AssetImage(AssetsManager.logo),
-                                ),
-                                title: Text(name),
-                                onTap: () {
-                                  Navigator.pop(context);
-                                  setState(() => _selectedCity = name);
-                                },
-                              );
-                            },
-                          );
-                        },
-                        loading: () => const Center(child: CircularProgressIndicator()),
-                        error: (e, __) => Center(child: Text('Error loading cities'.tr())),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          },
-        );
-      },
-    );
-  }
-
   Future<void> _pickGuests() async {
     int adults = _adults;
     int children = _children;
@@ -409,13 +396,13 @@ class _MobileSearchCardState extends ConsumerState<MobileSearchCard> {
           builder: (_, setModal) {
             return SafeArea(
               child: Padding(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(12),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    _counterRow(label: 'adults'.tr(), value: adults, onChanged: (v) => setModal(() => adults = v), min: 1),
-                    _counterRow(label: 'children'.tr(), value: children, onChanged: (v) => setModal(() => children = v), min: 0),
-                    _counterRow(label: 'rooms'.tr(), value: rooms, onChanged: (v) => setModal(() => rooms = v), min: 1),
+                    _counterRow(label: 'Adults', value: adults, onChanged: (v) => setModal(() => adults = v), min: 1),
+                    _counterRow(label: 'Children', value: children, onChanged: (v) => setModal(() => children = v), min: 0),
+                    _counterRow(label: 'Rooms', value: rooms, onChanged: (v) => setModal(() => rooms = v), min: 1),
                     const SizedBox(height: 12),
                     ElevatedButton(
                       onPressed: () {
@@ -426,7 +413,7 @@ class _MobileSearchCardState extends ConsumerState<MobileSearchCard> {
                           _rooms = rooms;
                         });
                       },
-                      child: Text('done'.tr()),
+                      child: Text('Done'),
                     )
                   ],
                 ),
@@ -453,12 +440,11 @@ class _MobileSearchCardState extends ConsumerState<MobileSearchCard> {
   }
 
   void _onSearchAndNavigate() {
-    final int bookingType = ref.read(selectedBookingTypeProvider);
     final baseQuery = _destinationController.text.trim();
     final query = [baseQuery, _selectedCity, _selectedCountry]
         .where((e) => e != null && e!.isNotEmpty)
         .join(' ');
-    ref.read(selectedLocationsProvider.notifier).state = query.isEmpty ? [] : [query];
+    
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (_) => SearchResultsPage(
@@ -466,9 +452,9 @@ class _MobileSearchCardState extends ConsumerState<MobileSearchCard> {
           adults: _adults,
           children: _children,
           rooms: _rooms,
-          dateRange: _dateRange,
-          startTime: bookingType == 0 ? _startTime : null,
-          endTime: bookingType == 0 ? _endTime : null,
+          dateRange: _selectedBookingType == 1 ? _dateRange : null,
+          startTime: _selectedBookingType == 0 ? _startTime : null,
+          endTime: _selectedBookingType == 0 ? _endTime : null,
         ),
       ),
     );

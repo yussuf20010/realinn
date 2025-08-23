@@ -12,8 +12,7 @@ class WPConfig {
   static Color get primaryColor {
     return navbarColor; // Use constant color as primary color for whole app
   }
-  // Constant navbar color that doesn't depend on site configuration
-  static const Color navbarColor = Color(0xFF7371FC);
+  static const Color navbarColor = Color(0xFFa93ae2);
   static const String apikey = '1234';
   static const int orderState = 3;
   static const bool forceUserToLoginEverytime = false;
