@@ -4,28 +4,43 @@ import '../../config/wp_config.dart';
 import '../../models/hotel.dart';
 import '../../controllers/hotel_controller.dart';
 
-class AllHotelsPage extends ConsumerStatefulWidget {
-  const AllHotelsPage({Key? key}) : super(key: key);
+class CountryHotelsPage extends ConsumerStatefulWidget {
+  final String countryName;
+
+  const CountryHotelsPage({
+    Key? key,
+    required this.countryName,
+  }) : super(key: key);
 
   @override
-  ConsumerState<AllHotelsPage> createState() => _AllHotelsPageState();
+  ConsumerState<CountryHotelsPage> createState() => _CountryHotelsPageState();
 }
 
-class _AllHotelsPageState extends ConsumerState<AllHotelsPage> {
-  List<Hotel> _hotels = [];
+class _CountryHotelsPageState extends ConsumerState<CountryHotelsPage> {
+  List<Hotel> _countryHotels = [];
   bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _loadHotels();
+    _loadCountryHotels();
   }
 
-  Future<void> _loadHotels() async {
+  Future<void> _loadCountryHotels() async {
     try {
-      final hotels = await ref.read(hotelProvider.future);
+      final allHotels = await ref.read(hotelProvider.future);
+      final countryHotels = allHotels
+          .where((hotel) =>
+              hotel.country?.toLowerCase() ==
+                  widget.countryName.toLowerCase() ||
+              hotel.location
+                      ?.toLowerCase()
+                      .contains(widget.countryName.toLowerCase()) ==
+                  true)
+          .toList();
+
       setState(() {
-        _hotels = hotels;
+        _countryHotels = countryHotels;
         _isLoading = false;
       });
     } catch (e) {
@@ -34,7 +49,7 @@ class _AllHotelsPageState extends ConsumerState<AllHotelsPage> {
       });
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to load hotels: $e')),
+          SnackBar(content: Text('Failed to load country hotels: $e')),
         );
       }
     }
@@ -73,7 +88,7 @@ class _AllHotelsPageState extends ConsumerState<AllHotelsPage> {
               Expanded(
                 child: Center(
                   child: Text(
-                    'All Hotels',
+                    'Hotels in ${widget.countryName}',
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: isTablet ? 28 : 24,
@@ -98,8 +113,8 @@ class _AllHotelsPageState extends ConsumerState<AllHotelsPage> {
       );
     }
 
-    if (_hotels.isEmpty) {
-      return _buildNoHotels(isTablet, primaryColor);
+    if (_countryHotels.isEmpty) {
+      return _buildNoCountryHotels(isTablet, primaryColor);
     }
 
     return Column(
@@ -114,10 +129,10 @@ class _AllHotelsPageState extends ConsumerState<AllHotelsPage> {
           ),
           child: Row(
             children: [
-              Icon(Icons.hotel, color: primaryColor, size: isTablet ? 24 : 20),
+              Icon(Icons.public, color: primaryColor, size: isTablet ? 24 : 20),
               SizedBox(width: 12),
               Text(
-                '${_hotels.length} Hotels Available',
+                '${_countryHotels.length} Hotels in ${widget.countryName}',
                 style: TextStyle(
                   fontSize: isTablet ? 18 : 16,
                   fontWeight: FontWeight.bold,
@@ -132,9 +147,9 @@ class _AllHotelsPageState extends ConsumerState<AllHotelsPage> {
         Expanded(
           child: ListView.builder(
             padding: EdgeInsets.all(isTablet ? 20 : 16),
-            itemCount: _hotels.length,
+            itemCount: _countryHotels.length,
             itemBuilder: (context, index) {
-              final hotel = _hotels[index];
+              final hotel = _countryHotels[index];
               return _buildHotelCard(hotel, isTablet, primaryColor);
             },
           ),
@@ -143,20 +158,20 @@ class _AllHotelsPageState extends ConsumerState<AllHotelsPage> {
     );
   }
 
-  Widget _buildNoHotels(bool isTablet, Color primaryColor) {
+  Widget _buildNoCountryHotels(bool isTablet, Color primaryColor) {
     return Center(
       child: Padding(
         padding: EdgeInsets.all(32),
         child: Column(
           children: [
             Icon(
-              Icons.hotel_outlined,
+              Icons.public_outlined,
               size: isTablet ? 80 : 64,
               color: Colors.grey[400],
             ),
             SizedBox(height: 16),
             Text(
-              'No hotels available',
+              'No hotels found in ${widget.countryName}',
               style: TextStyle(
                 fontSize: isTablet ? 20 : 18,
                 fontWeight: FontWeight.bold,
@@ -165,7 +180,7 @@ class _AllHotelsPageState extends ConsumerState<AllHotelsPage> {
             ),
             SizedBox(height: 8),
             Text(
-              'Try refreshing or check back later',
+              'Try searching for a different country',
               style: TextStyle(
                 fontSize: isTablet ? 16 : 14,
                 color: Colors.grey[500],
@@ -173,12 +188,12 @@ class _AllHotelsPageState extends ConsumerState<AllHotelsPage> {
             ),
             SizedBox(height: 24),
             ElevatedButton(
-              onPressed: _loadHotels,
+              onPressed: () => Navigator.pop(context),
               style: ElevatedButton.styleFrom(
                 backgroundColor: primaryColor,
                 foregroundColor: Colors.white,
               ),
-              child: Text('Refresh'),
+              child: Text('Back to Search'),
             ),
           ],
         ),

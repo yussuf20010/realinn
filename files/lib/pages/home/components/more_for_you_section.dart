@@ -18,7 +18,8 @@ class MoreForYouSection extends ConsumerWidget {
     final isTablet = MediaQuery.of(context).size.width >= 768;
 
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: isTablet ? 8 : 16, vertical: 16),
+      padding:
+          EdgeInsets.symmetric(horizontal: isTablet ? 8 : 16, vertical: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -40,20 +41,20 @@ class MoreForYouSection extends ConsumerWidget {
             ),
           ),
           SizedBox(height: 12),
-          
+
           // Dynamic destination cards based on your data
           Consumer(
             builder: (context, ref, child) {
               final locationResponse = ref.watch(locationProvider);
               final hotelsResponse = ref.watch(hotelProvider);
-              
+
               return locationResponse.when(
                 data: (locationData) {
                   return hotelsResponse.when(
                     data: (hotels) {
                       // Get top countries with most hotels
                       final countries = locationData.countries ?? [];
-                      
+
                       // Count hotels per country
                       Map<String, int> countryHotelCounts = {};
                       for (var hotel in hotels) {
@@ -63,29 +64,30 @@ class MoreForYouSection extends ConsumerWidget {
                             orElse: () => location_model.Country(),
                           );
                           if (country.name != null) {
-                            countryHotelCounts[country.name!] = (countryHotelCounts[country.name!] ?? 0) + 1;
+                            countryHotelCounts[country.name!] =
+                                (countryHotelCounts[country.name!] ?? 0) + 1;
                           }
                         }
                       }
-                      
+
                       // Sort countries by hotel count and take top 2
-                      final topCountries = countryHotelCounts.entries
-                          .toList()
-                          ..sort((a, b) => b.value.compareTo(a.value));
-                      
+                      final topCountries = countryHotelCounts.entries.toList()
+                        ..sort((a, b) => b.value.compareTo(a.value));
+
                       if (topCountries.isEmpty) {
                         return _buildPlaceholderCards(isTablet);
                       }
-                      
+
                       // Take top 2 countries or use available ones
                       final displayCountries = topCountries.take(2).toList();
-                      
+
                       return Row(
                         children: [
                           // First country card
                           Expanded(
                             child: GestureDetector(
-                              onTap: () => _navigateToDestination(context, displayCountries[0].key),
+                              onTap: () => _navigateToDestination(
+                                  context, displayCountries[0].key),
                               child: Container(
                                 height: isTablet ? 120 : 100,
                                 margin: EdgeInsets.only(right: 8),
@@ -108,7 +110,8 @@ class MoreForYouSection extends ConsumerWidget {
                                   child: Padding(
                                     padding: EdgeInsets.all(12),
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       mainAxisAlignment: MainAxisAlignment.end,
                                       children: [
                                         Text(
@@ -133,12 +136,13 @@ class MoreForYouSection extends ConsumerWidget {
                               ),
                             ),
                           ),
-                          
+
                           // Second country card (if available)
                           if (displayCountries.length > 1)
                             Expanded(
                               child: GestureDetector(
-                                onTap: () => _navigateToDestination(context, displayCountries[1].key),
+                                onTap: () => _navigateToDestination(
+                                    context, displayCountries[1].key),
                                 child: Container(
                                   height: isTablet ? 120 : 100,
                                   margin: EdgeInsets.only(left: 8),
@@ -161,8 +165,10 @@ class MoreForYouSection extends ConsumerWidget {
                                     child: Padding(
                                       padding: EdgeInsets.all(12),
                                       child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        mainAxisAlignment: MainAxisAlignment.end,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.end,
                                         children: [
                                           Text(
                                             displayCountries[1].key,
@@ -211,7 +217,8 @@ class MoreForYouSection extends ConsumerWidget {
                                   child: Padding(
                                     padding: EdgeInsets.all(12),
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       mainAxisAlignment: MainAxisAlignment.end,
                                       children: [
                                         Text(
@@ -257,13 +264,8 @@ class MoreForYouSection extends ConsumerWidget {
       context,
       MaterialPageRoute(
         builder: (_) => SearchResultsPage(
-          query: destination,
-          adults: 2,
-          children: 0,
-          rooms: 1,
-          dateRange: null,
-          startTime: null,
-          endTime: null,
+          hotels: [], // Empty list for now, will be loaded by the page
+          searchQuery: destination,
         ),
       ),
     );
@@ -327,4 +329,4 @@ class MoreForYouSection extends ConsumerWidget {
       ],
     );
   }
-} 
+}

@@ -1,22 +1,33 @@
 import 'package:flutter/cupertino.dart';
 import 'package:realinn/pages/profile/profile_page.dart';
+import '../../pages/all_hotels/all_hotels_page.dart';
+import '../../pages/city_hotels/city_hotels_page.dart';
+import '../../pages/country_hotels/country_hotels_page.dart';
+import '../../pages/customer_service/customer_service_page.dart';
 import '../../pages/entrypoint/loading_app_page.dart';
+import '../../pages/history/history_page.dart';
+import '../../pages/home/search_results_page.dart';
+import '../../pages/hotels/hotels_search_page.dart';
 import '../../pages/login/login_animation.dart';
 import '../../pages/login/login_intro_page.dart';
 import '../../pages/login/pages/forgot_password_page.dart';
 import '../../pages/login/pages/login_page.dart';
 import '../../pages/login/pages/signup_page.dart';
-import '../../pages/settings/pages/notifications_page.dart';
+import '../../pages/main/main_scaffold.dart';
+import '../../pages/notifications/notifications_page.dart';
+import '../../pages/settings/pages/rate_review_page.dart';
+import '../../pages/settings/pages/faq_page.dart';
+import '../../pages/chat/chat_page.dart';
+import '../../pages/favourites/favourites_page.dart';
+import '../../pages/bookings/bookings_page.dart';
 import 'app_routes.dart';
 import 'unknown_page.dart';
-import '../../pages/main/main_scaffold.dart';
 import '../../pages/settings/settings_page.dart';
 import '../../pages/settings/pages/privacy_policy_page.dart';
 import '../../pages/settings/pages/terms_conditions_page.dart';
 import '../../pages/settings/pages/about_page.dart';
 import '../../pages/settings/pages/help_support_page.dart';
-import '../../pages/settings/pages/rate_review_page.dart';
-import '../../pages/settings/pages/faq_page.dart';
+import '../../models/hotel.dart';
 
 class RouteGenerator {
   static Route? onGenerate(RouteSettings settings) {
@@ -26,11 +37,8 @@ class RouteGenerator {
       case AppRoutes.initial:
         return CupertinoPageRoute(builder: (_) => const LoadingAppPage());
 
-
-
       case AppRoutes.explore:
         return CupertinoPageRoute(builder: (_) => MainScaffold());
-
 
       case AppRoutes.loadingApp:
         return CupertinoPageRoute(builder: (_) => const LoadingAppPage());
@@ -41,7 +49,6 @@ class RouteGenerator {
       case AppRoutes.loginAnimation:
         return CupertinoPageRoute(builder: (_) => const LoggingInAnimation());
 
-
       case AppRoutes.loginIntro:
         return CupertinoPageRoute(builder: (_) => const LoginIntroPage());
 
@@ -50,7 +57,6 @@ class RouteGenerator {
 
       case AppRoutes.forgotPass:
         return CupertinoPageRoute(builder: (_) => const ForgotPasswordPage());
-
 
       case AppRoutes.homePage:
         return CupertinoPageRoute(builder: (_) => MainScaffold());
@@ -61,6 +67,48 @@ class RouteGenerator {
         return CupertinoPageRoute(builder: (_) => const SettingsPage());
       case AppRoutes.notifications:
         return CupertinoPageRoute(builder: (_) => const NotificationsPage());
+
+      case '/customer-service':
+        return CupertinoPageRoute(builder: (_) => const CustomerServicePage());
+
+      case '/chat':
+        return CupertinoPageRoute(builder: (_) => const ChatPage());
+
+      case '/favourites':
+        return CupertinoPageRoute(builder: (_) => const FavouritesPage());
+
+      case '/bookings':
+        return CupertinoPageRoute(builder: (_) => const BookingsPage());
+
+      case '/history':
+        return CupertinoPageRoute(builder: (_) => const HistoryPage());
+
+      case '/search-results':
+        final args = settings.arguments as Map<String, dynamic>?;
+        final hotels = args?['hotels'] as List<Hotel>? ?? [];
+        final searchQuery = args?['searchQuery'] as String? ?? '';
+        return CupertinoPageRoute(
+          builder: (_) => HotelsSearchPage(
+            searchQuery: searchQuery,
+            initialHotels: hotels,
+          ),
+        );
+
+      case '/all-hotels':
+        return CupertinoPageRoute(builder: (_) => const HotelsSearchPage());
+
+      case '/city-hotels':
+        final cityName = settings.arguments as String? ?? '';
+        return CupertinoPageRoute(
+          builder: (_) => HotelsSearchPage(cityName: cityName),
+        );
+
+      case '/country-hotels':
+        final countryName = settings.arguments as String? ?? '';
+        return CupertinoPageRoute(
+          builder: (_) => HotelsSearchPage(countryName: countryName),
+        );
+
       case AppRoutes.privacy:
         return CupertinoPageRoute(builder: (_) => const PrivacyPolicyPage());
       case AppRoutes.terms:

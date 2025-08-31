@@ -7,7 +7,8 @@ import '../core/constants/assets.dart';
 import '../pages/settings/pages/customer_support_page.dart';
 import '../pages/profile/profile_page.dart';
 
-class CustomAppBar extends ConsumerStatefulWidget implements PreferredSizeWidget {
+class CustomAppBar extends ConsumerStatefulWidget
+    implements PreferredSizeWidget {
   final String title;
   final bool showBackButton;
   final VoidCallback? onChatPressed;
@@ -28,14 +29,15 @@ class CustomAppBar extends ConsumerStatefulWidget implements PreferredSizeWidget
   }) : super(key: key);
 
   @override
-  Size get preferredSize => Size.fromHeight(70); // base; overridden in build for tablets
+  Size get preferredSize =>
+      Size.fromHeight(70); // base; overridden in build for tablets
 
   @override
   ConsumerState<CustomAppBar> createState() => _CustomAppBarState();
 }
 
 class _CustomAppBarState extends ConsumerState<CustomAppBar> {
-   void _toggleLanguage() async {
+  void _toggleLanguage() async {
     final currentLocale = context.locale;
     final newLocale = currentLocale.languageCode == 'ar'
         ? Locale('en', 'US')
@@ -87,8 +89,7 @@ class _CustomAppBarState extends ConsumerState<CustomAppBar> {
     final screenWidth = MediaQuery.of(context).size.width;
     final isTablet = screenWidth >= 768;
     final toolbarHeight = isTablet ? 80.0 : 64.0;
-    final horizontalIconSpacing = isTablet ? 8.0 : 0.0;
-    final dynamicConfig = ref.watch(dynamicConfigProvider);
+    ref.watch(dynamicConfigProvider);
     final primaryColor = WPConfig.navbarColor; // Use constant color directly
 
     if (widget.backAndLogoOnly) {
@@ -103,16 +104,14 @@ class _CustomAppBarState extends ConsumerState<CustomAppBar> {
                 onPressed: () => Navigator.of(context).maybePop(),
               )
             : null,
-                title: Image.asset(
+        title: Image.asset(
           AssetsManager.appbar,
-          height: isTablet ? 64 : 40, 
+          height: isTablet ? 64 : 40,
           fit: BoxFit.contain,
         ),
         centerTitle: true,
       );
     }
-
-    
 
     if (widget.minimal) {
       return AppBar(
@@ -150,19 +149,23 @@ class _CustomAppBarState extends ConsumerState<CustomAppBar> {
               icon: Icon(Icons.arrow_back, color: Colors.white),
               onPressed: () => Navigator.of(context).maybePop(),
             )
-          : !widget.showBackButton ? Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                IconButton(
-                  icon: Icon(Icons.person_outline, color: Colors.white, size: isTablet ? 24 : 20),
-                  onPressed: _openProfile,
-                ),
-                IconButton(
-                  icon: Icon(Icons.support_agent_outlined, color: Colors.white, size: isTablet ? 24 : 20),
-                  onPressed: _openCustomerSupport,
-                ),
-              ],
-            ) : null,
+          : !widget.showBackButton
+              ? Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      icon: Icon(Icons.person_outline,
+                          color: Colors.white, size: isTablet ? 24 : 20),
+                      onPressed: _openProfile,
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.support_agent_outlined,
+                          color: Colors.white, size: isTablet ? 24 : 20),
+                      onPressed: _openCustomerSupport,
+                    ),
+                  ],
+                )
+              : null,
       leadingWidth: widget.showBackButton ? null : (isTablet ? 120 : 100),
       title: Image.asset(
         AssetsManager.appbar,
@@ -170,18 +173,22 @@ class _CustomAppBarState extends ConsumerState<CustomAppBar> {
         fit: BoxFit.contain,
       ),
       centerTitle: true,
-      actions: widget.showBackButton ? null : [
-        // Show action icons only when there's no back button
-        IconButton(
-          icon: Icon(Icons.language, color: Colors.white, size: isTablet ? 24 : 20),
-          onPressed: _toggleLanguage,
-        ),
-        if (widget.onNotificationPressed != null)
-          IconButton(
-            icon: Icon(Icons.notifications_outlined, color: Colors.white, size: isTablet ? 24 : 20),
-            onPressed: widget.onNotificationPressed,
-          ),
-      ],
+      actions: widget.showBackButton
+          ? null
+          : [
+              // Show action icons only when there's no back button
+              IconButton(
+                icon: Icon(Icons.language,
+                    color: Colors.white, size: isTablet ? 24 : 20),
+                onPressed: _toggleLanguage,
+              ),
+              if (widget.onNotificationPressed != null)
+                IconButton(
+                  icon: Icon(Icons.notifications_outlined,
+                      color: Colors.white, size: isTablet ? 24 : 20),
+                  onPressed: widget.onNotificationPressed,
+                ),
+            ],
     );
   }
-} 
+}

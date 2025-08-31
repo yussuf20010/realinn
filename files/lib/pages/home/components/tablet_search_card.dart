@@ -55,7 +55,8 @@ class _TabletSearchCardState extends ConsumerState<TabletSearchCard> {
   @override
   Widget build(BuildContext context) {
     final dynamicConfig = ref.watch(dynamicConfigProvider);
-    final Color primaryColor = dynamicConfig.primaryColor ?? const Color(0xFF895ffc);
+    final Color primaryColor =
+        dynamicConfig.primaryColor ?? const Color(0xFF895ffc);
 
     return TweenAnimationBuilder<double>(
       duration: const Duration(milliseconds: 800),
@@ -84,259 +85,305 @@ class _TabletSearchCardState extends ConsumerState<TabletSearchCard> {
                 padding: EdgeInsets.all(12),
                 child: Column(
                   children: [
-            // Booking type selector
-            Container(
-              padding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-              decoration: BoxDecoration(
-                border: Border(bottom: BorderSide(color: Colors.grey.shade200)),
-              ),
-              child: Row(
-                children: [
-                  Icon(Icons.calendar_today, color: Colors.grey.shade600, size: 20),
-                  SizedBox(width: 12),
-                  Expanded(
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                _selectedBookingType = 0;
-                              });
-                            },
-                            child: Container(
-                              padding: EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-                              decoration: BoxDecoration(
-                                color: _selectedBookingType == 0 ? primaryColor : Colors.transparent,
-                                borderRadius: BorderRadius.circular(8),
-                                border: Border.all(
-                                  color: _selectedBookingType == 0 ? primaryColor : Colors.grey.shade300,
-                                ),
-                              ),
-                              child: Center(
-                                child: Text(
-                                  'Daily',
-                                  style: TextStyle(
-                                    color: _selectedBookingType == 0 ? Colors.white : Colors.grey.shade600,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 14,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                        SizedBox(width: 8),
-                        Expanded(
-                          child: GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                _selectedBookingType = 1;
-                              });
-                            },
-                            child: Container(
-                              padding: EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-                              decoration: BoxDecoration(
-                                color: _selectedBookingType == 1 ? primaryColor : Colors.transparent,
-                                borderRadius: BorderRadius.circular(8),
-                                border: Border.all(
-                                  color: _selectedBookingType == 1 ? primaryColor : Colors.grey.shade300,
-                                ),
-                              ),
-                              child: Center(
-                                child: Text(
-                                  'Monthly',
-                                  style: TextStyle(
-                                    color: _selectedBookingType == 1 ? Colors.white : Colors.grey.shade600,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 14,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            // Destination field
-            Container(
-              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-              decoration: BoxDecoration(
-                border: Border(bottom: BorderSide(color: Colors.grey.shade200)),
-              ),
-              child: Row(
-                children: [
-                  Icon(Icons.search, color: Colors.grey.shade600, size: 24),
-                  SizedBox(width: 16),
-                  Expanded(
-                    child: TextField(
-                      controller: _destinationController,
-                      style: const TextStyle(fontSize: 10, color: Colors.black87, fontWeight: FontWeight.w500),
-                      textAlign: TextAlign.center,
-                      decoration: InputDecoration(
-                        isDense: false, 
-                        contentPadding: EdgeInsets.symmetric(vertical: 10),
-                        hintText: 'Enter destination',
-                        hintStyle: TextStyle(fontSize: 10, color: Colors.grey.shade500, fontWeight: FontWeight.normal),
-                        border: InputBorder.none,
+                    // Booking type selector
+                    Container(
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                      decoration: BoxDecoration(
+                        border: Border(
+                            bottom: BorderSide(color: Colors.grey.shade200)),
                       ),
-                      textInputAction: TextInputAction.search,
-                      onSubmitted: (_) => _onSearchAndNavigate(),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            
-            // Date/Time selector based on booking type
-            if (_selectedBookingType == 0)
-              // Daily: show time range selectors
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 12, vertical: 16),
-                decoration: BoxDecoration(
-                  border: Border(bottom: BorderSide(color: Colors.grey.shade200)),
-                ),
-                child: Row(
-                  children: [
-                    Icon(Icons.access_time, color: Colors.grey.shade600, size: 20),
-                    SizedBox(width: 12),
-                    Expanded(
                       child: Row(
                         children: [
+                          Icon(Icons.calendar_today,
+                              color: Colors.grey.shade600, size: 20),
+                          SizedBox(width: 12),
                           Expanded(
-                            child: GestureDetector(
-                              onTap: _pickStartTime,
-                              child: Text(
-                                _startTime == null
-                                    ? 'Start time'
-                                    : _formatTime(_startTime!),
-                                style: const TextStyle(fontSize: 16, color: Colors.black87),
-                              ),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      setState(() {
+                                        _selectedBookingType = 0;
+                                      });
+                                    },
+                                    child: Container(
+                                      padding: EdgeInsets.symmetric(
+                                          vertical: 8, horizontal: 12),
+                                      decoration: BoxDecoration(
+                                        color: _selectedBookingType == 0
+                                            ? primaryColor
+                                            : Colors.transparent,
+                                        borderRadius: BorderRadius.circular(8),
+                                        border: Border.all(
+                                          color: _selectedBookingType == 0
+                                              ? primaryColor
+                                              : Colors.grey.shade300,
+                                        ),
+                                      ),
+                                      child: Center(
+                                        child: Text(
+                                          'Daily',
+                                          style: TextStyle(
+                                            color: _selectedBookingType == 0
+                                                ? Colors.white
+                                                : Colors.grey.shade600,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 14,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(width: 8),
+                                Expanded(
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      setState(() {
+                                        _selectedBookingType = 1;
+                                      });
+                                    },
+                                    child: Container(
+                                      padding: EdgeInsets.symmetric(
+                                          vertical: 8, horizontal: 12),
+                                      decoration: BoxDecoration(
+                                        color: _selectedBookingType == 1
+                                            ? primaryColor
+                                            : Colors.transparent,
+                                        borderRadius: BorderRadius.circular(8),
+                                        border: Border.all(
+                                          color: _selectedBookingType == 1
+                                              ? primaryColor
+                                              : Colors.grey.shade300,
+                                        ),
+                                      ),
+                                      child: Center(
+                                        child: Text(
+                                          'Monthly',
+                                          style: TextStyle(
+                                            color: _selectedBookingType == 1
+                                                ? Colors.white
+                                                : Colors.grey.shade600,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 14,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                          SizedBox(width: 8),
-                          Text('-', style: TextStyle(color: Colors.grey.shade600)),
-                          SizedBox(width: 8),
+                        ],
+                      ),
+                    ),
+
+                    // Destination field
+                    Container(
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+                      decoration: BoxDecoration(
+                        border: Border(
+                            bottom: BorderSide(color: Colors.grey.shade200)),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(Icons.search,
+                              color: Colors.grey.shade600, size: 24),
+                          SizedBox(width: 16),
+                          Expanded(
+                            child: TextField(
+                              controller: _destinationController,
+                              style: const TextStyle(
+                                  fontSize: 10,
+                                  color: Colors.black87,
+                                  fontWeight: FontWeight.w500),
+                              textAlign: TextAlign.center,
+                              decoration: InputDecoration(
+                                isDense: false,
+                                contentPadding:
+                                    EdgeInsets.symmetric(vertical: 10),
+                                hintText: 'Enter destination',
+                                hintStyle: TextStyle(
+                                    fontSize: 10,
+                                    color: Colors.grey.shade500,
+                                    fontWeight: FontWeight.normal),
+                                border: InputBorder.none,
+                              ),
+                              textInputAction: TextInputAction.search,
+                              onSubmitted: (_) => _onSearchAndNavigate(),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    // Date/Time selector based on booking type
+                    if (_selectedBookingType == 0)
+                      // Daily: show time range selectors
+                      Container(
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+                        decoration: BoxDecoration(
+                          border: Border(
+                              bottom: BorderSide(color: Colors.grey.shade200)),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(Icons.access_time,
+                                color: Colors.grey.shade600, size: 20),
+                            SizedBox(width: 12),
+                            Expanded(
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: GestureDetector(
+                                      onTap: _pickStartTime,
+                                      child: Text(
+                                        _startTime == null
+                                            ? 'Start time'
+                                            : _formatTime(_startTime!),
+                                        style: const TextStyle(
+                                            fontSize: 16,
+                                            color: Colors.black87),
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(width: 8),
+                                  Text('-',
+                                      style: TextStyle(
+                                          color: Colors.grey.shade600)),
+                                  SizedBox(width: 8),
+                                  Expanded(
+                                    child: GestureDetector(
+                                      onTap: _pickEndTime,
+                                      child: Text(
+                                        _endTime == null
+                                            ? 'End time'
+                                            : _formatTime(_endTime!),
+                                        style: const TextStyle(
+                                            fontSize: 16,
+                                            color: Colors.black87),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                    else
+                      // Monthly: show date range selector
+                      Container(
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+                        decoration: BoxDecoration(
+                          border: Border(
+                              bottom: BorderSide(color: Colors.grey.shade200)),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(Icons.calendar_today,
+                                color: Colors.grey.shade600, size: 20),
+                            SizedBox(width: 12),
+                            Expanded(
+                              child: GestureDetector(
+                                onTap: _pickDateRange,
+                                child: Text(
+                                  _dateRange != null
+                                      ? '${DateFormat('EEE, d MMM').format(_dateRange!.start)} - ${DateFormat('EEE, d MMM').format(_dateRange!.end)}'
+                                      : 'Select dates',
+                                  style: const TextStyle(
+                                      fontSize: 16, color: Colors.black87),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                    // Guests/Rooms field
+                    Container(
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+                      child: Row(
+                        children: [
+                          Icon(Icons.person,
+                              color: Colors.grey.shade600, size: 20),
+                          SizedBox(width: 12),
                           Expanded(
                             child: GestureDetector(
-                              onTap: _pickEndTime,
+                              onTap: _pickGuests,
                               child: Text(
-                                _endTime == null
-                                    ? 'End time'
-                                    : _formatTime(_endTime!),
-                                style: const TextStyle(fontSize: 16, color: Colors.black87),
+                                '${_rooms} room · ${_adults} adults · ${_children} children',
+                                style: const TextStyle(
+                                    fontSize: 16, color: Colors.black87),
                               ),
                             ),
                           ),
                         ],
                       ),
                     ),
-                  ],
-                ),
-              )
-            else
-              // Monthly: show date range selector
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 12, vertical: 16),
-                decoration: BoxDecoration(
-                  border: Border(bottom: BorderSide(color: Colors.grey.shade200)),
-                ),
-                child: Row(
-                  children: [
-                    Icon(Icons.calendar_today, color: Colors.grey.shade600, size: 20),
-                    SizedBox(width: 12),
-                    Expanded(
-                      child: GestureDetector(
-                        onTap: _pickDateRange,
-                        child: Text(
-                          _dateRange != null
-                              ? '${DateFormat('EEE, d MMM').format(_dateRange!.start)} - ${DateFormat('EEE, d MMM').format(_dateRange!.end)}'
-                              : 'Select dates',
-                          style: const TextStyle(fontSize: 16, color: Colors.black87),
+
+                    SizedBox(height: 20),
+
+                    // Search button
+                    SizedBox(
+                      width: double.infinity,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12),
+                          gradient: LinearGradient(
+                            colors: [
+                              primaryColor,
+                              primaryColor.withOpacity(0.9)
+                            ],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: primaryColor.withOpacity(0.25),
+                              blurRadius: 8,
+                              offset: Offset(0, 4),
+                              spreadRadius: 0,
+                            ),
+                          ],
+                        ),
+                        child: ElevatedButton(
+                          onPressed: _onSearchAndNavigate,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.transparent,
+                            foregroundColor: Colors.white,
+                            shadowColor: Colors.transparent,
+                            padding: EdgeInsets.symmetric(vertical: 12),
+                            minimumSize: Size(double.infinity, 40),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.search, size: 20, color: Colors.white),
+                              SizedBox(width: 8),
+                              Text(
+                                'Search Hotels',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                  letterSpacing: 0.3,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
-                  ],
-                ),
-              ),
-            
-            // Guests/Rooms field
-            Container(
-              padding: EdgeInsets.symmetric(horizontal: 12, vertical: 16),
-              child: Row(
-                children: [
-                  Icon(Icons.person, color: Colors.grey.shade600, size: 20),
-                  SizedBox(width: 12),
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: _pickGuests,
-                      child: Text(
-                        '${_rooms} room · ${_adults} adults · ${_children} children',
-                        style: const TextStyle(fontSize: 16, color: Colors.black87),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            
-            SizedBox(height: 20),
-            
-            // Search button
-            SizedBox(
-              width: double.infinity,
-              child: Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
-                  gradient: LinearGradient(
-                    colors: [primaryColor, primaryColor.withOpacity(0.9)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: primaryColor.withOpacity(0.25),
-                      blurRadius: 8,
-                      offset: Offset(0, 4),
-                      spreadRadius: 0,
-                    ),
-                  ],
-                ),
-                child: ElevatedButton(
-                  onPressed: _onSearchAndNavigate,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.transparent,
-                    foregroundColor: Colors.white,
-                    shadowColor: Colors.transparent,
-                    padding: EdgeInsets.symmetric(vertical: 12),
-                    minimumSize: Size(double.infinity, 40),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.search, size: 20, color: Colors.white),
-                      SizedBox(width: 8),
-                      Text(
-                        'Search Hotels',
-                        style: TextStyle(
-                          fontSize: 14, 
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: 0.3,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
                   ],
                 ),
               ),
@@ -395,9 +442,21 @@ class _TabletSearchCardState extends ConsumerState<TabletSearchCard> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    _counterRow(label: 'Adults', value: adults, onChanged: (v) => setModal(() => adults = v), min: 1),
-                    _counterRow(label: 'Children', value: children, onChanged: (v) => setModal(() => children = v), min: 0),
-                    _counterRow(label: 'Rooms', value: rooms, onChanged: (v) => setModal(() => rooms = v), min: 1),
+                    _counterRow(
+                        label: 'Adults',
+                        value: adults,
+                        onChanged: (v) => setModal(() => adults = v),
+                        min: 1),
+                    _counterRow(
+                        label: 'Children',
+                        value: children,
+                        onChanged: (v) => setModal(() => children = v),
+                        min: 0),
+                    _counterRow(
+                        label: 'Rooms',
+                        value: rooms,
+                        onChanged: (v) => setModal(() => rooms = v),
+                        min: 1),
                     const SizedBox(height: 12),
                     ElevatedButton(
                       onPressed: () {
@@ -420,15 +479,23 @@ class _TabletSearchCardState extends ConsumerState<TabletSearchCard> {
     );
   }
 
-  Widget _counterRow({required String label, required int value, required ValueChanged<int> onChanged, int min = 0}) {
+  Widget _counterRow(
+      {required String label,
+      required int value,
+      required ValueChanged<int> onChanged,
+      int min = 0}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
         children: [
           Expanded(child: Text(label)),
-          IconButton(onPressed: value > min ? () => onChanged(value - 1) : null, icon: const Icon(Icons.remove_circle_outline)),
+          IconButton(
+              onPressed: value > min ? () => onChanged(value - 1) : null,
+              icon: const Icon(Icons.remove_circle_outline)),
           Text('$value'),
-          IconButton(onPressed: () => onChanged(value + 1), icon: const Icon(Icons.add_circle_outline)),
+          IconButton(
+              onPressed: () => onChanged(value + 1),
+              icon: const Icon(Icons.add_circle_outline)),
         ],
       ),
     );
@@ -439,19 +506,14 @@ class _TabletSearchCardState extends ConsumerState<TabletSearchCard> {
     final query = [baseQuery, _selectedCity, _selectedCountry]
         .where((e) => e != null && e!.isNotEmpty)
         .join(' ');
-    
+
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (_) => SearchResultsPage(
-          query: query,
-          adults: _adults,
-          children: _children,
-          rooms: _rooms,
-          dateRange: _selectedBookingType == 1 ? _dateRange : null,
-          startTime: _selectedBookingType == 0 ? _startTime : null,
-          endTime: _selectedBookingType == 0 ? _endTime : null,
+          hotels: [], // Empty list for now, will be loaded by the page
+          searchQuery: query,
         ),
       ),
     );
   }
-} 
+}

@@ -1,219 +1,153 @@
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-import '../../controllers/hotel_controller.dart';
-import '../../controllers/location_controller.dart';
-import '../../models/hotel.dart';
-import '../../config/dynamic_config.dart';
-import 'components/hotel_card.dart';
-import 'providers/home_providers.dart';
 import '../../config/wp_config.dart';
-import '../../models/location.dart' as location_model;
-import '../../widgets/custom_app_bar.dart';
+import '../../models/hotel.dart';
+import 'components/hotel_card.dart';
 
-class SearchResultsPage extends ConsumerWidget {
-  final String query;
-  final int adults;
-  final int children;
-  final int rooms;
-  final DateTimeRange? dateRange;
-  final TimeOfDay? startTime;
-  final TimeOfDay? endTime;
+class SearchResultsPage extends ConsumerStatefulWidget {
+  final List<Hotel> hotels;
+  final String searchQuery;
 
   const SearchResultsPage({
     Key? key,
-    required this.query,
-    required this.adults,
-    required this.children,
-    required this.rooms,
-    this.dateRange,
-    this.startTime,
-    this.endTime,
+    required this.hotels,
+    required this.searchQuery,
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final primaryColor = WPConfig.navbarColor;
-
-    return Scaffold(
-      appBar: CustomAppBar(
-        title: 'search'.tr(),
-        showBackButton: true,
-        onNotificationPressed: null,
-      ),
-      body: Column(
-        children: [
-          // Summary chips
-          _SearchSummaryChips(query: query, adults: adults, children: children, rooms: rooms, dateRange: dateRange),
-          Expanded(
-            child: Consumer(
-              builder: (context, ref, _) {
-                final hotelsAsync = ref.watch(hotelProvider);
-                final locationsAsync = ref.watch(locationProvider);
-
-                return hotelsAsync.when(
-                  data: (hotels) {
-                    // Prepare location maps if available
-                    final locationData = locationsAsync.value;
-                    final countries = locationData?.countries ?? [];
-                    final cities = locationData?.cities ?? [];
-                    final states = locationData?.states ?? [];
-
-                    // normalize hotels with readable names
-                    final normalized = hotels.map((hotel) {
-                      String? countryName = hotel.country;
-                      String? cityName = hotel.city;
-                      String? stateName = hotel.state;
-
-                      if (hotel.countryId != null) {
-                        final country = countries.firstWhere(
-                          (c) => c.id == hotel.countryId,
-                          orElse: () => location_model.Country(),
-                        );
-                        countryName = country.name ?? countryName;
-                      }
-                      if (hotel.cityId != null) {
-                        final city = cities.firstWhere(
-                          (c) => c.id == hotel.cityId,
-                          orElse: () => location_model.City(),
-                        );
-                        cityName = city.name ?? cityName;
-                      }
-                      if (hotel.stateId != null) {
-                        final state = states.firstWhere(
-                          (s) => s.id == hotel.stateId,
-                          orElse: () => location_model.State(),
-                        );
-                        stateName = state.name ?? stateName;
-                      }
-
-                      return Hotel(
-                        id: hotel.id,
-                        name: hotel.name,
-                        location: hotel.location,
-                        imageUrl: hotel.imageUrl,
-                        rate: hotel.rate,
-                        isOccupied: hotel.isOccupied,
-                        description: hotel.description,
-                        facilities: hotel.facilities,
-                        roomTypes: hotel.roomTypes,
-                        checkInTime: hotel.checkInTime,
-                        checkOutTime: hotel.checkOutTime,
-                        priceRange: hotel.priceRange,
-                        contact: hotel.contact,
-                        reviews: hotel.reviews,
-                        locationCoordinates: hotel.locationCoordinates,
-                        bookingUrl: hotel.bookingUrl,
-                        images: hotel.images,
-                        category: hotel.category,
-                        nearbyAttractions: hotel.nearbyAttractions,
-                        availableDates: hotel.availableDates,
-                        country: countryName,
-                        state: stateName,
-                        city: cityName,
-                        countryId: hotel.countryId,
-                        stateId: hotel.stateId,
-                        cityId: hotel.cityId,
-                        slug: hotel.slug,
-                        stars: hotel.stars,
-                        categorySlug: hotel.categorySlug,
-                        latitude: hotel.latitude,
-                        longitude: hotel.longitude,
-                      );
-                    }).toList();
-
-                    final q = query.trim().toLowerCase();
-                    final List<Hotel> results = normalized.where((hotel) {
-                      final name = (hotel.name ?? '').toLowerCase();
-                      final category = (hotel.category ?? '').toLowerCase();
-                      final country = (hotel.country ?? '').toLowerCase();
-                      final city = (hotel.city ?? '').toLowerCase();
-                      final state = (hotel.state ?? '').toLowerCase();
-                      final loc = (hotel.location ?? '').toLowerCase();
-                      return name.contains(q) || category.contains(q) || country.contains(q) || city.contains(q) || state.contains(q) || loc.contains(q);
-                    }).toList();
-
-                    if (results.isEmpty) {
-                      return Center(
-                        child: Padding(
-                          padding: const EdgeInsets.all(24.0),
-                          child: Text('no_hotels_found'.tr(), style: const TextStyle(color: Colors.black)),
-                        ),
-                      );
-                    }
-
-                    final bookingType = ref.watch(selectedBookingTypeProvider);
-                    return ListView.builder(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      itemCount: results.length,
-                      itemBuilder: (_, index) => HotelCard(
-                        hotel: results[index],
-                        city: null,
-                        country: null,
-                        onFavoriteTap: null,
-                        isFavorite: false,
-                      ),
-                    );
-                  },
-                  loading: () => Center(child: CircularProgressIndicator(color: primaryColor)),
-                  error: (e, _) => Center(child: Text('error_loading_hotels'.tr())),
-                );
-              },
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+  ConsumerState<SearchResultsPage> createState() => _SearchResultsPageState();
 }
 
-class _SearchSummaryChips extends StatelessWidget {
-  final String query;
-  final int adults;
-  final int children;
-  final int rooms;
-  final DateTimeRange? dateRange;
-
-  const _SearchSummaryChips({
-    Key? key,
-    required this.query,
-    required this.adults,
-    required this.children,
-    required this.rooms,
-    this.dateRange,
-  }) : super(key: key);
-
+class _SearchResultsPageState extends ConsumerState<SearchResultsPage> {
   @override
   Widget build(BuildContext context) {
-    final chips = <Widget>[];
-    if (query.isNotEmpty) {
-      chips.add(_chip(Icons.search, query));
-    }
-    if (dateRange != null) {
-      final start = DateFormat('yMMMd').format(dateRange!.start);
-      final end = DateFormat('yMMMd').format(dateRange!.end);
-      chips.add(_chip(Icons.calendar_today, '$start - $end'));
-    }
-    chips.add(_chip(Icons.person, '${adults} ${'adults'.tr()}${children > 0 ? ' · ${children} ${'children'.tr()}' : ''}'));
-    chips.add(_chip(Icons.meeting_room, '${rooms} ${'rooms'.tr()}'));
+    final primaryColor = WPConfig.navbarColor;
+    final isTablet = MediaQuery.of(context).size.width >= 768;
 
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      child: Row(children: chips.map((w) => Padding(padding: const EdgeInsets.only(right: 8), child: w)).toList()),
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight(100),
+        child: _buildCustomAppBar(context, primaryColor, isTablet),
+      ),
+      body: _buildMainContent(isTablet, primaryColor),
     );
   }
 
-  Widget _chip(IconData icon, String label) {
-    return Chip(
-      avatar: Icon(icon, size: 14),
-      label: Text(label, style: const TextStyle(fontSize: 14)),
-      visualDensity: VisualDensity.compact,
-      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 0),
+  Widget _buildCustomAppBar(
+      BuildContext context, Color primaryColor, bool isTablet) {
+    return Container(
+      color: primaryColor,
+      child: SafeArea(
+        child: Container(
+          height: 80,
+          child: Row(
+            children: [
+              IconButton(
+                icon: Icon(Icons.arrow_back, color: Colors.white, size: 28),
+                onPressed: () => Navigator.pop(context),
+              ),
+              Expanded(
+                child: Center(
+                  child: Text(
+                    'Search Results',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: isTablet ? 28 : 24,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+              SizedBox(width: 56),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMainContent(bool isTablet, Color primaryColor) {
+    return Column(
+      children: [
+        Container(
+          width: double.infinity,
+          padding: EdgeInsets.all(isTablet ? 20 : 16),
+          decoration: BoxDecoration(
+            color: Colors.grey[50],
+            border: Border(bottom: BorderSide(color: Colors.grey[300]!)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Search Results for "${widget.searchQuery}"',
+                style: TextStyle(
+                  fontSize: isTablet ? 20 : 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                ),
+              ),
+              SizedBox(height: 8),
+              Text(
+                '${widget.hotels.length} hotels found',
+                style: TextStyle(
+                  fontSize: isTablet ? 16 : 14,
+                  color: Colors.grey[600],
+                ),
+              ),
+            ],
+          ),
+        ),
+        Expanded(
+          child: widget.hotels.isEmpty
+              ? Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(32),
+                    child: Column(
+                      children: [
+                        Icon(
+                          Icons.search_off,
+                          size: isTablet ? 80 : 64,
+                          color: Colors.grey[400],
+                        ),
+                        SizedBox(height: 16),
+                        Text(
+                          'No hotels found',
+                          style: TextStyle(
+                            fontSize: isTablet ? 20 : 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                        SizedBox(height: 8),
+                        Text(
+                          'Try adjusting your search criteria',
+                          style: TextStyle(
+                            fontSize: isTablet ? 16 : 14,
+                            color: Colors.grey[500],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                )
+              : ListView.builder(
+                  padding: EdgeInsets.all(isTablet ? 20 : 16),
+                  itemCount: widget.hotels.length,
+                  itemBuilder: (context, index) {
+                    final hotel = widget.hotels[index];
+                    return HotelCard(
+                      hotel: hotel,
+                      city: null,
+                      country: null,
+                      onFavoriteTap: null,
+                      isFavorite: false,
+                    );
+                  },
+                ),
+        ),
+      ],
     );
   }
 }
-
-

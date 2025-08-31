@@ -40,7 +40,6 @@ dependencies:
   path: ^1.8.1
   loader_overlay: ^4.0.4+1
   collection: ^1.16.0
-  connectivity_plus: ^6.1.4
   timeago: ^3.3.0
   html_unescape: ^2.0.0
   form_field_validator: ^1.1.0

@@ -4,28 +4,42 @@ import '../../config/wp_config.dart';
 import '../../models/hotel.dart';
 import '../../controllers/hotel_controller.dart';
 
-class AllHotelsPage extends ConsumerStatefulWidget {
-  const AllHotelsPage({Key? key}) : super(key: key);
+class CityHotelsPage extends ConsumerStatefulWidget {
+  final String cityName;
+
+  const CityHotelsPage({
+    Key? key,
+    required this.cityName,
+  }) : super(key: key);
 
   @override
-  ConsumerState<AllHotelsPage> createState() => _AllHotelsPageState();
+  ConsumerState<CityHotelsPage> createState() => _CityHotelsPageState();
 }
 
-class _AllHotelsPageState extends ConsumerState<AllHotelsPage> {
-  List<Hotel> _hotels = [];
+class _CityHotelsPageState extends ConsumerState<CityHotelsPage> {
+  List<Hotel> _cityHotels = [];
   bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _loadHotels();
+    _loadCityHotels();
   }
 
-  Future<void> _loadHotels() async {
+  Future<void> _loadCityHotels() async {
     try {
-      final hotels = await ref.read(hotelProvider.future);
+      final allHotels = await ref.read(hotelProvider.future);
+      final cityHotels = allHotels
+          .where((hotel) =>
+              hotel.city?.toLowerCase() == widget.cityName.toLowerCase() ||
+              hotel.location
+                      ?.toLowerCase()
+                      .contains(widget.cityName.toLowerCase()) ==
+                  true)
+          .toList();
+
       setState(() {
-        _hotels = hotels;
+        _cityHotels = cityHotels;
         _isLoading = false;
       });
     } catch (e) {
@@ -34,7 +48,7 @@ class _AllHotelsPageState extends ConsumerState<AllHotelsPage> {
       });
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to load hotels: $e')),
+          SnackBar(content: Text('Failed to load city hotels: $e')),
         );
       }
     }
@@ -73,7 +87,7 @@ class _AllHotelsPageState extends ConsumerState<AllHotelsPage> {
               Expanded(
                 child: Center(
                   child: Text(
-                    'All Hotels',
+                    'Hotels in ${widget.cityName}',
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: isTablet ? 28 : 24,
@@ -98,8 +112,8 @@ class _AllHotelsPageState extends ConsumerState<AllHotelsPage> {
       );
     }
 
-    if (_hotels.isEmpty) {
-      return _buildNoHotels(isTablet, primaryColor);
+    if (_cityHotels.isEmpty) {
+      return _buildNoCityHotels(isTablet, primaryColor);
     }
 
     return Column(
@@ -114,10 +128,11 @@ class _AllHotelsPageState extends ConsumerState<AllHotelsPage> {
           ),
           child: Row(
             children: [
-              Icon(Icons.hotel, color: primaryColor, size: isTablet ? 24 : 20),
+              Icon(Icons.location_city,
+                  color: primaryColor, size: isTablet ? 24 : 20),
               SizedBox(width: 12),
               Text(
-                '${_hotels.length} Hotels Available',
+                '${_cityHotels.length} Hotels in ${widget.cityName}',
                 style: TextStyle(
                   fontSize: isTablet ? 18 : 16,
                   fontWeight: FontWeight.bold,
@@ -132,9 +147,9 @@ class _AllHotelsPageState extends ConsumerState<AllHotelsPage> {
         Expanded(
           child: ListView.builder(
             padding: EdgeInsets.all(isTablet ? 20 : 16),
-            itemCount: _hotels.length,
+            itemCount: _cityHotels.length,
             itemBuilder: (context, index) {
-              final hotel = _hotels[index];
+              final hotel = _cityHotels[index];
               return _buildHotelCard(hotel, isTablet, primaryColor);
             },
           ),
@@ -143,20 +158,20 @@ class _AllHotelsPageState extends ConsumerState<AllHotelsPage> {
     );
   }
 
-  Widget _buildNoHotels(bool isTablet, Color primaryColor) {
+  Widget _buildNoCityHotels(bool isTablet, Color primaryColor) {
     return Center(
       child: Padding(
         padding: EdgeInsets.all(32),
         child: Column(
           children: [
             Icon(
-              Icons.hotel_outlined,
+              Icons.location_city_outlined,
               size: isTablet ? 80 : 64,
               color: Colors.grey[400],
             ),
             SizedBox(height: 16),
             Text(
-              'No hotels available',
+              'No hotels found in ${widget.cityName}',
               style: TextStyle(
                 fontSize: isTablet ? 20 : 18,
                 fontWeight: FontWeight.bold,
@@ -165,7 +180,7 @@ class _AllHotelsPageState extends ConsumerState<AllHotelsPage> {
             ),
             SizedBox(height: 8),
             Text(
-              'Try refreshing or check back later',
+              'Try searching for a different city',
               style: TextStyle(
                 fontSize: isTablet ? 16 : 14,
                 color: Colors.grey[500],
@@ -173,12 +188,12 @@ class _AllHotelsPageState extends ConsumerState<AllHotelsPage> {
             ),
             SizedBox(height: 24),
             ElevatedButton(
-              onPressed: _loadHotels,
+              onPressed: () => Navigator.pop(context),
               style: ElevatedButton.styleFrom(
                 backgroundColor: primaryColor,
                 foregroundColor: Colors.white,
               ),
-              child: Text('Refresh'),
+              child: Text('Back to Search'),
             ),
           ],
         ),

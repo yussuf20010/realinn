@@ -13,7 +13,6 @@ import '../../models/hotel.dart';
 import '../../models/selected_room.dart' as models;
 import '../../models/booking.dart' as models;
 import '../../providers/bookings_provider.dart' as providers;
-import '../booking/booking_page.dart';
 import '../main/main_scaffold.dart';
 
 class HotelDetailsPage extends ConsumerStatefulWidget {
@@ -32,13 +31,13 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
   int selectedImageIndex = 0;
   List<Map<String, dynamic>> userQuestions = [];
   int totalQuestionCount = 8; // Base count for default questions
-  
+
   // Expansion states for different sections
   bool isRoomsExpanded = false;
   bool isReviewsExpanded = false;
   bool isAttractionsExpanded = false;
   bool isPoliciesExpanded = false;
-  
+
   @override
   void initState() {
     super.initState();
@@ -64,36 +63,38 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
             pinned: true,
             backgroundColor: primaryColor,
             leading: IconButton(
-              icon: Icon(Icons.arrow_back, color: Colors.white, size: isTablet ? 28 : 24),
-                onPressed: () => Navigator.pop(context),
-              ),
+              icon: Icon(Icons.arrow_back,
+                  color: Colors.white, size: isTablet ? 28 : 24),
+              onPressed: () => Navigator.pop(context),
+            ),
             title: Column(
-                children: [
-                        Text(
+              children: [
+                Text(
                   widget.hotel.name ?? 'Hotel Name',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
                     fontSize: isTablet ? 24 : 18,
                   ),
                   textAlign: TextAlign.center,
                 ),
                 if (widget.hotel.city != null)
-                                    Text(
+                  Text(
                     '- ${widget.hotel.city}',
-                                      style: TextStyle(
-                                        color: Colors.white,
+                    style: TextStyle(
+                      color: Colors.white,
                       fontSize: isTablet ? 20 : 16,
-                                      ),
+                    ),
                     textAlign: TextAlign.center,
-                                    ),
-                                  ],
-                                ),
+                  ),
+              ],
+            ),
             actions: [
               Consumer(
                 builder: (context, ref, child) {
                   final favorites = ref.watch(favoritesProvider);
-                  final isFavorite = favorites.any((h) => h.id == widget.hotel.id);
+                  final isFavorite =
+                      favorites.any((h) => h.id == widget.hotel.id);
                   return IconButton(
                     icon: AnimatedSwitcher(
                       duration: Duration(milliseconds: 200),
@@ -105,22 +106,25 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
                       ),
                     ),
                     onPressed: () {
-                      ref.read(favoritesProvider.notifier).toggleFavorite(widget.hotel, context);
+                      ref
+                          .read(favoritesProvider.notifier)
+                          .toggleFavorite(widget.hotel, context);
                     },
                   );
                 },
               ),
               IconButton(
-                icon: Icon(Icons.share, color: Colors.white, size: isTablet ? 28 : 24),
+                icon: Icon(Icons.share,
+                    color: Colors.white, size: isTablet ? 28 : 24),
                 onPressed: () => _shareHotel(),
-                        ),
-                      ],
+              ),
+            ],
             flexibleSpace: FlexibleSpaceBar(
               background: _buildImageGallery(isTablet),
             ),
           ),
 
-                    // Hotel Content
+          // Hotel Content
           SliverToBoxAdapter(
             child: Padding(
               padding: EdgeInsets.all(isTablet ? 24 : 12),
@@ -129,80 +133,85 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
                 children: [
                   // Rating Section
                   _buildAnimatedSection(_buildRatingSection(isTablet), 0),
-                  
+
                   SizedBox(height: isTablet ? 20 : 16),
-                  
+
                   // Most Popular Facilities
                   _buildAnimatedSection(_buildFacilitiesSection(isTablet), 2),
-                  
+
                   SizedBox(height: isTablet ? 20 : 16),
-                  
+
                   // Travelers Questions
                   _buildAnimatedSection(_buildQuestionsSection(isTablet), 3),
-                  
+
                   SizedBox(height: isTablet ? 20 : 16),
-                  
+
                   // Description
                   _buildAnimatedSection(_buildDescriptionSection(isTablet), 4),
-                  
+
                   SizedBox(height: isTablet ? 20 : 16),
-                  
+
                   // Map Section
-                  if (widget.hotel.latitude != null && widget.hotel.longitude != null)
+                  if (widget.hotel.latitude != null &&
+                      widget.hotel.longitude != null)
                     _buildAnimatedSection(_buildMapSection(isTablet), 5),
-                  
+
                   SizedBox(height: isTablet ? 20 : 16),
-                  
+
                   // Expandable Sections
                   _buildExpandableSection(
                     title: 'Available Rooms',
                     previewText: '3 room types available • From \$120/night',
                     expandedContent: _buildRoomsContent(isTablet),
                     isExpanded: isRoomsExpanded,
-                    onToggle: () => setState(() => isRoomsExpanded = !isRoomsExpanded),
+                    onToggle: () =>
+                        setState(() => isRoomsExpanded = !isRoomsExpanded),
                     icon: Icons.bed_outlined,
                     isTablet: isTablet,
                   ),
-                  
+
                   _buildExpandableSection(
                     title: 'Guest Reviews',
                     previewText: '4.5/5 stars • 156 reviews',
                     expandedContent: _buildReviewsContent(isTablet),
                     isExpanded: isReviewsExpanded,
-                    onToggle: () => setState(() => isReviewsExpanded = !isReviewsExpanded),
+                    onToggle: () =>
+                        setState(() => isReviewsExpanded = !isReviewsExpanded),
                     icon: Icons.star_outline,
                     isTablet: isTablet,
                   ),
-                  
+
                   _buildExpandableSection(
                     title: 'Nearby Attractions',
                     previewText: 'City Center • National Museum • Central Park',
                     expandedContent: _buildAttractionsContent(isTablet),
                     isExpanded: isAttractionsExpanded,
-                    onToggle: () => setState(() => isAttractionsExpanded = !isAttractionsExpanded),
+                    onToggle: () => setState(
+                        () => isAttractionsExpanded = !isAttractionsExpanded),
                     icon: Icons.place_outlined,
                     isTablet: isTablet,
                   ),
-                  
+
                   _buildExpandableSection(
                     title: 'Hotel Policies',
-                    previewText: 'Check-in 3PM • Free cancellation • Pet policy',
+                    previewText:
+                        'Check-in 3PM • Free cancellation • Pet policy',
                     expandedContent: _buildPoliciesContent(isTablet),
                     isExpanded: isPoliciesExpanded,
-                    onToggle: () => setState(() => isPoliciesExpanded = !isPoliciesExpanded),
+                    onToggle: () => setState(
+                        () => isPoliciesExpanded = !isPoliciesExpanded),
                     icon: Icons.policy_outlined,
                     isTablet: isTablet,
                   ),
-                  
+
                   SizedBox(height: isTablet ? 20 : 16),
-                  
                 ],
               ),
             ),
           ),
         ],
       ),
-      
+
       // Bottom Action Button
       bottomNavigationBar: Container(
         padding: EdgeInsets.all(isTablet ? 24 : 16),
@@ -310,17 +319,16 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
                   right: isTablet ? 24 : 16,
                   child: Container(
                     padding: EdgeInsets.symmetric(
-                      horizontal: isTablet ? 16 : 12, 
-                      vertical: isTablet ? 8 : 6
-                    ),
-            decoration: BoxDecoration(
+                        horizontal: isTablet ? 16 : 12,
+                        vertical: isTablet ? 8 : 6),
+                    decoration: BoxDecoration(
                       color: Colors.black.withOpacity(0.7),
                       borderRadius: BorderRadius.circular(isTablet ? 24 : 20),
                     ),
                     child: Text(
                       '${selectedImageIndex + 1}/${widget.hotel.images!.length}',
-                  style: TextStyle(
-                    color: Colors.white,
+                      style: TextStyle(
+                        color: Colors.white,
                         fontSize: isTablet ? 16 : 14,
                         fontWeight: FontWeight.bold,
                       ),
@@ -340,25 +348,25 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
     return Container(
       color: Colors.grey[300],
       child: Center(
-            child: Column(
+        child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-              children: [
+          children: [
             Icon(
               Icons.hotel,
-                    color: Colors.grey[600],
+              color: Colors.grey[600],
               size: isTablet ? 80 : 64,
-                  ),
+            ),
             SizedBox(height: isTablet ? 24 : 16),
-                Text(
+            Text(
               'No Images Available',
-                  style: TextStyle(
+              style: TextStyle(
                 color: Colors.grey[600],
                 fontSize: isTablet ? 24 : 18,
                 fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
+              ),
             ),
+          ],
+        ),
       ),
     );
   }
@@ -385,16 +393,15 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
             children: [
               Container(
                 padding: EdgeInsets.symmetric(
-                  horizontal: isTablet ? 16 : 12, 
-                  vertical: isTablet ? 12 : 8
-                ),
+                    horizontal: isTablet ? 16 : 12,
+                    vertical: isTablet ? 12 : 8),
                 decoration: BoxDecoration(
                   color: WPConfig.navbarColor,
                   borderRadius: BorderRadius.circular(isTablet ? 12 : 8),
                 ),
                 child: Text(
                   '${widget.hotel.rate?.toStringAsFixed(1) ?? "N/A"}',
-                style: TextStyle(
+                  style: TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
                     fontSize: isTablet ? 22 : 18,
@@ -402,22 +409,20 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
                 ),
               ),
               SizedBox(width: isTablet ? 16 : 12),
-          Text(
+              Text(
                 _getRatingText(widget.hotel.rate),
-            style: TextStyle(
+                style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: isTablet ? 22 : 18,
                   color: Colors.black,
-            ),
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
           SizedBox(height: isTablet ? 12 : 8),
-
           _buildCategoryRating('Cleanliness', 8.5, isTablet),
           _buildCategoryRating('Comfort', 8.5, isTablet),
           _buildCategoryRating('Facilities', 8.3, isTablet),
-          
         ],
       ),
     );
@@ -448,8 +453,11 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
                 widthFactor: rating / 10,
                 child: Container(
                   decoration: BoxDecoration(
-                    gradient: LinearGradient( 
-                      colors: [WPConfig.navbarColor, WPConfig.navbarColor.withOpacity(0.8)],
+                    gradient: LinearGradient(
+                      colors: [
+                        WPConfig.navbarColor,
+                        WPConfig.navbarColor.withOpacity(0.8)
+                      ],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),
@@ -462,31 +470,79 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
           SizedBox(width: isTablet ? 12 : 8),
           Text(
             rating.toString(),
-             style: TextStyle(
+            style: TextStyle(
               fontSize: isTablet ? 16 : 14,
               fontWeight: FontWeight.bold,
               color: Colors.black87,
-             ),
+            ),
           ),
         ],
       ),
     );
   }
 
-
-
-    Widget _buildFacilitiesSection(bool isTablet) {
+  Widget _buildFacilitiesSection(bool isTablet) {
     final facilities = [
-      {'icon': Icons.restaurant_outlined, 'name': 'Restaurant', 'color': Colors.orange, 'description': 'Fine dining'},
-      {'icon': Icons.room_service_outlined, 'name': 'Room Service', 'color': Colors.blue, 'description': '24/7 available'},
-      {'icon': Icons.local_parking_outlined, 'name': 'Parking', 'color': Colors.green, 'description': 'Free parking'},
-      {'icon': Icons.wifi, 'name': 'WiFi', 'color': Colors.purple, 'description': 'High-speed internet'},
-      {'icon': Icons.support_agent_outlined, 'name': 'Front Desk', 'color': Colors.teal, 'description': '24-hour service'},
-      {'icon': Icons.local_bar_outlined, 'name': 'Bar & Lounge', 'color': Colors.amber, 'description': 'Premium drinks'},
-      {'icon': Icons.ac_unit_outlined, 'name': 'Air Conditioning', 'color': Colors.cyan, 'description': 'Climate control'},
-      {'icon': Icons.fitness_center_outlined, 'name': 'Fitness Center', 'color': Colors.red, 'description': 'Modern equipment'},
-      {'icon': Icons.pool_outlined, 'name': 'Swimming Pool', 'color': Colors.lightBlue, 'description': 'Outdoor pool'},
-      {'icon': Icons.spa_outlined, 'name': 'Spa & Wellness', 'color': Colors.pink, 'description': 'Relaxation services'},
+      {
+        'icon': Icons.restaurant_outlined,
+        'name': 'Restaurant',
+        'color': Colors.orange,
+        'description': 'Fine dining'
+      },
+      {
+        'icon': Icons.room_service_outlined,
+        'name': 'Room Service',
+        'color': Colors.blue,
+        'description': '24/7 available'
+      },
+      {
+        'icon': Icons.local_parking_outlined,
+        'name': 'Parking',
+        'color': Colors.green,
+        'description': 'Free parking'
+      },
+      {
+        'icon': Icons.wifi,
+        'name': 'WiFi',
+        'color': Colors.purple,
+        'description': 'High-speed internet'
+      },
+      {
+        'icon': Icons.support_agent_outlined,
+        'name': 'Front Desk',
+        'color': Colors.teal,
+        'description': '24-hour service'
+      },
+      {
+        'icon': Icons.local_bar_outlined,
+        'name': 'Bar & Lounge',
+        'color': Colors.amber,
+        'description': 'Premium drinks'
+      },
+      {
+        'icon': Icons.ac_unit_outlined,
+        'name': 'Air Conditioning',
+        'color': Colors.cyan,
+        'description': 'Climate control'
+      },
+      {
+        'icon': Icons.fitness_center_outlined,
+        'name': 'Fitness Center',
+        'color': Colors.red,
+        'description': 'Modern equipment'
+      },
+      {
+        'icon': Icons.pool_outlined,
+        'name': 'Swimming Pool',
+        'color': Colors.lightBlue,
+        'description': 'Outdoor pool'
+      },
+      {
+        'icon': Icons.spa_outlined,
+        'name': 'Spa & Wellness',
+        'color': Colors.pink,
+        'description': 'Relaxation services'
+      },
     ];
 
     return Column(
@@ -509,7 +565,7 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
               facility['name'] as String,
               facility['description'] as String,
               facility['color'] as Color,
-              isTablet, 
+              isTablet,
             );
           },
         ),
@@ -603,19 +659,18 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
                     ),
                   ],
                 ),
-                
                 AnimatedContainer(
                   duration: Duration(milliseconds: 300),
                   curve: Curves.easeInOut,
                   height: isExpanded ? null : 0,
-                  child: isExpanded 
-                    ? Column(
-                        children: [
-                          SizedBox(height: isTablet ? 12 : 8),
-                          expandedContent,
-                        ],
-                      )
-                    : SizedBox.shrink(),
+                  child: isExpanded
+                      ? Column(
+                          children: [
+                            SizedBox(height: isTablet ? 12 : 8),
+                            expandedContent,
+                          ],
+                        )
+                      : SizedBox.shrink(),
                 ),
               ],
             ),
@@ -625,7 +680,8 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
     );
   }
 
-  Widget _buildModernFacilityCard(IconData icon, String name, String description, Color color, bool isTablet) {
+  Widget _buildModernFacilityCard(IconData icon, String name,
+      String description, Color color, bool isTablet) {
     return InkWell(
       borderRadius: BorderRadius.circular(isTablet ? 8 : 6),
       onTap: () {
@@ -702,54 +758,53 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
           ),
         ),
         SizedBox(height: isTablet ? 20 : 16),
-        
         Container(
           padding: EdgeInsets.all(isTablet ? 24 : 16),
-      decoration: BoxDecoration(
-        color: Colors.white,
+          decoration: BoxDecoration(
+            color: Colors.white,
             borderRadius: BorderRadius.circular(isTablet ? 16 : 12),
             border: Border.all(color: Colors.grey.shade200),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
                 blurRadius: 8,
                 offset: Offset(0, 2),
+              ),
+            ],
           ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-                  Icon(Icons.chat_bubble_outline, color: Colors.grey[600], size: isTablet ? 24 : 20),
+              Row(
+                children: [
+                  Icon(Icons.chat_bubble_outline,
+                      color: Colors.grey[600], size: isTablet ? 24 : 20),
                   SizedBox(width: isTablet ? 12 : 8),
                   Expanded(
                     child: Text(
                       'Hi - can I check in early?',
-                style: TextStyle(
+                      style: TextStyle(
                         fontSize: isTablet ? 18 : 16,
                         color: Colors.black,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
+              ),
               SizedBox(height: isTablet ? 16 : 12),
-              
-                      Container(
+              Container(
                 padding: EdgeInsets.all(isTablet ? 16 : 12),
-                        decoration: BoxDecoration(
+                decoration: BoxDecoration(
                   color: Colors.grey[100],
                   borderRadius: BorderRadius.circular(isTablet ? 12 : 8),
                 ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
                       '8 Feb 2024',
-                                    style: TextStyle(
+                      style: TextStyle(
                         fontSize: isTablet ? 14 : 12,
                         color: Colors.grey[600],
                       ),
@@ -765,9 +820,7 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
                   ],
                 ),
               ),
-              
               SizedBox(height: isTablet ? 20 : 16),
-              
               GestureDetector(
                 onTap: _showAllQuestionsPage,
                 child: Text(
@@ -779,9 +832,7 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
                   ),
                 ),
               ),
-              
               SizedBox(height: isTablet ? 20 : 16),
-              
               OutlinedButton(
                 onPressed: () => _showAskQuestionDialog(isTablet),
                 style: OutlinedButton.styleFrom(
@@ -803,11 +854,10 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
                   ),
                 ),
               ),
-              
               SizedBox(height: isTablet ? 12 : 8),
-        Text(
+              Text(
                 'This property usually replies within a few days',
-          style: TextStyle(
+                style: TextStyle(
                   fontSize: isTablet ? 14 : 12,
                   color: Colors.grey[600],
                 ),
@@ -832,21 +882,18 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
           ),
         ),
         SizedBox(height: isTablet ? 20 : 16),
-        
-              Text(
+        Text(
           'Featuring a bar, ${widget.hotel.name ?? 'Hotel'} is located in ${widget.hotel.city ?? 'City'} in the ${widget.hotel.country ?? 'Country'} region, a 7-minute walk from the beach and 600 yards from the city center. The hotel offers air-conditioned rooms with free WiFi and private bathrooms.',
-                style: TextStyle(
+          style: TextStyle(
             fontSize: isTablet ? 18 : 16,
-                  color: Colors.black87,
+            color: Colors.black87,
             height: 1.5,
           ),
         ),
-        
         SizedBox(height: isTablet ? 12 : 8),
       ],
     );
   }
-
 
   String _getRatingText(double? rating) {
     if (rating == null) return 'N/A';
@@ -876,7 +923,7 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
 
   void _showRoomSelectionBottomSheet() {
     final isTablet = MediaQuery.of(context).size.width >= 768;
-    
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -899,7 +946,7 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
-            
+
             // Title
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
@@ -921,7 +968,7 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
                 ],
               ),
             ),
-            
+
             // Availability notice
             Container(
               margin: EdgeInsets.symmetric(horizontal: 20),
@@ -940,7 +987,7 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
                 textAlign: TextAlign.center,
               ),
             ),
-            
+
             // Room list using new design
             Expanded(
               child: SingleChildScrollView(
@@ -953,7 +1000,12 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
                       '2 adults',
                       '25 m²',
                       '1 double bed',
-                      ['Free Wi-Fi', 'Air conditioning', 'Private bathroom', 'TV'],
+                      [
+                        'Free Wi-Fi',
+                        'Air conditioning',
+                        'Private bathroom',
+                        'TV'
+                      ],
                       isTablet,
                     ),
                     _buildBookingRoomItem(
@@ -962,7 +1014,13 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
                       '2 adults + 1 child',
                       '45 m²',
                       '1 king bed + sofa bed',
-                      ['Free Wi-Fi', 'Air conditioning', 'Balcony', 'Mini bar', 'TV'],
+                      [
+                        'Free Wi-Fi',
+                        'Air conditioning',
+                        'Balcony',
+                        'Mini bar',
+                        'TV'
+                      ],
                       isTablet,
                     ),
                     _buildBookingRoomItem(
@@ -971,7 +1029,13 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
                       '4 adults',
                       '35 m²',
                       '2 double beds',
-                      ['Free Wi-Fi', 'Air conditioning', 'Private bathroom', 'TV', 'Coffee maker'],
+                      [
+                        'Free Wi-Fi',
+                        'Air conditioning',
+                        'Private bathroom',
+                        'TV',
+                        'Coffee maker'
+                      ],
                       isTablet,
                     ),
                   ],
@@ -984,7 +1048,8 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
     );
   }
 
-  Widget _buildBookingRoomItem(String name, String price, String guests, String size, String bed, List<String> amenities, bool isTablet) {
+  Widget _buildBookingRoomItem(String name, String price, String guests,
+      String size, String bed, List<String> amenities, bool isTablet) {
     return Container(
       margin: EdgeInsets.only(bottom: isTablet ? 20 : 16),
       decoration: BoxDecoration(
@@ -1039,7 +1104,7 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
                   ),
                 ),
               ),
-              
+
               // Room info
               Expanded(
                 child: Padding(
@@ -1060,7 +1125,7 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
                         ),
                       ),
                       SizedBox(height: isTablet ? 8 : 6),
-                      
+
                       // Room details
                       _buildRoomDetailRow(Icons.single_bed, bed, isTablet),
                       SizedBox(height: isTablet ? 4 : 3),
@@ -1071,7 +1136,7 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
               ),
             ],
           ),
-          
+
           // Amenities with icons
           Padding(
             padding: EdgeInsets.symmetric(horizontal: isTablet ? 16 : 12),
@@ -1080,7 +1145,8 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
               runSpacing: isTablet ? 8 : 6,
               children: [
                 _buildAmenityIcon(Icons.ac_unit, 'Air conditioning', isTablet),
-                _buildAmenityIcon(Icons.bathroom_outlined, 'Private bathroom', isTablet),
+                _buildAmenityIcon(
+                    Icons.bathroom_outlined, 'Private bathroom', isTablet),
                 _buildAmenityIcon(Icons.wifi, 'Internet', isTablet),
                 _buildAmenityIcon(Icons.check, 'Balcony', isTablet),
                 _buildAmenityIcon(Icons.tv, 'Flat-screen TV', isTablet),
@@ -1088,9 +1154,9 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
               ],
             ),
           ),
-          
+
           SizedBox(height: isTablet ? 16 : 12),
-          
+
           // Simplified pricing section
           Container(
             decoration: BoxDecoration(
@@ -1104,7 +1170,8 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
               children: [
                 Row(
                   children: [
-                    Icon(Icons.people_outline, size: isTablet ? 16 : 14, color: Colors.grey[600]),
+                    Icon(Icons.people_outline,
+                        size: isTablet ? 16 : 14, color: Colors.grey[600]),
                     SizedBox(width: 4),
                     Text(
                       'Price for 2 adults',
@@ -1116,14 +1183,17 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
                   ],
                 ),
                 SizedBox(height: isTablet ? 8 : 6),
-                
+
                 // Simplified policies
-                _buildPolicyItem(Icons.check, 'Free cancellation', '', Colors.green, isTablet),
-                _buildPolicyItem(Icons.check, 'No prepayment needed', '', Colors.green, isTablet),
-                _buildPolicyItem(Icons.restaurant, 'Breakfast included', '', Colors.green, isTablet),
-                
+                _buildPolicyItem(Icons.check, 'Free cancellation', '',
+                    Colors.green, isTablet),
+                _buildPolicyItem(Icons.check, 'No prepayment needed', '',
+                    Colors.green, isTablet),
+                _buildPolicyItem(Icons.restaurant, 'Breakfast included', '',
+                    Colors.green, isTablet),
+
                 SizedBox(height: isTablet ? 12 : 8),
-                
+
                 // Price
                 Row(
                   children: [
@@ -1146,18 +1216,19 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
                     ),
                   ],
                 ),
-                
+
                 SizedBox(height: isTablet ? 16 : 12),
-                
+
                 // Select button
                 SizedBox(
-                  width: double.infinity, 
+                  width: double.infinity,
                   child: ElevatedButton(
                     onPressed: () {
                       Navigator.pop(context);
                       final roomData = {
                         'name': name,
-                        'discountedPrice': double.tryParse(price.replaceAll('\$', '')) ?? 0.0,
+                        'discountedPrice':
+                            double.tryParse(price.replaceAll('\$', '')) ?? 0.0,
                         'maxAdults': 2,
                         'maxChildren': 0,
                         'image': '',
@@ -1170,7 +1241,8 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(4),
                       ),
-                      padding: EdgeInsets.symmetric(vertical: isTablet ? 12 : 10),
+                      padding:
+                          EdgeInsets.symmetric(vertical: isTablet ? 12 : 10),
                     ),
                     child: Text(
                       'Select',
@@ -1185,7 +1257,7 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
               ],
             ),
           ),
-          
+
           // Availability notice
           Container(
             width: double.infinity,
@@ -1205,7 +1277,8 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
               ),
               textAlign: TextAlign.center,
             ),
-          )],
+          )
+        ],
       ),
     );
   }
@@ -1213,7 +1286,7 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
   void _selectRoom(Map<String, dynamic> roomData) async {
     // Show booking confirmation dialog
     final confirmed = await _showBookingConfirmationDialog(roomData);
-    
+
     if (confirmed == true) {
       _processBooking(roomData);
     }
@@ -1259,7 +1332,7 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
               ),
             ),
             SizedBox(height: 8),
-            
+
             // Room details
             Container(
               padding: EdgeInsets.all(12),
@@ -1281,10 +1354,10 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
                   SizedBox(height: 4),
                   Text(roomName),
                   SizedBox(height: 8),
-                  
                   Row(
                     children: [
-                      Icon(Icons.calendar_today, size: 16, color: Colors.grey[600]),
+                      Icon(Icons.calendar_today,
+                          size: 16, color: Colors.grey[600]),
                       SizedBox(width: 4),
                       Text(
                         'check_in'.tr(),
@@ -1294,10 +1367,10 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
                   ),
                   Text(DateFormat('MMM dd, yyyy').format(checkInDate)),
                   SizedBox(height: 4),
-                  
                   Row(
                     children: [
-                      Icon(Icons.calendar_today, size: 16, color: Colors.grey[600]),
+                      Icon(Icons.calendar_today,
+                          size: 16, color: Colors.grey[600]),
                       SizedBox(width: 4),
                       Text(
                         'check_out'.tr(),
@@ -1307,9 +1380,7 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
                   ),
                   Text(DateFormat('MMM dd, yyyy').format(checkOutDate)),
                   SizedBox(height: 8),
-                  
                   Divider(),
-                  
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -1338,7 +1409,7 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
               ),
             ),
             SizedBox(height: 12),
-            
+
             Text(
               'booking_confirmation_message'.tr(),
               style: TextStyle(
@@ -1381,30 +1452,30 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
   }
 
   void _processBooking(Map<String, dynamic> roomData) {
-        // Create a SelectedRoom object
+    // Create a SelectedRoom object
     final selectedRoom = models.SelectedRoom(
       name: roomData['name'] as String,
-      pricePerNight: roomData['discountedPrice'] as double, 
+      pricePerNight: roomData['discountedPrice'] as double,
       maxAdults: roomData['maxAdults'] as int,
       maxChildren: roomData['maxChildren'] as int,
       imageUrl: roomData['image'] as String? ?? '',
       amenities: (roomData['amenities'] as List<String>),
     );
-    
+
     // Create a booking using the factory constructor
     final booking = models.Booking.create(
       hotel: widget.hotel,
-      selectedRoom: selectedRoom, 
+      selectedRoom: selectedRoom,
       adults: 2,
       children: 0,
     );
-    
+
     // Add to bookings
     ref.read(providers.bookingsProvider.notifier).addBooking(booking);
-    
+
     // Close the bottom sheet if it's open
     Navigator.pop(context);
-    
+
     // Show success message with booking details
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -1428,6 +1499,17 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
               MaterialPageRoute(builder: (_) => MainScaffold()),
               (route) => false,
             );
+            // Navigate to bookings page (index 2)
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (context.mounted) {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => MainScaffold(initialIndex: 2),
+                  ),
+                );
+              }
+            });
           },
         ),
       ),
@@ -1439,21 +1521,23 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
     final hotelCity = widget.hotel.city ?? 'City';
     final hotelCountry = widget.hotel.country ?? 'Country';
     final hotelPrice = widget.hotel.priceRange ?? '0';
-    
-    final shareText = 'Check out this amazing hotel: $hotelName in $hotelCity, $hotelCountry\nPrice: US\$$hotelPrice\n\nBook now on RealInn!';
-    
+
+    final shareText =
+        'Check out this amazing hotel: $hotelName in $hotelCity, $hotelCountry\nPrice: US\$$hotelPrice\n\nBook now on RealInn!';
+
     try {
-      if (kIsWeb || defaultTargetPlatform == TargetPlatform.windows || 
-          defaultTargetPlatform == TargetPlatform.macOS || 
+      if (kIsWeb ||
+          defaultTargetPlatform == TargetPlatform.windows ||
+          defaultTargetPlatform == TargetPlatform.macOS ||
           defaultTargetPlatform == TargetPlatform.linux) {
         // For web and desktop platforms, copy to clipboard and show snackbar
         _showShareFallback(shareText);
       } else {
         // For mobile platforms, use native share
-    Share.share(
-      shareText,
-      subject: 'Amazing Hotel: $hotelName',
-    );
+        Share.share(
+          shareText,
+          subject: 'Amazing Hotel: $hotelName',
+        );
       }
     } catch (e) {
       // Fallback if share fails
@@ -1505,7 +1589,7 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
             ),
           ),
           SizedBox(height: isTablet ? 20 : 16),
-          
+
           // Map placeholder with location info
           Container(
             width: double.infinity,
@@ -1525,7 +1609,7 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
                         Icons.location_on,
                         color: Colors.red,
                         size: isTablet ? 48 : 32,
-                      ), 
+                      ),
                       SizedBox(height: 8),
                       Text(
                         '${widget.hotel.latitude!.toStringAsFixed(4)}, ${widget.hotel.longitude!.toStringAsFixed(4)}',
@@ -1549,9 +1633,9 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
               ],
             ),
           ),
-          
+
           SizedBox(height: 12),
-          
+
           // Location details
           Row(
             children: [
@@ -1577,7 +1661,7 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
     final lat = widget.hotel.latitude;
     final lng = widget.hotel.longitude;
     final hotelName = widget.hotel.name ?? 'Hotel';
-    
+
     if (lat != null && lng != null) {
       final url = 'https://www.google.com/maps/search/?api=1&query=$lat,$lng';
       if (await canLaunchUrl(Uri.parse(url))) {
@@ -1611,7 +1695,12 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
         'guests': '2 adults',
         'size': '25 m²',
         'bed': '1 double bed',
-        'amenities': ['Free Wi-Fi', 'Air conditioning', 'Private bathroom', 'TV'],
+        'amenities': [
+          'Free Wi-Fi',
+          'Air conditioning',
+          'Private bathroom',
+          'TV'
+        ],
       },
       {
         'name': 'Deluxe Suite',
@@ -1619,7 +1708,13 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
         'guests': '2 adults + 1 child',
         'size': '45 m²',
         'bed': '1 king bed + sofa bed',
-        'amenities': ['Free Wi-Fi', 'Air conditioning', 'Balcony', 'Mini bar', 'TV'],
+        'amenities': [
+          'Free Wi-Fi',
+          'Air conditioning',
+          'Balcony',
+          'Mini bar',
+          'TV'
+        ],
       },
       {
         'name': 'Family Room',
@@ -1627,20 +1722,28 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
         'guests': '4 adults',
         'size': '35 m²',
         'bed': '2 double beds',
-        'amenities': ['Free Wi-Fi', 'Air conditioning', 'Private bathroom', 'TV', 'Coffee maker'],
+        'amenities': [
+          'Free Wi-Fi',
+          'Air conditioning',
+          'Private bathroom',
+          'TV',
+          'Coffee maker'
+        ],
       },
     ];
 
     return Column(
-      children: rooms.map((room) => _buildRoomItem(
-        room['name'] as String,
-        room['price'] as String,
-        room['guests'] as String,
-        room['size'] as String,
-        room['bed'] as String,
-        room['amenities'] as List<String>,
-        isTablet,
-      )).toList(),
+      children: rooms
+          .map((room) => _buildRoomItem(
+                room['name'] as String,
+                room['price'] as String,
+                room['guests'] as String,
+                room['size'] as String,
+                room['bed'] as String,
+                room['amenities'] as List<String>,
+                isTablet,
+              ))
+          .toList(),
     );
   }
 
@@ -1650,7 +1753,8 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
         'name': 'John Smith',
         'rating': 4.5,
         'date': '2 days ago',
-        'comment': 'Excellent hotel with great service. The staff was very friendly and helpful.',
+        'comment':
+            'Excellent hotel with great service. The staff was very friendly and helpful.',
         'country': 'United States',
       },
       {
@@ -1701,14 +1805,16 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
           ),
         ),
         SizedBox(height: isTablet ? 20 : 16),
-        ...reviews.map((review) => _buildReviewItem(
-          review['name'] as String,
-          review['rating'] as double,
-          review['date'] as String,
-          review['comment'] as String,
-          review['country'] as String,
-          isTablet,
-        )).toList(),
+        ...reviews
+            .map((review) => _buildReviewItem(
+                  review['name'] as String,
+                  review['rating'] as double,
+                  review['date'] as String,
+                  review['comment'] as String,
+                  review['country'] as String,
+                  isTablet,
+                ))
+            .toList(),
       ],
     );
   }
@@ -1748,13 +1854,15 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
     ];
 
     return Column(
-      children: attractions.map((attraction) => _buildAttractionItem(
-        attraction['name'] as String,
-        attraction['distance'] as String,
-        attraction['type'] as String,
-        attraction['icon'] as IconData,
-        isTablet,
-      )).toList(),
+      children: attractions
+          .map((attraction) => _buildAttractionItem(
+                attraction['name'] as String,
+                attraction['distance'] as String,
+                attraction['type'] as String,
+                attraction['icon'] as IconData,
+                isTablet,
+              ))
+          .toList(),
     );
   }
 
@@ -1834,7 +1942,6 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
             ),
           ),
           SizedBox(height: isTablet ? 20 : 16),
-          
           _buildPolicyItem(
             Icons.login,
             'Check-in',
@@ -1881,8 +1988,6 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
       ),
     );
   }
-
-
 
   Widget _buildAttractionsSection(bool isTablet) {
     final attractions = [
@@ -1944,20 +2049,22 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
             ),
           ),
           SizedBox(height: isTablet ? 20 : 16),
-          
-          ...attractions.map((attraction) => _buildAttractionItem(
-            attraction['name'] as String,
-            attraction['distance'] as String,
-            attraction['type'] as String,
-            attraction['icon'] as IconData,
-            isTablet,
-          )).toList(),
+          ...attractions
+              .map((attraction) => _buildAttractionItem(
+                    attraction['name'] as String,
+                    attraction['distance'] as String,
+                    attraction['type'] as String,
+                    attraction['icon'] as IconData,
+                    isTablet,
+                  ))
+              .toList(),
         ],
       ),
     );
   }
 
-  Widget _buildAttractionItem(String name, String distance, String type, IconData icon, bool isTablet) {
+  Widget _buildAttractionItem(
+      String name, String distance, String type, IconData icon, bool isTablet) {
     return Padding(
       padding: EdgeInsets.only(bottom: isTablet ? 16 : 12),
       child: Row(
@@ -2028,7 +2135,8 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
         'name': 'John Smith',
         'rating': 4.5,
         'date': '2 days ago',
-        'comment': 'Excellent hotel with great service. The staff was very friendly and helpful.',
+        'comment':
+            'Excellent hotel with great service. The staff was very friendly and helpful.',
         'country': 'United States',
       },
       {
@@ -2107,21 +2215,23 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
             ],
           ),
           SizedBox(height: isTablet ? 20 : 16),
-          
-          ...reviews.map((review) => _buildReviewItem(
-            review['name'] as String,
-            review['rating'] as double,
-            review['date'] as String,
-            review['comment'] as String,
-            review['country'] as String,
-            isTablet,
-          )).toList(),
+          ...reviews
+              .map((review) => _buildReviewItem(
+                    review['name'] as String,
+                    review['rating'] as double,
+                    review['date'] as String,
+                    review['comment'] as String,
+                    review['country'] as String,
+                    isTablet,
+                  ))
+              .toList(),
         ],
       ),
     );
   }
 
-  Widget _buildReviewItem(String name, double rating, String date, String comment, String country, bool isTablet) {
+  Widget _buildReviewItem(String name, double rating, String date,
+      String comment, String country, bool isTablet) {
     return Container(
       margin: EdgeInsets.only(bottom: isTablet ? 20 : 16),
       padding: EdgeInsets.all(isTablet ? 16 : 12),
@@ -2210,7 +2320,12 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
         'guests': '2 adults',
         'size': '25 m²',
         'bed': '1 double bed',
-        'amenities': ['Free Wi-Fi', 'Air conditioning', 'Private bathroom', 'TV'],
+        'amenities': [
+          'Free Wi-Fi',
+          'Air conditioning',
+          'Private bathroom',
+          'TV'
+        ],
       },
       {
         'name': 'Deluxe Suite',
@@ -2218,7 +2333,13 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
         'guests': '2 adults + 1 child',
         'size': '45 m²',
         'bed': '1 king bed + sofa bed',
-        'amenities': ['Free Wi-Fi', 'Air conditioning', 'Balcony', 'Mini bar', 'TV'],
+        'amenities': [
+          'Free Wi-Fi',
+          'Air conditioning',
+          'Balcony',
+          'Mini bar',
+          'TV'
+        ],
       },
       {
         'name': 'Family Room',
@@ -2226,7 +2347,13 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
         'guests': '4 adults',
         'size': '35 m²',
         'bed': '2 double beds',
-        'amenities': ['Free Wi-Fi', 'Air conditioning', 'Private bathroom', 'TV', 'Coffee maker'],
+        'amenities': [
+          'Free Wi-Fi',
+          'Air conditioning',
+          'Private bathroom',
+          'TV',
+          'Coffee maker'
+        ],
       },
     ];
 
@@ -2256,22 +2383,24 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
             ),
           ),
           SizedBox(height: isTablet ? 20 : 16),
-          
-          ...rooms.map((room) => _buildRoomItem(
-            room['name'] as String,
-            room['price'] as String,
-            room['guests'] as String,
-            room['size'] as String,
-            room['bed'] as String,
-            room['amenities'] as List<String>,
-            isTablet,
-          )).toList(),
+          ...rooms
+              .map((room) => _buildRoomItem(
+                    room['name'] as String,
+                    room['price'] as String,
+                    room['guests'] as String,
+                    room['size'] as String,
+                    room['bed'] as String,
+                    room['amenities'] as List<String>,
+                    isTablet,
+                  ))
+              .toList(),
         ],
       ),
     );
   }
 
-  Widget _buildRoomItem(String name, String price, String guests, String size, String bed, List<String> amenities, bool isTablet) {
+  Widget _buildRoomItem(String name, String price, String guests, String size,
+      String bed, List<String> amenities, bool isTablet) {
     return Container(
       margin: EdgeInsets.only(bottom: isTablet ? 20 : 16),
       decoration: BoxDecoration(
@@ -2326,7 +2455,7 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
                   ),
                 ),
               ),
-              
+
               // Room info
               Expanded(
                 child: Padding(
@@ -2347,7 +2476,7 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
                         ),
                       ),
                       SizedBox(height: isTablet ? 8 : 6),
-                      
+
                       // Room details
                       _buildRoomDetailRow(Icons.single_bed, bed, isTablet),
                       SizedBox(height: isTablet ? 4 : 3),
@@ -2358,7 +2487,7 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
               ),
             ],
           ),
-          
+
           // Amenities with icons
           Padding(
             padding: EdgeInsets.symmetric(horizontal: isTablet ? 16 : 12),
@@ -2370,8 +2499,10 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
                   spacing: isTablet ? 16 : 12,
                   runSpacing: isTablet ? 8 : 6,
                   children: [
-                    _buildAmenityIcon(Icons.ac_unit, 'Air conditioning', isTablet),
-                    _buildAmenityIcon(Icons.bathroom_outlined, 'Private bathroom', isTablet),
+                    _buildAmenityIcon(
+                        Icons.ac_unit, 'Air conditioning', isTablet),
+                    _buildAmenityIcon(
+                        Icons.bathroom_outlined, 'Private bathroom', isTablet),
                     _buildAmenityIcon(Icons.wifi, 'Internet', isTablet),
                     _buildAmenityIcon(Icons.check, 'Balcony', isTablet),
                     _buildAmenityIcon(Icons.tv, 'Flat-screen TV', isTablet),
@@ -2381,9 +2512,9 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
               ],
             ),
           ),
-          
+
           SizedBox(height: isTablet ? 16 : 12),
-          
+
           // Pricing section
           Container(
             decoration: BoxDecoration(
@@ -2402,7 +2533,9 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
                       children: [
                         Row(
                           children: [
-                            Icon(Icons.people_outline, size: isTablet ? 16 : 14, color: Colors.grey[600]),
+                            Icon(Icons.people_outline,
+                                size: isTablet ? 16 : 14,
+                                color: Colors.grey[600]),
                             SizedBox(width: 4),
                             Text(
                               'Price for 2 adults',
@@ -2414,18 +2547,31 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
                           ],
                         ),
                         SizedBox(height: isTablet ? 8 : 6),
-                        
+
                         // Policies
-                        _buildPolicyItem(Icons.check, 'Free cancellation', 'before 6:00 PM on 23 Aug 2025', Colors.green, isTablet),
-                        _buildPolicyItem(Icons.check, 'No prepayment needed', 'pay at the property', Colors.green, isTablet),
-                        _buildPolicyItem(Icons.credit_card_off, 'No credit card needed', '', Colors.green, isTablet),
-                        _buildPolicyItem(Icons.restaurant, 'Breakfast included', '', Colors.green, isTablet),
-                        
+                        _buildPolicyItem(
+                            Icons.check,
+                            'Free cancellation',
+                            'before 6:00 PM on 23 Aug 2025',
+                            Colors.green,
+                            isTablet),
+                        _buildPolicyItem(Icons.check, 'No prepayment needed',
+                            'pay at the property', Colors.green, isTablet),
+                        _buildPolicyItem(
+                            Icons.credit_card_off,
+                            'No credit card needed',
+                            '',
+                            Colors.green,
+                            isTablet),
+                        _buildPolicyItem(Icons.restaurant, 'Breakfast included',
+                            '', Colors.green, isTablet),
+
                         SizedBox(height: isTablet ? 12 : 8),
-                        
+
                         // Discount
                         Container(
-                          padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          padding:
+                              EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                           decoration: BoxDecoration(
                             color: Colors.orange,
                             borderRadius: BorderRadius.circular(4),
@@ -2433,7 +2579,8 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(Icons.local_offer, size: 12, color: Colors.white),
+                              Icon(Icons.local_offer,
+                                  size: 12, color: Colors.white),
                               SizedBox(width: 4),
                               Text(
                                 'Genius 14% discount',
@@ -2454,14 +2601,15 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
                             color: Colors.grey[600],
                           ),
                         ),
-                        
+
                         SizedBox(height: isTablet ? 12 : 8),
-                        
+
                         // Discount badges
                         Row(
                           children: [
                             Container(
-                              padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 8, vertical: 4),
                               decoration: BoxDecoration(
                                 color: Colors.green,
                                 borderRadius: BorderRadius.circular(4),
@@ -2477,7 +2625,8 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
                             ),
                             SizedBox(width: 8),
                             Container(
-                              padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 8, vertical: 4),
                               decoration: BoxDecoration(
                                 color: Colors.blue[700],
                                 borderRadius: BorderRadius.circular(4),
@@ -2493,9 +2642,9 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
                             ),
                           ],
                         ),
-                        
+
                         SizedBox(height: isTablet ? 16 : 12),
-                        
+
                         // Price
                         Text(
                           'Price for 1 night (23 Aug - 24 Aug)',
@@ -2526,7 +2675,8 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
                               ),
                             ),
                             SizedBox(width: 4),
-                            Icon(Icons.info_outline, size: 16, color: Colors.blue),
+                            Icon(Icons.info_outline,
+                                size: 16, color: Colors.blue),
                           ],
                         ),
                         Text(
@@ -2536,9 +2686,9 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
                             color: Colors.grey[600],
                           ),
                         ),
-                        
+
                         SizedBox(height: isTablet ? 16 : 12),
-                        
+
                         // Select button
                         SizedBox(
                           width: double.infinity,
@@ -2549,7 +2699,8 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(4),
                               ),
-                              padding: EdgeInsets.symmetric(vertical: isTablet ? 12 : 10),
+                              padding: EdgeInsets.symmetric(
+                                  vertical: isTablet ? 12 : 10),
                             ),
                             child: Text(
                               'Select',
@@ -2565,7 +2716,7 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
                     ),
                   ),
                 ),
-                
+
                 // Right pricing card (if multiple options)
                 if (false) // Set to true if you want to show multiple pricing options
                   Container(
@@ -2576,7 +2727,7 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
               ],
             ),
           ),
-          
+
           // Availability notice
           Container(
             width: double.infinity,
@@ -2643,7 +2794,8 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
     );
   }
 
-  Widget _buildPolicyItem(IconData icon, String title, String subtitle, Color color, bool isTablet) {
+  Widget _buildPolicyItem(IconData icon, String title, String subtitle,
+      Color color, bool isTablet) {
     return Padding(
       padding: EdgeInsets.only(bottom: isTablet ? 4 : 3),
       child: Row(
@@ -2683,8 +2835,6 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
     );
   }
 
-
-
   Widget _buildRoomDetail(IconData icon, String text, bool isTablet) {
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -2716,7 +2866,7 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
           totalQuestionCount = 8;
         });
       }
-      
+
       // TODO: Re-enable SharedPreferences once platform channel issue is fixed
       /*
       final prefs = await SharedPreferences.getInstance();
@@ -2753,12 +2903,14 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
     try {
       final prefs = await SharedPreferences.getInstance();
       final hotelKey = 'hotel_questions_${widget.hotel.id}';
-      final questionsJson = json.encode(userQuestions.map((q) => {
-        'question': q['question'],
-        'date': q['date'].toIso8601String(),
-        'answered': q['answered'],
-      }).toList());
-      
+      final questionsJson = json.encode(userQuestions
+          .map((q) => {
+                'question': q['question'],
+                'date': q['date'].toIso8601String(),
+                'answered': q['answered'],
+              })
+          .toList());
+
       await prefs.setString(hotelKey, questionsJson);
     } catch (e) {
       // Silently handle SharedPreferences errors - don't crash the app
@@ -2787,7 +2939,7 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
 
   void _showAskQuestionDialog(bool isTablet) {
     final TextEditingController questionController = TextEditingController();
-    
+
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -2819,7 +2971,8 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
                   maxLines: 2,
                   decoration: InputDecoration(
                     hintText: 'What would you like to know?',
-                    contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    contentPadding:
+                        EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(6),
                       borderSide: BorderSide(color: Colors.grey.shade300),
@@ -2927,7 +3080,8 @@ class _AllQuestionsPageState extends State<AllQuestionsPage> {
     },
     {
       'question': 'Do you have airport shuttle service?',
-      'answer': 'Yes, we provide complimentary airport shuttle service every hour.',
+      'answer':
+          'Yes, we provide complimentary airport shuttle service every hour.',
       'date': '5 Feb 2024',
       'isDefault': true,
     },
@@ -2939,13 +3093,15 @@ class _AllQuestionsPageState extends State<AllQuestionsPage> {
     },
     {
       'question': 'What time is checkout?',
-      'answer': 'Standard checkout time is 12:00 PM. Late checkout available upon request.',
+      'answer':
+          'Standard checkout time is 12:00 PM. Late checkout available upon request.',
       'date': '3 Feb 2024',
       'isDefault': true,
     },
     {
       'question': 'Do you allow pets?',
-      'answer': 'Unfortunately, pets are not allowed except for service animals.',
+      'answer':
+          'Unfortunately, pets are not allowed except for service animals.',
       'date': '2 Feb 2024',
       'isDefault': true,
     },
@@ -2966,7 +3122,7 @@ class _AllQuestionsPageState extends State<AllQuestionsPage> {
   void _showAskQuestionDialog() {
     final TextEditingController questionController = TextEditingController();
     final isTablet = MediaQuery.of(context).size.width >= 768;
-    
+
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -2998,7 +3154,8 @@ class _AllQuestionsPageState extends State<AllQuestionsPage> {
                   maxLines: 2,
                   decoration: InputDecoration(
                     hintText: 'What would you like to know?',
-                    contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    contentPadding:
+                        EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(6),
                       borderSide: BorderSide(color: Colors.grey.shade300),
@@ -3074,7 +3231,7 @@ class _AllQuestionsPageState extends State<AllQuestionsPage> {
   Widget build(BuildContext context) {
     final isTablet = MediaQuery.of(context).size.width >= 768;
     final allQuestions = [...defaultQuestions, ...widget.userQuestions];
-    
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -3121,7 +3278,7 @@ class _AllQuestionsPageState extends State<AllQuestionsPage> {
               ],
             ),
           ),
-          
+
           // Questions list
           Expanded(
             child: ListView.builder(
@@ -3130,7 +3287,7 @@ class _AllQuestionsPageState extends State<AllQuestionsPage> {
               itemBuilder: (context, index) {
                 final question = allQuestions[index];
                 final isDefault = question['isDefault'] == true;
-                
+
                 return Container(
                   margin: EdgeInsets.only(bottom: isTablet ? 20 : 16),
                   padding: EdgeInsets.all(isTablet ? 20 : 16),
@@ -3173,9 +3330,10 @@ class _AllQuestionsPageState extends State<AllQuestionsPage> {
                                 ),
                                 SizedBox(height: 4),
                                 Text(
-                                  isDefault 
-                                    ? question['date'] 
-                                    : DateFormat('d MMM yyyy').format(question['date']),
+                                  isDefault
+                                      ? question['date']
+                                      : DateFormat('d MMM yyyy')
+                                          .format(question['date']),
                                   style: TextStyle(
                                     fontSize: isTablet ? 14 : 12,
                                     color: Colors.grey[500],
@@ -3205,7 +3363,7 @@ class _AllQuestionsPageState extends State<AllQuestionsPage> {
                             ),
                         ],
                       ),
-                      
+
                       // Answer (only for default questions)
                       if (isDefault && question['answer'] != null) ...[
                         SizedBox(height: isTablet ? 16 : 12),
@@ -3213,7 +3371,8 @@ class _AllQuestionsPageState extends State<AllQuestionsPage> {
                           padding: EdgeInsets.all(isTablet ? 16 : 12),
                           decoration: BoxDecoration(
                             color: Colors.grey[100],
-                            borderRadius: BorderRadius.circular(isTablet ? 12 : 8),
+                            borderRadius:
+                                BorderRadius.circular(isTablet ? 12 : 8),
                           ),
                           child: Text(
                             question['answer'],
@@ -3224,7 +3383,7 @@ class _AllQuestionsPageState extends State<AllQuestionsPage> {
                           ),
                         ),
                       ],
-                      
+
                       // Pending status for user questions
                       if (!isDefault) ...[
                         SizedBox(height: isTablet ? 12 : 8),
@@ -3255,7 +3414,7 @@ class _AllQuestionsPageState extends State<AllQuestionsPage> {
           ),
         ],
       ),
-      
+
       // Floating action button to ask new question
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _showAskQuestionDialog,
@@ -3271,4 +3430,4 @@ class _AllQuestionsPageState extends State<AllQuestionsPage> {
       ),
     );
   }
-} 
+}

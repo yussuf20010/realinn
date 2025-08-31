@@ -5,14 +5,17 @@ import '../../../../controllers/location_controller.dart';
 import '../../../../models/hotel.dart';
 import '../../../../models/location.dart' as location_model;
 import '../../../../config/dynamic_config.dart';
-import '../../booking/booking_page.dart';
 import '../../../config/wp_config.dart';
 import '../../../core/utils/app_utils.dart';
-import '../components/hotels_list.dart';
+import '../../../models/booking.dart';
+import '../../../models/selected_room.dart';
+import '../../../providers/bookings_provider.dart';
+import '../../bookings/bookings_page.dart';
 
 class MonthlyBookingModal extends ConsumerStatefulWidget {
   @override
-  ConsumerState<MonthlyBookingModal> createState() => _MonthlyBookingModalState();
+  ConsumerState<MonthlyBookingModal> createState() =>
+      _MonthlyBookingModalState();
 }
 
 class _MonthlyBookingModalState extends ConsumerState<MonthlyBookingModal> {
@@ -51,7 +54,7 @@ class _MonthlyBookingModalState extends ConsumerState<MonthlyBookingModal> {
   @override
   Widget build(BuildContext context) {
     final primaryColor = ref.watch(dynamicConfigProvider).primaryColor;
-    
+
     return Container(
       height: MediaQuery.of(context).size.height * 0.8,
       decoration: BoxDecoration(
@@ -85,24 +88,28 @@ class _MonthlyBookingModalState extends ConsumerState<MonthlyBookingModal> {
               ],
             ),
           ),
-          
+
           // Progress indicator
           Container(
             padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Row(
-              children: List.generate(5, (index) => Expanded(
-                child: Container(
-                  height: 4,
-                  margin: EdgeInsets.symmetric(horizontal: 4),
-                  decoration: BoxDecoration(
-                    color: index <= currentStep ? primaryColor : Colors.grey[300],
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-              )),
+              children: List.generate(
+                  5,
+                  (index) => Expanded(
+                        child: Container(
+                          height: 4,
+                          margin: EdgeInsets.symmetric(horizontal: 4),
+                          decoration: BoxDecoration(
+                            color: index <= currentStep
+                                ? primaryColor
+                                : Colors.grey[300],
+                            borderRadius: BorderRadius.circular(2),
+                          ),
+                        ),
+                      )),
             ),
           ),
-          
+
           // Content
           Flexible(
             child: Padding(
@@ -110,7 +117,7 @@ class _MonthlyBookingModalState extends ConsumerState<MonthlyBookingModal> {
               child: _buildStepContent(),
             ),
           ),
-          
+
           // Navigation buttons
           Container(
             padding: EdgeInsets.all(12),
@@ -169,13 +176,16 @@ class _MonthlyBookingModalState extends ConsumerState<MonthlyBookingModal> {
       children: [
         Text(
           'Select Dates',
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black),
+          style: TextStyle(
+              fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black),
         ),
         SizedBox(height: 12),
         ListTile(
           leading: Icon(Icons.calendar_today, color: Colors.black),
           title: Text('Start Date', style: TextStyle(color: Colors.black)),
-          subtitle: Text(startDate?.toString().split(' ')[0] ?? 'Select start date', style: TextStyle(color: Colors.black)),
+          subtitle: Text(
+              startDate?.toString().split(' ')[0] ?? 'Select start date',
+              style: TextStyle(color: Colors.black)),
           onTap: () async {
             final date = await showDatePicker(
               context: context,
@@ -191,7 +201,8 @@ class _MonthlyBookingModalState extends ConsumerState<MonthlyBookingModal> {
         ListTile(
           leading: Icon(Icons.calendar_today, color: Colors.black),
           title: Text('End Date', style: TextStyle(color: Colors.black)),
-          subtitle: Text(endDate?.toString().split(' ')[0] ?? 'Select end date', style: TextStyle(color: Colors.black)),
+          subtitle: Text(endDate?.toString().split(' ')[0] ?? 'Select end date',
+              style: TextStyle(color: Colors.black)),
           onTap: () async {
             final date = await showDatePicker(
               context: context,
@@ -214,7 +225,8 @@ class _MonthlyBookingModalState extends ConsumerState<MonthlyBookingModal> {
       children: [
         Text(
           'Select Country',
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black),
+          style: TextStyle(
+              fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black),
         ),
         SizedBox(height: 12),
         // Search field
@@ -227,7 +239,8 @@ class _MonthlyBookingModalState extends ConsumerState<MonthlyBookingModal> {
             ),
             contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           ),
-          onChanged: (value) => setState(() => locationSearchQuery = value.toLowerCase()),
+          onChanged: (value) =>
+              setState(() => locationSearchQuery = value.toLowerCase()),
         ),
         SizedBox(height: 12),
         Flexible(
@@ -241,10 +254,13 @@ class _MonthlyBookingModalState extends ConsumerState<MonthlyBookingModal> {
                     // Show All Hotels option
                     ListTile(
                       leading: Icon(Icons.hotel, color: Colors.black),
-                      title: Text('Show All Hotels', style: TextStyle(color: Colors.black)),
+                      title: Text('Show All Hotels',
+                          style: TextStyle(color: Colors.black)),
                       subtitle: Text('Skip location filtering'),
                       selected: selectedCountry == null,
-                      selectedTileColor: selectedCountry == null ? Colors.blue.withOpacity(0.15) : Colors.grey[100],
+                      selectedTileColor: selectedCountry == null
+                          ? Colors.blue.withOpacity(0.15)
+                          : Colors.grey[100],
                       onTap: () => setState(() => selectedCountry = null),
                     ),
                     Divider(),
@@ -252,7 +268,10 @@ class _MonthlyBookingModalState extends ConsumerState<MonthlyBookingModal> {
                     if (locationResponse.countries?.isNotEmpty == true) ...[
                       Text(
                         'Countries',
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black),
+                        style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black),
                       ),
                       SizedBox(height: 8),
                       Flexible(
@@ -262,22 +281,29 @@ class _MonthlyBookingModalState extends ConsumerState<MonthlyBookingModal> {
                           itemBuilder: (context, index) {
                             final country = locationResponse.countries![index];
                             final countryName = country.name ?? '';
-                            if (locationSearchQuery.isNotEmpty && 
-                                !countryName.toLowerCase().contains(locationSearchQuery)) {
+                            if (locationSearchQuery.isNotEmpty &&
+                                !countryName
+                                    .toLowerCase()
+                                    .contains(locationSearchQuery)) {
                               return SizedBox.shrink();
                             }
-                            
+
                             // Count hotels in this country
-                            final hotelCount = locationResponse.hotels?.where((hotel) => 
-                              hotel.countryId == country.id
-                            ).length ?? 0;
-                            
+                            final hotelCount = locationResponse.hotels
+                                    ?.where((hotel) =>
+                                        hotel.countryId == country.id)
+                                    .length ??
+                                0;
+
                             return ListTile(
-                              leading: Icon(Icons.location_on, color: Colors.black),
-                              title: Text(countryName, style: TextStyle(color: Colors.black)),
+                              leading:
+                                  Icon(Icons.location_on, color: Colors.black),
+                              title: Text(countryName,
+                                  style: TextStyle(color: Colors.black)),
                               subtitle: Text('Country'),
                               trailing: Container(
-                                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: 8, vertical: 4),
                                 decoration: BoxDecoration(
                                   color: Colors.blue.withOpacity(0.1),
                                   borderRadius: BorderRadius.circular(12),
@@ -285,7 +311,8 @@ class _MonthlyBookingModalState extends ConsumerState<MonthlyBookingModal> {
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    Icon(Icons.hotel, size: 14, color: Colors.blue),
+                                    Icon(Icons.hotel,
+                                        size: 14, color: Colors.blue),
                                     SizedBox(width: 4),
                                     Text(
                                       '$hotelCount',
@@ -299,8 +326,11 @@ class _MonthlyBookingModalState extends ConsumerState<MonthlyBookingModal> {
                                 ),
                               ),
                               selected: selectedCountry == countryName,
-                              selectedTileColor: selectedCountry == countryName ? Colors.blue.withOpacity(0.15) : Colors.grey[100],
-                              onTap: () => setState(() => selectedCountry = countryName),
+                              selectedTileColor: selectedCountry == countryName
+                                  ? Colors.blue.withOpacity(0.15)
+                                  : Colors.grey[100],
+                              onTap: () =>
+                                  setState(() => selectedCountry = countryName),
                             );
                           },
                         ),
@@ -309,7 +339,8 @@ class _MonthlyBookingModalState extends ConsumerState<MonthlyBookingModal> {
                   ],
                 ),
                 loading: () => Center(child: CircularProgressIndicator()),
-                error: (e, _) => Text('Error loading countries', style: TextStyle(color: Colors.black)),
+                error: (e, _) => Text('Error loading countries',
+                    style: TextStyle(color: Colors.black)),
               );
             },
           ),
@@ -324,7 +355,8 @@ class _MonthlyBookingModalState extends ConsumerState<MonthlyBookingModal> {
       children: [
         Text(
           'Select City',
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black),
+          style: TextStyle(
+              fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black),
         ),
         if (selectedCountry != null)
           Padding(
@@ -337,7 +369,7 @@ class _MonthlyBookingModalState extends ConsumerState<MonthlyBookingModal> {
         SizedBox(height: 12),
         // Search field
         TextField(
-          decoration: InputDecoration( 
+          decoration: InputDecoration(
             hintText: 'Search for cities...',
             prefixIcon: Icon(Icons.search, color: Colors.black),
             border: OutlineInputBorder(
@@ -345,7 +377,8 @@ class _MonthlyBookingModalState extends ConsumerState<MonthlyBookingModal> {
             ),
             contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           ),
-          onChanged: (value) => setState(() => locationSearchQuery = value.toLowerCase()),
+          onChanged: (value) =>
+              setState(() => locationSearchQuery = value.toLowerCase()),
         ),
         SizedBox(height: 12),
         Expanded(
@@ -356,24 +389,29 @@ class _MonthlyBookingModalState extends ConsumerState<MonthlyBookingModal> {
                 data: (locationResponse) {
                   // Find the selected country ID
                   final selectedCountryId = locationResponse.countries
-                      ?.firstWhere((c) => c.name == selectedCountry, orElse: () => location_model.Country())
+                      ?.firstWhere((c) => c.name == selectedCountry,
+                          orElse: () => location_model.Country())
                       .id;
-                  
+
                   // Filter cities by selected country
                   final citiesInCountry = locationResponse.cities
-                      ?.where((city) => city.countryId == selectedCountryId)
-                      .toList() ?? [];
-                  
+                          ?.where((city) => city.countryId == selectedCountryId)
+                          .toList() ??
+                      [];
+
                   return Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       // Show All Hotels option
                       ListTile(
                         leading: Icon(Icons.hotel, color: Colors.black),
-                        title: Text('Show All Hotels', style: TextStyle(color: Colors.black)),
+                        title: Text('Show All Hotels',
+                            style: TextStyle(color: Colors.black)),
                         subtitle: Text('Skip location filtering'),
                         selected: selectedCity == null,
-                        selectedTileColor: selectedCity == null ? Colors.blue.withOpacity(0.15) : Colors.grey[100],
+                        selectedTileColor: selectedCity == null
+                            ? Colors.blue.withOpacity(0.15)
+                            : Colors.grey[100],
                         onTap: () => setState(() => selectedCity = null),
                       ),
                       Divider(),
@@ -381,7 +419,10 @@ class _MonthlyBookingModalState extends ConsumerState<MonthlyBookingModal> {
                       if (citiesInCountry.isNotEmpty) ...[
                         Text(
                           'Cities in $selectedCountry',
-                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black),
+                          style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black),
                         ),
                         SizedBox(height: 8),
                         Flexible(
@@ -391,22 +432,29 @@ class _MonthlyBookingModalState extends ConsumerState<MonthlyBookingModal> {
                             itemBuilder: (context, index) {
                               final city = citiesInCountry[index];
                               final cityName = city.name ?? '';
-                              if (locationSearchQuery.isNotEmpty && 
-                                  !cityName.toLowerCase().contains(locationSearchQuery)) {
+                              if (locationSearchQuery.isNotEmpty &&
+                                  !cityName
+                                      .toLowerCase()
+                                      .contains(locationSearchQuery)) {
                                 return SizedBox.shrink();
                               }
-                              
+
                               // Count hotels in this city
-                              final hotelCount = locationResponse.hotels?.where((hotel) => 
-                                hotel.cityId == city.id
-                              ).length ?? 0;
-                              
+                              final hotelCount = locationResponse.hotels
+                                      ?.where(
+                                          (hotel) => hotel.cityId == city.id)
+                                      .length ??
+                                  0;
+
                               return ListTile(
-                                leading: Icon(Icons.location_city, color: Colors.black),
-                                title: Text(cityName, style: TextStyle(color: Colors.black)),
+                                leading: Icon(Icons.location_city,
+                                    color: Colors.black),
+                                title: Text(cityName,
+                                    style: TextStyle(color: Colors.black)),
                                 subtitle: Text('City'),
                                 trailing: Container(
-                                  padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                  padding: EdgeInsets.symmetric(
+                                      horizontal: 8, vertical: 4),
                                   decoration: BoxDecoration(
                                     color: Colors.blue.withOpacity(0.1),
                                     borderRadius: BorderRadius.circular(12),
@@ -414,7 +462,8 @@ class _MonthlyBookingModalState extends ConsumerState<MonthlyBookingModal> {
                                   child: Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      Icon(Icons.hotel, size: 14, color: Colors.blue),
+                                      Icon(Icons.hotel,
+                                          size: 14, color: Colors.blue),
                                       SizedBox(width: 4),
                                       Text(
                                         '$hotelCount',
@@ -428,8 +477,11 @@ class _MonthlyBookingModalState extends ConsumerState<MonthlyBookingModal> {
                                   ),
                                 ),
                                 selected: selectedCity == cityName,
-                                selectedTileColor: selectedCity == cityName ? Colors.blue.withOpacity(0.15) : Colors.grey[100],
-                                onTap: () => setState(() => selectedCity = cityName),
+                                selectedTileColor: selectedCity == cityName
+                                    ? Colors.blue.withOpacity(0.15)
+                                    : Colors.grey[100],
+                                onTap: () =>
+                                    setState(() => selectedCity = cityName),
                               );
                             },
                           ),
@@ -440,16 +492,19 @@ class _MonthlyBookingModalState extends ConsumerState<MonthlyBookingModal> {
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Icon(Icons.location_city_outlined, size: 64, color: Colors.grey[400]),
+                                Icon(Icons.location_city_outlined,
+                                    size: 64, color: Colors.grey[400]),
                                 SizedBox(height: 12),
                                 Text(
                                   'No cities found in $selectedCountry',
-                                  style: TextStyle(fontSize: 16, color: Colors.black),
+                                  style: TextStyle(
+                                      fontSize: 16, color: Colors.black),
                                 ),
                                 SizedBox(height: 8),
                                 Text(
                                   'Try selecting a different country',
-                                  style: TextStyle(fontSize: 14, color: Colors.grey[500]),
+                                  style: TextStyle(
+                                      fontSize: 14, color: Colors.grey[500]),
                                 ),
                               ],
                             ),
@@ -460,7 +515,8 @@ class _MonthlyBookingModalState extends ConsumerState<MonthlyBookingModal> {
                   );
                 },
                 loading: () => Center(child: CircularProgressIndicator()),
-                error: (e, _) => Text('Error loading cities', style: TextStyle(color: Colors.black)),
+                error: (e, _) => Text('Error loading cities',
+                    style: TextStyle(color: Colors.black)),
               );
             },
           ),
@@ -475,7 +531,8 @@ class _MonthlyBookingModalState extends ConsumerState<MonthlyBookingModal> {
       children: [
         Text(
           'Select Hotel',
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black),
+          style: TextStyle(
+              fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black),
         ),
         if (selectedCity != null)
           Padding(
@@ -493,17 +550,19 @@ class _MonthlyBookingModalState extends ConsumerState<MonthlyBookingModal> {
               return hotelsAsync.when(
                 data: (hotels) {
                   // Filter hotels based on selected location using helper function
-                  final filteredHotels = _filterHotelsForMonthlyBooking(hotels, selectedCity, ref);
-                  
+                  final filteredHotels =
+                      _filterHotelsForMonthlyBooking(hotels, selectedCity, ref);
+
                   if (filteredHotels.isEmpty) {
                     return Center(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.hotel_outlined, size: 64, color: Colors.grey[400]),
+                          Icon(Icons.hotel_outlined,
+                              size: 64, color: Colors.grey[400]),
                           SizedBox(height: 12),
                           Text(
-                            selectedCity != null 
+                            selectedCity != null
                                 ? 'No hotels found in $selectedCity'
                                 : 'No hotels available',
                             style: TextStyle(fontSize: 16, color: Colors.black),
@@ -511,17 +570,20 @@ class _MonthlyBookingModalState extends ConsumerState<MonthlyBookingModal> {
                           SizedBox(height: 8),
                           Text(
                             'Total hotels loaded: ${hotels.length}',
-                            style: TextStyle(fontSize: 14, color: Colors.grey[500]),
+                            style: TextStyle(
+                                fontSize: 14, color: Colors.grey[500]),
                           ),
                           if (selectedCity != null) ...[
                             SizedBox(height: 8),
                             Text(
                               'Try selecting a different city or check if hotels have location data',
-                              style: TextStyle(fontSize: 14, color: Colors.grey[500]),
+                              style: TextStyle(
+                                  fontSize: 14, color: Colors.grey[500]),
                             ),
                             SizedBox(height: 12),
                             ElevatedButton(
-                              onPressed: () => setState(() => selectedCity = null),
+                              onPressed: () =>
+                                  setState(() => selectedCity = null),
                               child: Text('Show All Hotels'),
                             ),
                           ],
@@ -529,7 +591,7 @@ class _MonthlyBookingModalState extends ConsumerState<MonthlyBookingModal> {
                       ),
                     );
                   }
-                  
+
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -543,11 +605,12 @@ class _MonthlyBookingModalState extends ConsumerState<MonthlyBookingModal> {
                         ),
                         child: Row(
                           children: [
-                            Icon(Icons.info_outline, color: Colors.blue, size: 20),
+                            Icon(Icons.info_outline,
+                                color: Colors.blue, size: 20),
                             SizedBox(width: 8),
                             Expanded(
                               child: Text(
-                                selectedCity != null 
+                                selectedCity != null
                                     ? 'Found ${filteredHotels.length} hotels in "$selectedCity"'
                                     : 'Showing all ${filteredHotels.length} hotels',
                                 style: TextStyle(
@@ -569,14 +632,17 @@ class _MonthlyBookingModalState extends ConsumerState<MonthlyBookingModal> {
                             return ListTile(
                               leading: CircleAvatar(
                                 backgroundColor: Colors.grey[200],
-                                child: hotel.imageUrl != null && hotel.imageUrl!.isNotEmpty
+                                child: hotel.imageUrl != null &&
+                                        hotel.imageUrl!.isNotEmpty
                                     ? ClipOval(
                                         child: Image.network(
                                           hotel.imageUrl!,
                                           width: 40,
                                           height: 40,
                                           fit: BoxFit.cover,
-                                          errorBuilder: (context, error, stackTrace) => Icon(
+                                          errorBuilder:
+                                              (context, error, stackTrace) =>
+                                                  Icon(
                                             Icons.hotel,
                                             color: Colors.black,
                                             size: 20,
@@ -589,11 +655,19 @@ class _MonthlyBookingModalState extends ConsumerState<MonthlyBookingModal> {
                                         size: 20,
                                       ),
                               ),
-                              title: Text(hotel.name ?? '', style: TextStyle(color: Colors.white)),
-                              subtitle: Text(hotel.city ?? hotel.country ?? hotel.category ?? hotel.location ?? '', style: TextStyle(color: Colors.black)),
+                              title: Text(hotel.name ?? '',
+                                  style: TextStyle(color: Colors.white)),
+                              subtitle: Text(
+                                  hotel.city ??
+                                      hotel.country ??
+                                      hotel.category ??
+                                      hotel.location ??
+                                      '',
+                                  style: TextStyle(color: Colors.black)),
                               selected: selectedHotel == hotel.name,
                               selectedTileColor: Colors.grey[100],
-                              onTap: () => setState(() => selectedHotel = hotel.name),
+                              onTap: () =>
+                                  setState(() => selectedHotel = hotel.name),
                             );
                           },
                         ),
@@ -602,7 +676,8 @@ class _MonthlyBookingModalState extends ConsumerState<MonthlyBookingModal> {
                   );
                 },
                 loading: () => Center(child: CircularProgressIndicator()),
-                error: (e, _) => Text('Error loading hotels', style: TextStyle(color: Colors.black)),
+                error: (e, _) => Text('Error loading hotels',
+                    style: TextStyle(color: Colors.black)),
               );
             },
           ),
@@ -647,24 +722,26 @@ class _MonthlyBookingModalState extends ConsumerState<MonthlyBookingModal> {
       );
 
       // Prepare selected room from options
-      final int seed = (selectedHotelData.id?.hashCode ?? selectedHotelData.name?.hashCode ?? 0).abs();
+      final int seed = (selectedHotelData.id?.hashCode ??
+              selectedHotelData.name?.hashCode ??
+              0)
+          .abs();
       final selectedRoom = roomOptions[selectedRoomIndex];
-      final booking = Booking(
+      final booking = Booking.create(
         hotel: selectedHotelData,
         selectedRoom: SelectedRoom(
           name: selectedRoom['name'] as String,
           pricePerNight: selectedRoom['price'] as double,
           maxAdults: selectedRoom['maxAdults'] as int,
           maxChildren: selectedRoom['maxChildren'] as int,
-          imageUrl: 'https://source.unsplash.com/featured/?hotel,monthly&sig=${seed + 21 + selectedRoomIndex}',
+          imageUrl:
+              'https://source.unsplash.com/featured/?hotel,monthly&sig=${seed + 21 + selectedRoomIndex}',
           amenities: List<String>.from(selectedRoom['amenities'] as List),
         ),
-        checkIn: startDate!,
-        checkOut: endDate!,
+        checkInDate: startDate!,
+        checkOutDate: endDate!,
         adults: 1,
         children: 0,
-        rooms: 1,
-        status: 'upcoming',
       );
 
       // Add booking to provider
@@ -680,7 +757,7 @@ class _MonthlyBookingModalState extends ConsumerState<MonthlyBookingModal> {
         onActionPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (_) => BookingPage()),
+            MaterialPageRoute(builder: (_) => BookingsPage()),
           );
         },
       );
@@ -688,27 +765,30 @@ class _MonthlyBookingModalState extends ConsumerState<MonthlyBookingModal> {
   }
 
   // Helper function for Monthly booking modal
-  List<Hotel> _filterHotelsForMonthlyBooking(List<Hotel> hotels, String? selectedCity, WidgetRef ref) {
+  List<Hotel> _filterHotelsForMonthlyBooking(
+      List<Hotel> hotels, String? selectedCity, WidgetRef ref) {
     if (selectedCity == null) return hotels;
-    
+
     print('Monthly Booking - Total hotels before filtering: ${hotels.length}');
     print('Monthly Booking - Selected city: $selectedCity');
-    
+
     return hotels.where((hotel) {
       // Get city ID from location data
       final locationResponse = ref.read(locationProvider).value;
-      final selectedCityData = locationResponse?.cities
-          ?.firstWhere((c) => c.name == selectedCity, orElse: () => location_model.City());
+      final selectedCityData = locationResponse?.cities?.firstWhere(
+          (c) => c.name == selectedCity,
+          orElse: () => location_model.City());
       final selectedCityId = selectedCityData?.id;
-      
+
       print('Monthly Booking - Filtering hotel: ${hotel.name}');
-      print('Monthly Booking - Hotel city_id: ${hotel.cityId}'); 
+      print('Monthly Booking - Hotel city_id: ${hotel.cityId}');
       print('Monthly Booking - Selected city_id: $selectedCityId');
-      
+
       // Match by city_id first, then fallback to name matching
       final matches = (hotel.cityId == selectedCityId) ||
-                     (hotel.city?.toLowerCase().trim() == selectedCity.toLowerCase().trim());
-      
+          (hotel.city?.toLowerCase().trim() ==
+              selectedCity.toLowerCase().trim());
+
       print('Monthly Booking - Hotel ${hotel.name} matches: $matches');
       return matches;
     }).toList();
@@ -721,7 +801,8 @@ class _MonthlyBookingModalState extends ConsumerState<MonthlyBookingModal> {
       children: [
         Text(
           'Select Room',
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black),
+          style: TextStyle(
+              fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black),
         ),
         SizedBox(height: 12),
         ...List.generate(roomOptions.length, (index) {
@@ -730,16 +811,20 @@ class _MonthlyBookingModalState extends ConsumerState<MonthlyBookingModal> {
           return Container(
             margin: EdgeInsets.only(bottom: 8),
             decoration: BoxDecoration(
-              color: isSelected ? primaryColor.withOpacity(0.06) : Colors.grey[50],
+              color:
+                  isSelected ? primaryColor.withOpacity(0.06) : Colors.grey[50],
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: isSelected ? primaryColor : Colors.grey[300]!),
+              border: Border.all(
+                  color: isSelected ? primaryColor : Colors.grey[300]!),
             ),
             child: RadioListTile<int>(
               value: index,
               groupValue: selectedRoomIndex,
               onChanged: (v) => setState(() => selectedRoomIndex = v ?? 0),
               activeColor: primaryColor,
-              title: Text(option['name'] as String, style: TextStyle(fontWeight: FontWeight.w600, color: Colors.black)),
+              title: Text(option['name'] as String,
+                  style: TextStyle(
+                      fontWeight: FontWeight.w600, color: Colors.black)),
               subtitle: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -754,10 +839,11 @@ class _MonthlyBookingModalState extends ConsumerState<MonthlyBookingModal> {
                     runSpacing: -6,
                     children: List<Widget>.from(
                       (option['amenities'] as List).map((a) => Chip(
-                        label: Text(a, style: TextStyle(fontSize: 10)),
-                        visualDensity: VisualDensity.compact,
-                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      )),
+                            label: Text(a, style: TextStyle(fontSize: 10)),
+                            visualDensity: VisualDensity.compact,
+                            materialTapTargetSize:
+                                MaterialTapTargetSize.shrinkWrap,
+                          )),
                     ),
                   ),
                 ],
@@ -769,4 +855,3 @@ class _MonthlyBookingModalState extends ConsumerState<MonthlyBookingModal> {
     );
   }
 }
-

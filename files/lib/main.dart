@@ -6,7 +6,6 @@ import 'package:loader_overlay/loader_overlay.dart';
 import 'config/wp_config.dart';
 import 'config/dynamic_config.dart';
 import 'core/localization/app_locales.dart';
-import 'core/routes/app_routes.dart';
 import 'core/routes/on_generate_route.dart';
 import 'core/themes/theme_constants.dart';
 import 'core/utils/app_utils.dart';
@@ -36,8 +35,6 @@ class NewsProApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final dynamicConfig = ProviderScope.containerOf(context, listen: true).read(dynamicConfigProvider);
-    // final isDarkMode = AdaptiveTheme.of(context).mode == AdaptiveThemeMode.dark;
-
     return AdaptiveTheme(
       light: AppTheme.lightTheme,
       dark: AppTheme.darkTheme,
@@ -56,7 +53,7 @@ class NewsProApp extends StatelessWidget {
             final isTablet = width >= 768;
             final textScale = isTablet ? 1.15 : 1.0;
             return MediaQuery(
-              data: mediaQuery.copyWith(textScaleFactor: textScale),
+              data: mediaQuery.copyWith(textScaler: TextScaler.linear(textScale)),
               child: child ?? const SizedBox.shrink(),
             );
           },

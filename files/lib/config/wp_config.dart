@@ -5,23 +5,22 @@ import 'dynamic_config.dart';
 class WPConfig {
   static const String appName = 'RealInn';
   static const String url = 'https://realinn.b-circles.co';
-  static const String siteStorageUrl = 'https://realinn.b-circles.co/storage/' ;
+  static const String siteStorageUrl = 'https://realinn.b-circles.co/storage/';
   static const String siteSettingsApiUrl = '$url/api/site-settings';
   static const String hotelsApiUrl = '$url/api/hotels';
-  static const String siteApiKey = 'your_secret_api_key';
+  static const String siteApiKey = 'your_secret_api_key'; // Updated API key
   static Color get primaryColor {
     return navbarColor; // Use constant color as primary color for whole app
   }
+
   static const Color navbarColor = Color(0xFFa93ae2);
-  static const String apikey = '1234';
+  static const String apikey = 'your_secret_api_key';
   static const int orderState = 3;
   static const bool forceUserToLoginEverytime = false;
   static const int configID = 676;
   static const bool usingPlainFormatLink = true;
   static bool showPostDialogOnNotificaiton = false;
   static bool isPopularPostPluginEnabled = true;
-  static bool showLogoInHomePage = true;
-  static bool enableHomeTabCache = true;
 
   /// Blocked Categories ID's which will not appear in UI
   ///
@@ -31,7 +30,7 @@ class WPConfig {
 
   static String enArticleCategoryFilterNumber = '0';
   static String arArticleCategoryFilterNumber = '1';
-  static String videosCategoryFilterNumber  = '2';
+  static String videosCategoryFilterNumber = '2';
 
   static String get imageBaseUrl => siteStorageUrl;
 }

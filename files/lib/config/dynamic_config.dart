@@ -28,7 +28,6 @@ class DynamicConfig {
     return DynamicConfig(
       appName: siteSettings.websiteTitle,
       primaryColor: WPConfig.navbarColor, // Use constant color
-      logoUrl: siteSettings.logo,
     );
   }
 

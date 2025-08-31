@@ -8,18 +8,18 @@ import '../../models/hotel.dart';
 import '../../models/location.dart';
 import '../../widgets/custom_app_bar.dart';
 import '../home/components/hotel_card.dart';
-import '../home/home_page.dart'; // Import to use _HotelCardModern
 import 'package:easy_localization/easy_localization.dart';
 
 class LocationHotelsPage extends ConsumerWidget {
   final LocationModel location;
 
-  const LocationHotelsPage({Key? key, required this.location}) : super(key: key);
+  const LocationHotelsPage({Key? key, required this.location})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final hotelsAsync = ref.watch(hotelProvider);
-    
+
     return Scaffold(
       appBar: CustomAppBar(
         title: location.country ?? 'location_hotels'.tr(),
@@ -28,14 +28,30 @@ class LocationHotelsPage extends ConsumerWidget {
       body: hotelsAsync.when(
         data: (hotels) {
           // Filter hotels based on the selected location
-          final filteredHotels = hotels.where((hotel) => 
-            hotel.country?.toLowerCase().contains((location.country ?? '').toLowerCase()) == true ||
-            hotel.city?.toLowerCase().contains((location.country ?? '').toLowerCase()) == true ||
-            hotel.state?.toLowerCase().contains((location.country ?? '').toLowerCase()) == true ||
-            hotel.location?.toLowerCase().contains((location.country ?? '').toLowerCase()) == true ||
-            hotel.category?.toLowerCase().contains((location.country ?? '').toLowerCase()) == true
-          ).toList();
-          
+          final filteredHotels = hotels
+              .where((hotel) =>
+                  hotel.country
+                          ?.toLowerCase()
+                          .contains((location.country ?? '').toLowerCase()) ==
+                      true ||
+                  hotel.city
+                          ?.toLowerCase()
+                          .contains((location.country ?? '').toLowerCase()) ==
+                      true ||
+                  hotel.state
+                          ?.toLowerCase()
+                          .contains((location.country ?? '').toLowerCase()) ==
+                      true ||
+                  hotel.location
+                          ?.toLowerCase()
+                          .contains((location.country ?? '').toLowerCase()) ==
+                      true ||
+                  hotel.category
+                          ?.toLowerCase()
+                          .contains((location.country ?? '').toLowerCase()) ==
+                      true)
+              .toList();
+
           if (filteredHotels.isEmpty) {
             return Center(
               child: Column(
@@ -44,7 +60,8 @@ class LocationHotelsPage extends ConsumerWidget {
                   Icon(Icons.hotel_outlined, size: 64, color: Colors.grey[400]),
                   SizedBox(height: 12),
                   Text(
-                    'no_hotels_found_in'.tr(namedArgs: {'country': location.country ?? ''}),
+                    'no_hotels_found_in'
+                        .tr(namedArgs: {'country': location.country ?? ''}),
                     style: TextStyle(fontSize: 16, color: Colors.black),
                   ),
                   SizedBox(height: 8),
@@ -72,5 +89,3 @@ class LocationHotelsPage extends ConsumerWidget {
     );
   }
 }
-
- 

@@ -2,44 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../config/wp_config.dart';
 import '../../models/hotel.dart';
-import '../../controllers/hotel_controller.dart';
 
-class AllHotelsPage extends ConsumerStatefulWidget {
-  const AllHotelsPage({Key? key}) : super(key: key);
+class SearchResultsPage extends ConsumerStatefulWidget {
+  final List<Hotel> hotels;
+  final String searchQuery;
+
+  const SearchResultsPage({
+    Key? key,
+    required this.hotels,
+    required this.searchQuery,
+  }) : super(key: key);
 
   @override
-  ConsumerState<AllHotelsPage> createState() => _AllHotelsPageState();
+  ConsumerState<SearchResultsPage> createState() => _SearchResultsPageState();
 }
 
-class _AllHotelsPageState extends ConsumerState<AllHotelsPage> {
-  List<Hotel> _hotels = [];
-  bool _isLoading = true;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadHotels();
-  }
-
-  Future<void> _loadHotels() async {
-    try {
-      final hotels = await ref.read(hotelProvider.future);
-      setState(() {
-        _hotels = hotels;
-        _isLoading = false;
-      });
-    } catch (e) {
-      setState(() {
-        _isLoading = false;
-      });
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to load hotels: $e')),
-        );
-      }
-    }
-  }
-
+class _SearchResultsPageState extends ConsumerState<SearchResultsPage> {
   @override
   Widget build(BuildContext context) {
     final primaryColor = WPConfig.navbarColor;
@@ -73,7 +51,7 @@ class _AllHotelsPageState extends ConsumerState<AllHotelsPage> {
               Expanded(
                 child: Center(
                   child: Text(
-                    'All Hotels',
+                    'Search Results',
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: isTablet ? 28 : 24,
@@ -92,16 +70,6 @@ class _AllHotelsPageState extends ConsumerState<AllHotelsPage> {
   }
 
   Widget _buildMainContent(bool isTablet, Color primaryColor) {
-    if (_isLoading) {
-      return Center(
-        child: CircularProgressIndicator(color: primaryColor),
-      );
-    }
-
-    if (_hotels.isEmpty) {
-      return _buildNoHotels(isTablet, primaryColor);
-    }
-
     return Column(
       children: [
         // Header
@@ -112,16 +80,23 @@ class _AllHotelsPageState extends ConsumerState<AllHotelsPage> {
             color: Colors.grey[50],
             border: Border(bottom: BorderSide(color: Colors.grey[300]!)),
           ),
-          child: Row(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Icon(Icons.hotel, color: primaryColor, size: isTablet ? 24 : 20),
-              SizedBox(width: 12),
               Text(
-                '${_hotels.length} Hotels Available',
+                'Search Results for "${widget.searchQuery}"',
                 style: TextStyle(
-                  fontSize: isTablet ? 18 : 16,
+                  fontSize: isTablet ? 20 : 18,
                   fontWeight: FontWeight.bold,
                   color: Colors.black,
+                ),
+              ),
+              SizedBox(height: 8),
+              Text(
+                '${widget.hotels.length} hotels found',
+                style: TextStyle(
+                  fontSize: isTablet ? 16 : 14,
+                  color: Colors.grey[600],
                 ),
               ),
             ],
@@ -130,33 +105,35 @@ class _AllHotelsPageState extends ConsumerState<AllHotelsPage> {
 
         // Hotels list
         Expanded(
-          child: ListView.builder(
-            padding: EdgeInsets.all(isTablet ? 20 : 16),
-            itemCount: _hotels.length,
-            itemBuilder: (context, index) {
-              final hotel = _hotels[index];
-              return _buildHotelCard(hotel, isTablet, primaryColor);
-            },
-          ),
+          child: widget.hotels.isEmpty
+              ? _buildNoResults(isTablet, primaryColor)
+              : ListView.builder(
+                  padding: EdgeInsets.all(isTablet ? 20 : 16),
+                  itemCount: widget.hotels.length,
+                  itemBuilder: (context, index) {
+                    final hotel = widget.hotels[index];
+                    return _buildHotelCard(hotel, isTablet, primaryColor);
+                  },
+                ),
         ),
       ],
     );
   }
 
-  Widget _buildNoHotels(bool isTablet, Color primaryColor) {
+  Widget _buildNoResults(bool isTablet, Color primaryColor) {
     return Center(
       child: Padding(
         padding: EdgeInsets.all(32),
         child: Column(
           children: [
             Icon(
-              Icons.hotel_outlined,
+              Icons.search_off,
               size: isTablet ? 80 : 64,
               color: Colors.grey[400],
             ),
             SizedBox(height: 16),
             Text(
-              'No hotels available',
+              'No hotels found',
               style: TextStyle(
                 fontSize: isTablet ? 20 : 18,
                 fontWeight: FontWeight.bold,
@@ -165,7 +142,7 @@ class _AllHotelsPageState extends ConsumerState<AllHotelsPage> {
             ),
             SizedBox(height: 8),
             Text(
-              'Try refreshing or check back later',
+              'Try adjusting your search criteria',
               style: TextStyle(
                 fontSize: isTablet ? 16 : 14,
                 color: Colors.grey[500],
@@ -173,12 +150,12 @@ class _AllHotelsPageState extends ConsumerState<AllHotelsPage> {
             ),
             SizedBox(height: 24),
             ElevatedButton(
-              onPressed: _loadHotels,
+              onPressed: () => Navigator.pop(context),
               style: ElevatedButton.styleFrom(
                 backgroundColor: primaryColor,
                 foregroundColor: Colors.white,
               ),
-              child: Text('Refresh'),
+              child: Text('Back to Search'),
             ),
           ],
         ),
