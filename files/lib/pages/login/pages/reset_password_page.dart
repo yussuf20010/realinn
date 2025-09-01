@@ -11,6 +11,7 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_defaults.dart';
 import '../../../core/constants/sizedbox_const.dart';
 import '../../../core/utils/app_form_validattors.dart';
+import '../../../widgets/custom_app_bar.dart';
 
 class ResetPasswordPage extends StatelessWidget {
   const ResetPasswordPage({
@@ -25,41 +26,43 @@ class ResetPasswordPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-
-        appBar: AppBar(),
-        body: SafeArea(
-          child: Center(
-            child: SingleChildScrollView(
-              child: ResetPasswordForm(
-                email: email,
-                otp: otp,
-              ),
+      appBar: CustomAppBar(
+        title: 'Reset Password',
+        showBackButton: true,
+      ),
+      body: SafeArea(
+        child: Center(
+          child: SingleChildScrollView(
+            child: ResetPasswordForm(
+              email: email,
+              otp: otp,
             ),
           ),
         ),
-        bottomNavigationBar: SafeArea(
-          child: TextButton(
-            onPressed: () {
-              SystemNavigator.pop(animated: true);
-            },
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.adaptive.arrow_back_rounded, size: 16),
-                AppSizedBox.w5,
-                Text('go_back'.tr(),
-                  style: TextStyle(
-                    color: Colors.blue,
-                    fontSize: 16,
-                    decoration: TextDecoration.underline,
-                  ),
+      ),
+      bottomNavigationBar: SafeArea(
+        child: TextButton(
+          onPressed: () {
+            SystemNavigator.pop(animated: true);
+          },
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.adaptive.arrow_back_rounded, size: 16),
+              AppSizedBox.w5,
+              Text(
+                'go_back'.tr(),
+                style: TextStyle(
+                  color: Colors.blue,
+                  fontSize: 16,
+                  decoration: TextDecoration.underline,
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
-
+      ),
     );
   }
 }
@@ -147,7 +150,8 @@ class _ResetPasswordFormState extends ConsumerState<ResetPasswordForm> {
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 HeadlineRow(
-                  fontColor: AppColors.primary, headline: '',
+                  fontColor: AppColors.primary,
+                  headline: '',
                 ),
                 AppSizedBox.h16,
                 Text(

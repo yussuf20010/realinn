@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../home/home_page.dart';
 import '../favourites/favourites_page.dart';
 import '../bookings/bookings_page.dart';
@@ -8,7 +9,7 @@ import '../../config/wp_config.dart';
 
 class MainScaffold extends ConsumerStatefulWidget {
   final int initialIndex;
-  
+
   const MainScaffold({Key? key, this.initialIndex = 0}) : super(key: key);
 
   @override
@@ -62,11 +63,13 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _buildNavItem(0, Icons.home, 'Home', isTablet, primaryColor),
-              _buildNavItem(1, Icons.favorite, 'Fav', isTablet, primaryColor),
-              _buildNavItem(2, Icons.book, 'Booking', isTablet, primaryColor),
+              _buildNavItem(0, Icons.home, 'home'.tr(), isTablet, primaryColor),
               _buildNavItem(
-                  3, Icons.history, 'History', isTablet, primaryColor),
+                  1, Icons.favorite, 'favorites'.tr(), isTablet, primaryColor),
+              _buildNavItem(
+                  2, Icons.book, 'booking'.tr(), isTablet, primaryColor),
+              _buildNavItem(
+                  3, Icons.history, 'history'.tr(), isTablet, primaryColor),
             ],
           ),
         ),

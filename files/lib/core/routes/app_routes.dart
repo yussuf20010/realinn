@@ -4,7 +4,7 @@ class AppRoutes {
   static const String entryPoint = '/entrypoint';
   static const String onboarding = '/onboarding';
   static const String selectThemeAndLang = '/selectLangAndTheme';
-  static const String selectLocation  = '/selectLocation ';
+  static const String selectLocation = '/selectLocation ';
   static const String loginIntro = '/login_intro';
   static const String login = '/login';
   static const String loginAnimation = '/login_animation';
@@ -15,6 +15,8 @@ class AppRoutes {
   static const String notification = '/notification';
   static const String explore = '/explore';
   static const String profile = '/profile';
+  static const String booking = '/bookings';
+  static const String createBooking = '/create-booking';
 
   static const String service = '/service';
   static const String allProperties = '/allProperties';

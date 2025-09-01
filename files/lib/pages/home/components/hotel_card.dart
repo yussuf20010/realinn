@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:easy_localization/easy_localization.dart';
+
 import '../../../../config/dynamic_config.dart';
 import '../../../../providers/favorites_provider.dart';
-import '../../../../core/utils/page_transitions.dart';
+
 import '../../../models/hotel.dart';
 import '../../../models/location.dart' as location_model;
-import '../../hotel_details/hotel_details_page.dart';
+
 
 class HotelCard extends ConsumerWidget {
   final Hotel hotel;
@@ -685,7 +685,11 @@ class HotelCard extends ConsumerWidget {
 
   String _getHotelCategoryImage(String hotelName) {
     final name = hotelName.toLowerCase();
-
+    
+    // Create a hash-based selection to ensure different hotels get different images
+    final hash = hotelName.hashCode;
+    final imageIndex = (hash % 20).abs(); // Use 20 different images
+    
     // Luxury hotels
     if (name.contains('luxury') ||
         name.contains('premium') ||
@@ -693,7 +697,14 @@ class HotelCard extends ConsumerWidget {
         name.contains('royal') ||
         name.contains('grand') ||
         name.contains('palace')) {
-      return 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400&h=300&fit=crop';
+      final luxuryImages = [
+        'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400&h=300&fit=crop',
+        'https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=400&h=300&fit=crop',
+        'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=400&h=300&fit=crop',
+        'https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=400&h=300&fit=crop',
+        'https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=400&h=300&fit=crop',
+      ];
+      return luxuryImages[imageIndex % luxuryImages.length];
     }
 
     // Beach resorts
@@ -702,7 +713,14 @@ class HotelCard extends ConsumerWidget {
         name.contains('coastal') ||
         name.contains('ocean') ||
         name.contains('seaside')) {
-      return 'https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=400&h=300&fit=crop';
+      final beachImages = [
+        'https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=400&h=300&fit=crop',
+        'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=400&h=300&fit=crop',
+        'https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=400&h=300&fit=crop',
+        'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=400&h=300&fit=crop',
+        'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400&h=300&fit=crop',
+      ];
+      return beachImages[imageIndex % beachImages.length];
     }
 
     // Mountain hotels
@@ -711,7 +729,14 @@ class HotelCard extends ConsumerWidget {
         name.contains('ski') ||
         name.contains('lodge') ||
         name.contains('cabin')) {
-      return 'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=400&h=300&fit=crop';
+      final mountainImages = [
+        'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=400&h=300&fit=crop',
+        'https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=400&h=300&fit=crop',
+        'https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=400&h=300&fit=crop',
+        'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=400&h=300&fit=crop',
+        'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400&h=300&fit=crop',
+      ];
+      return mountainImages[imageIndex % mountainImages.length];
     }
 
     // City hotels
@@ -720,7 +745,14 @@ class HotelCard extends ConsumerWidget {
         name.contains('downtown') ||
         name.contains('center') ||
         name.contains('plaza')) {
-      return 'https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=400&h=300&fit=crop';
+      final cityImages = [
+        'https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=400&h=300&fit=crop',
+        'https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=400&h=300&fit=crop',
+        'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=400&h=300&fit=crop',
+        'https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=400&h=300&fit=crop',
+        'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=400&h=300&fit=crop',
+      ];
+      return cityImages[imageIndex % cityImages.length];
     }
 
     // Boutique hotels
@@ -729,7 +761,14 @@ class HotelCard extends ConsumerWidget {
         name.contains('vintage') ||
         name.contains('heritage') ||
         name.contains('classic')) {
-      return 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=300&fit=crop';
+      final boutiqueImages = [
+        'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=300&fit=crop',
+        'https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=400&h=300&fit=crop',
+        'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=400&h=300&fit=crop',
+        'https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=400&h=300&fit=crop',
+        'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=400&h=300&fit=crop',
+      ];
+      return boutiqueImages[imageIndex % boutiqueImages.length];
     }
 
     // Business hotels
@@ -738,11 +777,41 @@ class HotelCard extends ConsumerWidget {
         name.contains('executive') ||
         name.contains('suite') ||
         name.contains('conference')) {
-      return 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400&h=300&fit=crop';
+      final businessImages = [
+        'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400&h=300&fit=crop',
+        'https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=400&h=300&fit=crop',
+        'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=400&h=300&fit=crop',
+        'https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=400&h=300&fit=crop',
+        'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=400&h=300&fit=crop',
+      ];
+      return businessImages[imageIndex % businessImages.length];
     }
 
-    // Default beautiful hotel image
-    return 'https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=400&h=300&fit=crop';
+    // Default diverse hotel images based on hash
+    final defaultImages = [
+      'https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=400&h=300&fit=crop',
+      'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400&h=300&fit=crop',
+      'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=400&h=300&fit=crop',
+      'https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=400&h=300&fit=crop',
+      'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=400&h=300&fit=crop',
+      'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=300&fit=crop',
+      'https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=400&h=300&fit=crop',
+      'https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=400&h=300&fit=crop',
+      'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400&h=300&fit=crop',
+      'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=400&h=300&fit=crop',
+      'https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=400&h=300&fit=crop',
+      'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=400&h=300&fit=crop',
+      'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=300&fit=crop',
+      'https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=400&h=300&fit=crop',
+      'https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=400&h=300&fit=crop',
+      'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400&h=300&fit=crop',
+      'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=400&h=300&fit=crop',
+      'https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=400&h=300&fit=crop',
+      'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=400&h=300&fit=crop',
+      'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=300&fit=crop',
+    ];
+    
+    return defaultImages[imageIndex];
   }
 
   Widget _buildPlaceholderImage() {
@@ -858,11 +927,15 @@ class HotelCard extends ConsumerWidget {
   }
 
   void _navigateToHotelDetails(BuildContext context) {
-    Navigator.push(
+    Navigator.pushNamed(
       context,
-      ScalePageRoute(
-        child: HotelDetailsPage(hotel: hotel),
-      ),
+      '/hotel-details',
+      arguments: {
+        'hotel': hotel,
+        'checkInDate': null,
+        'checkOutDate': null,
+        'rooms': null,
+      },
     );
   }
 }
@@ -1249,11 +1322,15 @@ class HotelCardModern extends ConsumerWidget {
   }
 
   void _navigateToHotelDetails(BuildContext context) {
-    Navigator.push(
+    Navigator.pushNamed(
       context,
-      ScalePageRoute(
-        child: HotelDetailsPage(hotel: hotel),
-      ),
+      '/hotel-details',
+      arguments: {
+        'hotel': hotel,
+        'checkInDate': null,
+        'checkOutDate': null,
+        'rooms': null,
+      },
     );
   }
 }

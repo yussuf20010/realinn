@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../../config/wp_config.dart';
 import '../../providers/bookings_provider.dart';
 import '../../models/booking.dart';
-import '../hotel_details/hotel_details_page.dart';
+import '../hotels/hotel_details_page.dart';
 
 class BookingsPage extends ConsumerStatefulWidget {
   const BookingsPage({Key? key}) : super(key: key);
@@ -59,7 +60,7 @@ class _BookingsPageState extends ConsumerState<BookingsPage> {
               height: 80,
               child: Center(
                 child: Text(
-                  'Trips',
+                  'bookings'.tr(),
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: isTablet ? 28 : 24,
@@ -75,7 +76,7 @@ class _BookingsPageState extends ConsumerState<BookingsPage> {
   }
 
   Widget _buildNavigationTabs(bool isTablet, Color primaryColor) {
-    final tabs = ['Active', 'Past', 'Canceled'];
+    final tabs = ['active'.tr(), 'past'.tr(), 'cancelled'.tr()];
 
     return Container(
       height: 50,
@@ -165,7 +166,7 @@ class _BookingsPageState extends ConsumerState<BookingsPage> {
                   color: WPConfig.navbarColor, size: isTablet ? 24 : 20),
               SizedBox(width: 8),
               Text(
-                '${filteredBookings.length} ${_getTabTitle()} ${filteredBookings.length == 1 ? 'trip' : 'trips'}',
+                '${filteredBookings.length} ${_getTabTitle()} ${filteredBookings.length == 1 ? 'trip'.tr() : 'trips'.tr()}',
                 style: TextStyle(
                   fontSize: isTablet ? 18 : 16,
                   fontWeight: FontWeight.w600,
@@ -194,11 +195,11 @@ class _BookingsPageState extends ConsumerState<BookingsPage> {
   String _getTabTitle() {
     switch (_selectedTabIndex) {
       case 0:
-        return 'active';
+        return 'active'.tr();
       case 1:
-        return 'past';
+        return 'past'.tr();
       case 2:
-        return 'cancelled';
+        return 'cancelled'.tr();
       default:
         return '';
     }
@@ -349,21 +350,21 @@ class _BookingsPageState extends ConsumerState<BookingsPage> {
             SizedBox(height: isTablet ? 32 : 24),
 
             // Heading
-            Text(
-              'Where to next?',
-              style: TextStyle(
-                fontSize: isTablet ? 28 : 24,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-              ),
-              textAlign: TextAlign.center,
-            ),
+                         Text(
+               'where_to_next'.tr(),
+               style: TextStyle(
+                 fontSize: isTablet ? 28 : 24,
+                 fontWeight: FontWeight.bold,
+                 color: Colors.black,
+               ),
+               textAlign: TextAlign.center,
+             ),
 
             SizedBox(height: isTablet ? 16 : 12),
 
             // Description
             Text(
-              'You haven\'t started any trips yet. Once you make a booking, it\'ll appear here.',
+              'no_trips_yet'.tr(),
               style: TextStyle(
                 fontSize: isTablet ? 16 : 14,
                 color: Colors.grey[600],
@@ -415,7 +416,7 @@ class _BookingsPageState extends ConsumerState<BookingsPage> {
                 children: [
                   Expanded(
                     child: Text(
-                      booking.hotel.name ?? 'Hotel Name',
+                      booking.hotel.name ?? 'hotel_name'.tr(),
                       style: TextStyle(
                         fontSize: isTablet ? 18 : 16,
                         fontWeight: FontWeight.bold,
@@ -468,13 +469,13 @@ class _BookingsPageState extends ConsumerState<BookingsPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          'Check-in',
-                          style: TextStyle(
-                            color: Colors.grey[600],
-                            fontSize: isTablet ? 12 : 10,
-                          ),
-                        ),
+                                                 Text(
+                           'check_in'.tr(),
+                           style: TextStyle(
+                             color: Colors.grey[600],
+                             fontSize: isTablet ? 12 : 10,
+                           ),
+                         ),
                         Text(
                           '${booking.checkInDate.day}/${booking.checkInDate.month}/${booking.checkInDate.year}',
                           style: TextStyle(
@@ -490,13 +491,13 @@ class _BookingsPageState extends ConsumerState<BookingsPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          'Check-out',
-                          style: TextStyle(
-                            color: Colors.grey[600],
-                            fontSize: isTablet ? 12 : 10,
-                          ),
-                        ),
+                                                 Text(
+                           'check_out'.tr(),
+                           style: TextStyle(
+                             color: Colors.grey[600],
+                             fontSize: isTablet ? 12 : 10,
+                           ),
+                         ),
                         Text(
                           '${booking.checkOutDate.day}/${booking.checkOutDate.month}/${booking.checkOutDate.year}',
                           style: TextStyle(
@@ -512,13 +513,13 @@ class _BookingsPageState extends ConsumerState<BookingsPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          'Total',
-                          style: TextStyle(
-                            color: Colors.grey[600],
-                            fontSize: isTablet ? 12 : 10,
-                          ),
-                        ),
+                                                 Text(
+                           'total'.tr(),
+                           style: TextStyle(
+                             color: Colors.grey[600],
+                             fontSize: isTablet ? 12 : 10,
+                           ),
+                         ),
                         Text(
                           '\$${booking.totalPrice.toStringAsFixed(2)}',
                           style: TextStyle(
@@ -557,15 +558,15 @@ class _BookingsPageState extends ConsumerState<BookingsPage> {
   String _getStatusText(BookingStatus status) {
     switch (status) {
       case BookingStatus.completed:
-        return 'Completed';
+        return 'completed'.tr();
       case BookingStatus.cancelled:
-        return 'Cancelled';
+        return 'cancelled'.tr();
       case BookingStatus.confirmed:
-        return 'Confirmed';
+        return 'confirmed'.tr();
       case BookingStatus.pending:
-        return 'Pending';
+        return 'pending'.tr();
       default:
-        return 'Unknown';
+        return 'unknown'.tr();
     }
   }
 }

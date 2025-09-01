@@ -1,13 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:easy_localization/easy_localization.dart';
 import '../../../../config/dynamic_config.dart';
 import '../../../../config/wp_config.dart';
 import '../providers/home_providers.dart';
-import '../../../controllers/location_controller.dart';
 import '../../../controllers/hotel_controller.dart';
-import '../../../models/location.dart' as location_model;
-import '../../hotels/hotels_search_page.dart';
 
 class TableSearchInterface extends ConsumerStatefulWidget {
   const TableSearchInterface({Key? key}) : super(key: key);
@@ -24,7 +20,7 @@ class _TableSearchInterfaceState extends ConsumerState<TableSearchInterface> {
   DateTimeRange? _dateRange;
   String? _selectedCountry;
   String? _selectedCity;
-  bool _isSearching = false;
+  // Removed unused _isSearching
 
   @override
   void initState() {
@@ -39,8 +35,7 @@ class _TableSearchInterfaceState extends ConsumerState<TableSearchInterface> {
   @override
   Widget build(BuildContext context) {
     final dynamicConfig = ref.watch(dynamicConfigProvider);
-    final Color primaryColor =
-        dynamicConfig.primaryColor ?? const Color(0xFF895ffc);
+    final Color primaryColor = dynamicConfig.primaryColor;
     final isTablet = MediaQuery.of(context).size.width >= 768;
 
     return Container(
@@ -68,7 +63,7 @@ class _TableSearchInterfaceState extends ConsumerState<TableSearchInterface> {
 
             SizedBox(height: 20),
 
-            // Destination Field - Fully bordered, clickable
+            // Destination - horizontal row
             _buildClickableField(
               icon: Icons.search,
               label: 'Click to select destination',
@@ -82,7 +77,7 @@ class _TableSearchInterfaceState extends ConsumerState<TableSearchInterface> {
 
             SizedBox(height: 16),
 
-            // Date Selection Field - Fully bordered, clickable
+            // Date - horizontal row
             _buildClickableField(
               icon: Icons.calendar_today,
               label: 'Select dates',
@@ -96,7 +91,7 @@ class _TableSearchInterfaceState extends ConsumerState<TableSearchInterface> {
 
             SizedBox(height: 16),
 
-            // Guests and Rooms Field - Fully bordered, clickable
+            // Rooms and guests - horizontal row
             _buildClickableField(
               icon: Icons.person,
               label: 'Select guests and rooms',
@@ -124,30 +119,26 @@ class _TableSearchInterfaceState extends ConsumerState<TableSearchInterface> {
 
         return Row(
           children: [
-            Expanded(
-              child: _buildBookingTypeButton(
-                isSelected: selectedBookingType == 0,
-                text: 'Daily',
-                icon: Icons.bed,
-                onTap: () {
-                  ref.read(selectedBookingTypeProvider.notifier).state = 0;
-                },
-                isTablet: isTablet,
-                primaryColor: primaryColor,
-              ),
+            _buildBookingTypeButton(
+              isSelected: selectedBookingType == 0,
+              text: 'Daily',
+              icon: Icons.bed,
+              onTap: () {
+                ref.read(selectedBookingTypeProvider.notifier).state = 0;
+              },
+              isTablet: isTablet,
+              primaryColor: primaryColor,
             ),
             SizedBox(width: isTablet ? 16 : 8),
-            Expanded(
-              child: _buildBookingTypeButton(
-                isSelected: selectedBookingType == 1,
-                text: 'Monthly',
-                icon: Icons.calendar_month,
-                onTap: () {
-                  ref.read(selectedBookingTypeProvider.notifier).state = 1;
-                },
-                isTablet: isTablet,
-                primaryColor: primaryColor,
-              ),
+            _buildBookingTypeButton(
+              isSelected: selectedBookingType == 1,
+              text: 'Monthly',
+              icon: Icons.calendar_month,
+              onTap: () {
+                ref.read(selectedBookingTypeProvider.notifier).state = 1;
+              },
+              isTablet: isTablet,
+              primaryColor: primaryColor,
             ),
           ],
         );
@@ -163,15 +154,15 @@ class _TableSearchInterfaceState extends ConsumerState<TableSearchInterface> {
     required bool isTablet,
     required Color primaryColor,
   }) {
+    final size = isTablet ? 80.0 : 60.0;
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        height: isTablet ? 56 : 48,
-        padding:
-            EdgeInsets.symmetric(horizontal: isTablet ? 16 : 8, vertical: 12),
+        width: size,
+        height: size,
         decoration: BoxDecoration(
           color: isSelected ? primaryColor : Colors.white,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(8),
           border: Border.all(
             color: primaryColor,
             width: 2,
@@ -184,7 +175,7 @@ class _TableSearchInterfaceState extends ConsumerState<TableSearchInterface> {
             ),
           ],
         ),
-        child: Row(
+        child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
@@ -192,13 +183,13 @@ class _TableSearchInterfaceState extends ConsumerState<TableSearchInterface> {
               color: isSelected ? Colors.white : primaryColor,
               size: isTablet ? 24 : 18,
             ),
-            SizedBox(width: isTablet ? 8 : 4),
+            SizedBox(height: 4),
             Text(
               text,
               style: TextStyle(
                 color: isSelected ? Colors.white : primaryColor,
                 fontWeight: FontWeight.bold,
-                fontSize: isTablet ? 16 : 12,
+                fontSize: isTablet ? 12 : 10,
               ),
               overflow: TextOverflow.ellipsis,
             ),
@@ -220,35 +211,30 @@ class _TableSearchInterfaceState extends ConsumerState<TableSearchInterface> {
       onTap: onTap,
       child: Container(
         width: double.infinity,
-        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        padding:
+            EdgeInsets.symmetric(horizontal: 16, vertical: isTablet ? 16 : 14),
         decoration: BoxDecoration(
           color: Colors.white,
+          border: Border.all(color: Colors.grey[400]!, width: 2),
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: primaryColor, width: 2),
         ),
         child: Row(
           children: [
             Icon(
               icon,
-              color: primaryColor,
-              size: isTablet ? 24 : 20,
+              color: Colors.black87,
+              size: isTablet ? 24 : 22,
             ),
-            SizedBox(width: 16),
+            SizedBox(width: 12),
             Expanded(
               child: Text(
                 value ?? label,
                 style: TextStyle(
-                  color: value != null ? Colors.black : Colors.grey[600],
-                  fontWeight:
-                      value != null ? FontWeight.bold : FontWeight.normal,
-                  fontSize: isTablet ? 16 : 14,
+                  color: value != null ? Colors.black : Colors.grey[700],
+                  fontWeight: FontWeight.bold,
+                  fontSize: isTablet ? 16 : 15,
                 ),
               ),
-            ),
-            Icon(
-              Icons.arrow_drop_down,
-              color: primaryColor,
-              size: isTablet ? 24 : 20,
             ),
           ],
         ),
@@ -257,25 +243,35 @@ class _TableSearchInterfaceState extends ConsumerState<TableSearchInterface> {
   }
 
   Widget _buildSearchButton(Color primaryColor, bool isTablet) {
-    return SizedBox(
+    return Container(
       width: double.infinity,
-      height: isTablet ? 56 : 48,
+      height: isTablet ? 56 : 50,
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.grey[400]!, width: 2),
+        borderRadius: BorderRadius.circular(8),
+      ),
       child: ElevatedButton(
         onPressed: _performSearch,
         style: ElevatedButton.styleFrom(
           backgroundColor: primaryColor,
           foregroundColor: Colors.white,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(6),
           ),
-          elevation: 2,
+          elevation: 0,
+          padding: EdgeInsets.zero,
         ),
-        child: Text(
-          'Search',
-          style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-            fontSize: isTablet ? 18 : 16,
+        child: Container(
+          width: double.infinity,
+          height: double.infinity,
+          alignment: Alignment.center,
+          child: Text(
+            'Search',
+            style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: isTablet ? 18 : 16,
+            ),
           ),
         ),
       ),
@@ -541,6 +537,9 @@ class _TableSearchInterfaceState extends ConsumerState<TableSearchInterface> {
     Navigator.pushNamed(context, '/search-results', arguments: {
       'searchQuery': '$_selectedCity, $_selectedCountry',
       'hotels': [], // Will be loaded by HotelsSearchPage
+      'checkInDate': _dateRange?.start,
+      'checkOutDate': _dateRange?.end,
+      'rooms': _rooms,
     });
   }
 }

@@ -42,27 +42,50 @@ class _CustomAppBarState extends ConsumerState<CustomAppBar> {
     final newLocale = currentLocale.languageCode == 'ar'
         ? Locale('en', 'US')
         : Locale('ar', 'SA');
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text('change_language'.tr()),
-        content: Text('change_language_confirm'.tr()),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: Text('cancel'.tr()),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: Text('ok'.tr()),
-          ),
-        ],
-      ),
-    );
-    if (confirmed == true) {
+
+    print('=== LANGUAGE TOGGLE DEBUG ===');
+    print('Current locale: ${currentLocale.languageCode}');
+    print('Current full locale: $currentLocale');
+    print('New locale: ${newLocale.languageCode}');
+    print('New full locale: $newLocale');
+    print('Context mounted: ${context.mounted}');
+
+    try {
+      // Set the new locale directly without confirmation
+      print('Setting new locale...');
       await context.setLocale(newLocale);
-      // Reload the app by pushing replacement to HomePage
-      Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
+      print('Locale set successfully to: ${newLocale.languageCode}');
+
+      // Force a rebuild by calling setState
+      print('Calling setState...');
+      setState(() {});
+
+      // Also force a rebuild of the entire app to ensure RTL is applied
+      if (context.mounted) {
+        print('Navigating to home page to force app rebuild...');
+        Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
+      } else {
+        print('Context not mounted, cannot navigate');
+      }
+    } catch (e) {
+      print('Error setting locale: $e');
+      print('Error stack trace: ${StackTrace.current}');
+      // Show error dialog
+      if (context.mounted) {
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Text('Error'),
+            content: Text('Failed to change language: $e'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: Text('OK'),
+              ),
+            ],
+          ),
+        );
+      }
     }
   }
 
@@ -110,6 +133,38 @@ class _CustomAppBarState extends ConsumerState<CustomAppBar> {
           fit: BoxFit.contain,
         ),
         centerTitle: true,
+        actions: [
+          // Simple Language Toggle for backAndLogoOnly mode
+          Container(
+            margin: EdgeInsets.symmetric(horizontal: 8),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: Colors.white.withOpacity(0.3),
+                width: 1,
+              ),
+            ),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                borderRadius: BorderRadius.circular(20),
+                onTap: _toggleLanguage,
+                child: Container(
+                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: Text(
+                    context.locale.languageCode.toUpperCase(),
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: isTablet ? 16 : 14,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
       );
     }
 
@@ -136,6 +191,38 @@ class _CustomAppBarState extends ConsumerState<CustomAppBar> {
           ),
         ),
         centerTitle: true,
+        actions: [
+          // Simple Language Toggle for minimal mode
+          Container(
+            margin: EdgeInsets.symmetric(horizontal: 8),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: Colors.white.withOpacity(0.3),
+                width: 1,
+              ),
+            ),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                borderRadius: BorderRadius.circular(20),
+                onTap: _toggleLanguage,
+                child: Container(
+                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: Text(
+                    context.locale.languageCode.toUpperCase(),
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: isTablet ? 16 : 14,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
       );
     }
 
@@ -173,22 +260,44 @@ class _CustomAppBarState extends ConsumerState<CustomAppBar> {
         fit: BoxFit.contain,
       ),
       centerTitle: true,
-      actions: widget.showBackButton
-          ? null
-          : [
-              // Show action icons only when there's no back button
-              IconButton(
-                icon: Icon(Icons.language,
-                    color: Colors.white, size: isTablet ? 24 : 20),
-                onPressed: _toggleLanguage,
-              ),
-              if (widget.onNotificationPressed != null)
-                IconButton(
-                  icon: Icon(Icons.notifications_outlined,
-                      color: Colors.white, size: isTablet ? 24 : 20),
-                  onPressed: widget.onNotificationPressed,
-                ),
-            ],
+      actions: [
+        // Simple Language Toggle - Always visible
+        // Container(
+        //   margin: EdgeInsets.symmetric(horizontal: 8),
+        //   decoration: BoxDecoration(
+        //     color: Colors.white.withOpacity(0.2),
+        //     borderRadius: BorderRadius.circular(20),
+        //     border: Border.all(
+        //       color: Colors.white.withOpacity(0.3),
+        //       width: 1,
+        //     ),
+        //   ),
+        //   child: Material(
+        //     color: Colors.transparent,
+        //     child: InkWell(
+        //       borderRadius: BorderRadius.circular(20),
+        //       onTap: _toggleLanguage,
+        //       child: Container(
+        //         padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        //         child: Text(
+        //           context.locale.languageCode.toUpperCase(),
+        //           style: TextStyle(
+        //             color: Colors.white,
+        //             fontWeight: FontWeight.bold,
+        //             fontSize: isTablet ? 16 : 14,
+        //           ),
+        //         ),
+        //       ),
+        //     ),
+        //   ),
+        // ),
+        if (widget.onNotificationPressed != null)
+          IconButton(
+            icon: Icon(Icons.notifications_outlined,
+                color: Colors.white, size: isTablet ? 24 : 20),
+            onPressed: widget.onNotificationPressed,
+          ),
+      ],
     );
   }
 }

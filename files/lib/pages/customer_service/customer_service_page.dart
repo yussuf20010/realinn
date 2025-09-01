@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../../config/wp_config.dart';
 
 class CustomerServicePage extends ConsumerStatefulWidget {
@@ -44,7 +45,7 @@ class _CustomerServicePageState extends ConsumerState<CustomerServicePage> {
               Expanded(
                 child: Center(
                   child: Text(
-                    'Customer Service',
+                    'customer_service'.tr(),
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: isTablet ? 28 : 24,
@@ -70,7 +71,7 @@ class _CustomerServicePageState extends ConsumerState<CustomerServicePage> {
         children: [
           // Header
           Text(
-            'How can we help you?',
+            'how_can_we_help'.tr(),
             style: TextStyle(
               fontSize: isTablet ? 28 : 24,
               fontWeight: FontWeight.bold,
@@ -79,7 +80,7 @@ class _CustomerServicePageState extends ConsumerState<CustomerServicePage> {
           ),
           SizedBox(height: 8),
           Text(
-            'Get in touch with our support team',
+            'get_in_touch_support'.tr(),
             style: TextStyle(
               fontSize: isTablet ? 16 : 14,
               color: Colors.grey[600],
@@ -94,13 +95,13 @@ class _CustomerServicePageState extends ConsumerState<CustomerServicePage> {
           // Other support options
           _buildSupportOption(
             icon: Icons.phone,
-            title: 'Call Us',
-            subtitle: 'Speak directly with our team',
-            action: 'Call Now',
+            title: 'call_us'.tr(),
+            subtitle: 'speak_directly_team'.tr(),
+            action: 'call_now'.tr(),
             onTap: () {
               // Handle phone call
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Calling customer service...')),
+                SnackBar(content: Text('calling_customer_service'.tr())),
               );
             },
             isTablet: isTablet,
@@ -110,13 +111,13 @@ class _CustomerServicePageState extends ConsumerState<CustomerServicePage> {
 
           _buildSupportOption(
             icon: Icons.email,
-            title: 'Email Support',
-            subtitle: 'Send us a detailed message',
-            action: 'Send Email',
+            title: 'email_support'.tr(),
+            subtitle: 'send_detailed_message'.tr(),
+            action: 'send_email'.tr(),
             onTap: () {
               // Handle email
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Opening email client...')),
+                SnackBar(content: Text('opening_email_client'.tr())),
               );
             },
             isTablet: isTablet,
@@ -126,13 +127,13 @@ class _CustomerServicePageState extends ConsumerState<CustomerServicePage> {
 
           _buildSupportOption(
             icon: Icons.help_outline,
-            title: 'FAQ',
-            subtitle: 'Find answers to common questions',
-            action: 'Browse FAQ',
+            title: 'faq'.tr(),
+            subtitle: 'find_common_answers'.tr(),
+            action: 'browse_faq'.tr(),
             onTap: () {
               // Handle FAQ
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Opening FAQ section...')),
+                SnackBar(content: Text('opening_faq_section'.tr())),
               );
             },
             isTablet: isTablet,
@@ -174,22 +175,22 @@ class _CustomerServicePageState extends ConsumerState<CustomerServicePage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'Live Chat',
-                      style: TextStyle(
-                        fontSize: isTablet ? 22 : 20,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black,
-                      ),
-                    ),
+                                         Text(
+                       'live_chat'.tr(),
+                       style: TextStyle(
+                         fontSize: isTablet ? 22 : 20,
+                         fontWeight: FontWeight.bold,
+                         color: Colors.black,
+                       ),
+                     ),
                     SizedBox(height: 4),
-                    Text(
-                      'Chat with our support team in real-time',
-                      style: TextStyle(
-                        fontSize: isTablet ? 16 : 14,
-                        color: Colors.grey[600],
-                      ),
-                    ),
+                                         Text(
+                       'chat_support_real_time'.tr(),
+                       style: TextStyle(
+                         fontSize: isTablet ? 16 : 14,
+                         color: Colors.grey[600],
+                       ),
+                     ),
                   ],
                 ),
               ),
@@ -211,13 +212,13 @@ class _CustomerServicePageState extends ConsumerState<CustomerServicePage> {
                 ),
                 elevation: 0,
               ),
-              child: Text(
-                'Start Chat',
-                style: TextStyle(
-                  fontSize: isTablet ? 18 : 16,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+                             child: Text(
+                 'start_chat'.tr(),
+                 style: TextStyle(
+                   fontSize: isTablet ? 18 : 16,
+                   fontWeight: FontWeight.bold,
+                 ),
+               ),
             ),
           ),
         ],

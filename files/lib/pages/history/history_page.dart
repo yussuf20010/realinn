@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../../config/wp_config.dart';
 import '../../providers/bookings_provider.dart';
 import '../../models/booking.dart';
@@ -58,7 +59,7 @@ class _HistoryPageState extends ConsumerState<HistoryPage> {
               height: 80,
               child: Center(
                 child: Text(
-                  'History',
+                  'history'.tr(),
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: isTablet ? 28 : 24,
@@ -74,7 +75,7 @@ class _HistoryPageState extends ConsumerState<HistoryPage> {
   }
 
   Widget _buildNavigationTabs(bool isTablet, Color primaryColor) {
-    final tabs = ['Completed', 'Past', 'All'];
+    final tabs = ['completed'.tr(), 'past'.tr(), 'all'.tr()];
 
     return Container(
       height: 50,
@@ -124,7 +125,7 @@ class _HistoryPageState extends ConsumerState<HistoryPage> {
   }
 
   Widget _buildMainContent(bool isTablet) {
-    final bookings = ref.watch(bookingsProvider);
+    final bookings = ref.watch(bookingsProvider); 
 
     // Filter bookings based on selected tab
     List<Booking> filteredBookings = [];
@@ -173,7 +174,7 @@ class _HistoryPageState extends ConsumerState<HistoryPage> {
             ),
             SizedBox(height: isTablet ? 24 : 16),
             Text(
-              'No history yet',
+              'no_history_yet'.tr(),
               style: TextStyle(
                 fontSize: isTablet ? 24 : 20,
                 fontWeight: FontWeight.bold,
@@ -182,7 +183,7 @@ class _HistoryPageState extends ConsumerState<HistoryPage> {
             ),
             SizedBox(height: isTablet ? 12 : 8),
             Text(
-              'Your completed and past bookings will appear here',
+              'completed_past_bookings'.tr(),
               style: TextStyle(
                 fontSize: isTablet ? 16 : 14,
                 color: Colors.grey[500],
@@ -191,7 +192,7 @@ class _HistoryPageState extends ConsumerState<HistoryPage> {
             ),
           ],
         ),
-      ),
+      ), 
     );
   }
 
@@ -223,7 +224,7 @@ class _HistoryPageState extends ConsumerState<HistoryPage> {
               children: [
                 Expanded(
                   child: Text(
-                    booking.hotel.name ?? 'Hotel Name',
+                    booking.hotel.name ?? 'hotel_name'.tr(),
                     style: TextStyle(
                       fontSize: isTablet ? 18 : 16,
                       fontWeight: FontWeight.bold,
@@ -277,7 +278,7 @@ class _HistoryPageState extends ConsumerState<HistoryPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Check-in',
+                        'check_in'.tr(),
                         style: TextStyle(
                           color: Colors.grey[600],
                           fontSize: isTablet ? 12 : 10,
@@ -299,7 +300,7 @@ class _HistoryPageState extends ConsumerState<HistoryPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Check-out',
+                        'check_out'.tr(),
                         style: TextStyle(
                           color: Colors.grey[600],
                           fontSize: isTablet ? 12 : 10,
@@ -321,7 +322,7 @@ class _HistoryPageState extends ConsumerState<HistoryPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Total',
+                        'total'.tr(),
                         style: TextStyle(
                           color: Colors.grey[600],
                           fontSize: isTablet ? 12 : 10,
@@ -364,15 +365,15 @@ class _HistoryPageState extends ConsumerState<HistoryPage> {
   String _getStatusText(BookingStatus status) {
     switch (status) {
       case BookingStatus.completed:
-        return 'Completed';
+        return 'completed'.tr();
       case BookingStatus.cancelled:
-        return 'Cancelled';
+        return 'cancelled'.tr();
       case BookingStatus.confirmed:
-        return 'Confirmed';
+        return 'confirmed'.tr();
       case BookingStatus.pending:
-        return 'Pending';
+        return 'pending'.tr();
       default:
-        return 'Unknown';
+        return 'unknown'.tr();
     }
   }
 }

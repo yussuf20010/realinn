@@ -1,12 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:realinn/pages/profile/profile_page.dart';
-import '../../pages/all_hotels/all_hotels_page.dart';
-import '../../pages/city_hotels/city_hotels_page.dart';
-import '../../pages/country_hotels/country_hotels_page.dart';
 import '../../pages/customer_service/customer_service_page.dart';
 import '../../pages/entrypoint/loading_app_page.dart';
 import '../../pages/history/history_page.dart';
-import '../../pages/home/search_results_page.dart';
+import '../../pages/hotels/hotel_details_page.dart';
 import '../../pages/hotels/hotels_search_page.dart';
 import '../../pages/login/login_animation.dart';
 import '../../pages/login/login_intro_page.dart';
@@ -28,6 +25,9 @@ import '../../pages/settings/pages/terms_conditions_page.dart';
 import '../../pages/settings/pages/about_page.dart';
 import '../../pages/settings/pages/help_support_page.dart';
 import '../../models/hotel.dart';
+import '../../pages/bookings/create_booking_page.dart';
+import '../../models/selected_room.dart';
+import '../../models/booking.dart';
 
 class RouteGenerator {
   static Route? onGenerate(RouteSettings settings) {
@@ -80,6 +80,23 @@ class RouteGenerator {
       case '/bookings':
         return CupertinoPageRoute(builder: (_) => const BookingsPage());
 
+      case '/create-booking':
+        final args = settings.arguments as Map<String, dynamic>?;
+        final hotel = args?['hotel'] as Hotel?;
+        final selectedRoom = args?['selectedRoom'] as SelectedRoom?;
+        final booking = args?['booking'] as Booking?;
+
+        if (hotel != null && selectedRoom != null) {
+          return CupertinoPageRoute(
+            builder: (_) => CreateBookingPage(
+              hotel: hotel,
+              selectedRoom: selectedRoom,
+              booking: booking,
+            ),
+          );
+        }
+        return errorRoute();
+
       case '/history':
         return CupertinoPageRoute(builder: (_) => const HistoryPage());
 
@@ -87,10 +104,16 @@ class RouteGenerator {
         final args = settings.arguments as Map<String, dynamic>?;
         final hotels = args?['hotels'] as List<Hotel>? ?? [];
         final searchQuery = args?['searchQuery'] as String? ?? '';
+        final checkInDate = args?['checkInDate'] as DateTime?;
+        final checkOutDate = args?['checkOutDate'] as DateTime?;
+        final rooms = args?['rooms'] as int?;
         return CupertinoPageRoute(
           builder: (_) => HotelsSearchPage(
             searchQuery: searchQuery,
             initialHotels: hotels,
+            checkInDate: checkInDate,
+            checkOutDate: checkOutDate,
+            rooms: rooms,
           ),
         );
 
@@ -108,6 +131,25 @@ class RouteGenerator {
         return CupertinoPageRoute(
           builder: (_) => HotelsSearchPage(countryName: countryName),
         );
+
+      case '/hotel-details':
+        final args = settings.arguments as Map<String, dynamic>?;
+        final hotel = args?['hotel'] as Hotel?;
+        final checkInDate = args?['checkInDate'] as DateTime?;
+        final checkOutDate = args?['checkOutDate'] as DateTime?;
+        final rooms = args?['rooms'] as int?;
+
+        if (hotel != null) {
+          return CupertinoPageRoute(
+            builder: (_) => HotelDetailsPage(
+              hotel: hotel,
+              checkInDate: checkInDate,
+              checkOutDate: checkOutDate,
+              rooms: rooms,
+            ),
+          );
+        }
+        return errorRoute();
 
       case AppRoutes.privacy:
         return CupertinoPageRoute(builder: (_) => const PrivacyPolicyPage());

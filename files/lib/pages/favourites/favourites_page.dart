@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../../config/wp_config.dart';
 import '../../providers/favorites_provider.dart';
 import '../../models/hotel.dart';
-import '../hotel_details/hotel_details_page.dart';
+import '../hotels/hotel_details_page.dart';
 
 class FavouritesPage extends ConsumerStatefulWidget {
   const FavouritesPage({Key? key}) : super(key: key);
@@ -47,7 +48,7 @@ class _FavouritesPageState extends ConsumerState<FavouritesPage> {
               height: 80,
               child: Center(
                 child: Text(
-                  'Saved',
+                  'favorites'.tr(),
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: isTablet ? 28 : 24,
@@ -80,7 +81,7 @@ class _FavouritesPageState extends ConsumerState<FavouritesPage> {
                   color: primaryColor, size: isTablet ? 24 : 20),
               SizedBox(width: 8),
               Text(
-                '${favorites.length} saved ${favorites.length == 1 ? 'hotel' : 'hotels'}',
+                '${favorites.length} ${favorites.length == 1 ? 'saved_hotel'.tr() : 'saved_hotels'.tr()}',
                 style: TextStyle(
                   fontSize: isTablet ? 18 : 16,
                   fontWeight: FontWeight.w600,
@@ -152,7 +153,7 @@ class _FavouritesPageState extends ConsumerState<FavouritesPage> {
                                 SizedBox(width: 4),
                                 Expanded(
                                   child: Text(
-                                    'Hill view',
+                                    'hill_view'.tr(),
                                     style: TextStyle(
                                       color: Colors.white,
                                       fontWeight: FontWeight.bold,
@@ -165,7 +166,7 @@ class _FavouritesPageState extends ConsumerState<FavouritesPage> {
                             ),
                             SizedBox(height: 2),
                             Text(
-                              'Apartments',
+                              'apartments'.tr(),
                               style: TextStyle(
                                 color: Colors.white,
                                 fontSize: isTablet ? 10 : 8,
@@ -220,7 +221,7 @@ class _FavouritesPageState extends ConsumerState<FavouritesPage> {
                             ),
                             SizedBox(height: 2),
                             Text(
-                              'Downtown',
+                              'downtown'.tr(),
                               style: TextStyle(
                                 color: Colors.white,
                                 fontWeight: FontWeight.bold,
@@ -267,7 +268,7 @@ class _FavouritesPageState extends ConsumerState<FavouritesPage> {
 
             // Heading
             Text(
-              'Save what you like for later',
+              'save_what_you_like'.tr(),
               style: TextStyle(
                 fontSize: isTablet ? 28 : 24,
                 fontWeight: FontWeight.bold,
@@ -280,7 +281,7 @@ class _FavouritesPageState extends ConsumerState<FavouritesPage> {
 
             // Description
             Text(
-              'Create lists of your favorite properties to help you share, compare, and book.',
+              'create_lists_favorites'.tr(),
               style: TextStyle(
                 fontSize: isTablet ? 16 : 14,
                 color: Colors.grey[600],
@@ -310,7 +311,7 @@ class _FavouritesPageState extends ConsumerState<FavouritesPage> {
                   elevation: 0,
                 ),
                 child: Text(
-                  'Start your search',
+                  'start_your_search'.tr(),
                   style: TextStyle(
                     fontSize: isTablet ? 18 : 16,
                     fontWeight: FontWeight.w600,
@@ -328,7 +329,7 @@ class _FavouritesPageState extends ConsumerState<FavouritesPage> {
                 Navigator.pushReplacementNamed(context, '/');
               },
               child: Text(
-                'Create a list',
+                'create_a_list'.tr(),
                 style: TextStyle(
                   color: primaryColor,
                   fontSize: isTablet ? 16 : 14,
@@ -371,18 +372,17 @@ class _FavouritesPageState extends ConsumerState<FavouritesPage> {
           padding: EdgeInsets.all(isTablet ? 20 : 16),
           child: Row(
             children: [
-              // Hotel image placeholder
+              // Hotel image
               Container(
                 width: isTablet ? 80 : 60,
                 height: isTablet ? 80 : 60,
                 decoration: BoxDecoration(
-                  color: Colors.grey[200],
                   borderRadius: BorderRadius.circular(8),
-                ),
-                child: Icon(
-                  Icons.hotel,
-                  color: Colors.grey[400],
-                  size: isTablet ? 32 : 24,
+                  image: DecorationImage(
+                    image: NetworkImage(
+                        'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=200&h=200&fit=crop'),
+                    fit: BoxFit.cover,
+                  ),
                 ),
               ),
 

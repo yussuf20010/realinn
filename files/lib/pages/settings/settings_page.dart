@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:realinn/widgets/custom_app_bar.dart';
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({Key? key}) : super(key: key);
@@ -9,15 +10,13 @@ class SettingsPage extends StatelessWidget {
     const cardRadius = 12.0;
     const cardMargin = EdgeInsets.symmetric(vertical: 6);
     const cardPadding = EdgeInsets.symmetric(horizontal: 16);
-    const blueChevron = Icon(Icons.chevron_right, color: Color(0xFF2196F3), size: 26);
+    const blueChevron =
+        Icon(Icons.chevron_right, color: Color(0xFF2196F3), size: 26);
     return Scaffold(
       backgroundColor: bgColor,
-      appBar: AppBar(
-        title: const Text('Settings', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black, fontSize: 20)),
-        backgroundColor: Colors.white,
-        elevation: 0,
-        centerTitle: false,
-        iconTheme: const IconThemeData(color: Colors.black),
+      appBar: CustomAppBar(
+        title: 'Settings',
+        showBackButton: true,
       ),
       body: ListView(
         padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
@@ -31,7 +30,8 @@ class SettingsPage extends StatelessWidget {
             child: SwitchListTile(
               value: true,
               onChanged: (val) {},
-              title: const Text('Notifications', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
+              title: const Text('Notifications',
+                  style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
               activeColor: Color(0xFF19C37D),
               contentPadding: cardPadding,
             ),
@@ -85,7 +85,11 @@ class _SettingsTile extends StatelessWidget {
   final VoidCallback onTap;
   final Widget trailing;
   final bool isLogout;
-  const _SettingsTile({required this.title, required this.onTap, required this.trailing, this.isLogout = false});
+  const _SettingsTile(
+      {required this.title,
+      required this.onTap,
+      required this.trailing,
+      this.isLogout = false});
 
   @override
   Widget build(BuildContext context) {
@@ -111,4 +115,4 @@ class _SettingsTile extends StatelessWidget {
       ),
     );
   }
-} 
+}

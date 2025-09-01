@@ -181,7 +181,7 @@ class _TabletSearchCardState extends ConsumerState<TabletSearchCard> {
                       ),
                     ),
 
-                    // Destination field
+                    // Enhanced Destination field
                     Container(
                       padding:
                           EdgeInsets.symmetric(horizontal: 16, vertical: 20),
@@ -191,30 +191,46 @@ class _TabletSearchCardState extends ConsumerState<TabletSearchCard> {
                       ),
                       child: Row(
                         children: [
-                          Icon(Icons.search,
-                              color: Colors.grey.shade600, size: 24),
+                          Icon(Icons.location_on,
+                              color: primaryColor, size: 24),
                           SizedBox(width: 16),
                           Expanded(
-                            child: TextField(
-                              controller: _destinationController,
-                              style: const TextStyle(
-                                  fontSize: 10,
-                                  color: Colors.black87,
-                                  fontWeight: FontWeight.w500),
-                              textAlign: TextAlign.center,
-                              decoration: InputDecoration(
-                                isDense: false,
-                                contentPadding:
-                                    EdgeInsets.symmetric(vertical: 10),
-                                hintText: 'Enter destination',
-                                hintStyle: TextStyle(
-                                    fontSize: 10,
-                                    color: Colors.grey.shade500,
-                                    fontWeight: FontWeight.normal),
-                                border: InputBorder.none,
+                            child: GestureDetector(
+                              onTap: () =>
+                                  _showDestinationModal(context, primaryColor),
+                              child: Container(
+                                padding: EdgeInsets.symmetric(
+                                    vertical: 16, horizontal: 20),
+                                decoration: BoxDecoration(
+                                  color: Colors.grey[50],
+                                  borderRadius: BorderRadius.circular(16),
+                                  border: Border.all(color: Colors.grey[300]!),
+                                ),
+                                child: Row(
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        _destinationController.text.isEmpty
+                                            ? 'Choose destination'
+                                            : _destinationController.text,
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          color: _destinationController
+                                                  .text.isEmpty
+                                              ? Colors.grey[500]
+                                              : Colors.black87,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ),
+                                    Icon(
+                                      Icons.keyboard_arrow_down,
+                                      color: primaryColor,
+                                      size: 24,
+                                    ),
+                                  ],
+                                ),
                               ),
-                              textInputAction: TextInputAction.search,
-                              onSubmitted: (_) => _onSearchAndNavigate(),
                             ),
                           ),
                         ],
@@ -425,6 +441,523 @@ class _TabletSearchCardState extends ConsumerState<TabletSearchCard> {
     final h = t.hour.toString().padLeft(2, '0');
     final m = t.minute.toString().padLeft(2, '0');
     return '$h:$m';
+  }
+
+  void _showDestinationModal(BuildContext context, Color primaryColor) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => _buildDestinationModal(context, primaryColor),
+    );
+  }
+
+  Widget _buildDestinationModal(BuildContext context, Color primaryColor) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Enhanced Header with gradient
+          Container(
+            padding: EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  primaryColor,
+                  primaryColor.withOpacity(0.8),
+                ],
+              ),
+              borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+              boxShadow: [
+                BoxShadow(
+                  color: primaryColor.withOpacity(0.4),
+                  blurRadius: 25,
+                  offset: Offset(0, 15),
+                  spreadRadius: 0,
+                ),
+              ],
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: Colors.white.withOpacity(0.3),
+                      width: 1,
+                    ),
+                  ),
+                  child: Icon(
+                    Icons.explore,
+                    color: Colors.white,
+                    size: 28,
+                  ),
+                ),
+                SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Choose Your Destination',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      SizedBox(height: 4),
+                      Text(
+                        'Discover amazing places to stay',
+                        style: TextStyle(
+                          color: Colors.white.withOpacity(0.9),
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: Colors.white.withOpacity(0.3),
+                      width: 1,
+                    ),
+                  ),
+                  child: IconButton(
+                    icon: Icon(Icons.close, color: Colors.white, size: 20),
+                    onPressed: () => Navigator.pop(context),
+                    padding: EdgeInsets.all(8),
+                    constraints: BoxConstraints(
+                      minWidth: 40,
+                      minHeight: 40,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // Enhanced Content
+          Container(
+            constraints: BoxConstraints(
+                maxHeight: MediaQuery.of(context).size.height * 0.7),
+            child: Column(
+              children: [
+                // Enhanced Search Bar
+                Padding(
+                  padding: EdgeInsets.all(20),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.grey[50],
+                      borderRadius: BorderRadius.circular(24),
+                      border: Border.all(color: Colors.grey[200]!),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.08),
+                          blurRadius: 15,
+                          offset: Offset(0, 5),
+                          spreadRadius: 0,
+                        ),
+                      ],
+                    ),
+                    child: TextField(
+                      controller: _destinationController,
+                      decoration: InputDecoration(
+                        hintText: 'Search destinations, cities, countries...',
+                        hintStyle: TextStyle(
+                          color: Colors.grey[500],
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                        ),
+                        prefixIcon: Container(
+                          margin: EdgeInsets.only(left: 8),
+                          padding: EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: primaryColor.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: Icon(
+                            Icons.search,
+                            color: primaryColor,
+                            size: 24,
+                          ),
+                        ),
+                        border: InputBorder.none,
+                        contentPadding:
+                            EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+                      ),
+                      onChanged: (value) {
+                        setState(() {
+                          _countrySearchQuery = value;
+                          _citySearchQuery = value;
+                        });
+                      },
+                    ),
+                  ),
+                ),
+
+                // Enhanced Destinations Section
+                Expanded(
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Container(
+                              padding: EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: primaryColor.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Icon(
+                                Icons.star,
+                                color: primaryColor,
+                                size: 20,
+                              ),
+                            ),
+                            SizedBox(width: 12),
+                            Text(
+                              'Popular Destinations',
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black,
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 20),
+                        Expanded(
+                          child: Consumer(
+                            builder: (context, ref, child) {
+                              final locationsAsync =
+                                  ref.watch(locationProvider);
+
+                              return locationsAsync.when(
+                                data: (locationData) {
+                                  final countries =
+                                      locationData.countries ?? [];
+                                  final cities = locationData.cities ?? [];
+
+                                  return ListView(
+                                    children: [
+                                      // Enhanced Countries Section
+                                      if (countries.isNotEmpty) ...[
+                                        _buildEnhancedSectionHeader(
+                                            'Countries',
+                                            Icons.public,
+                                            'Explore countries',
+                                            primaryColor),
+                                        SizedBox(height: 16),
+                                        ...countries.take(6).map((country) =>
+                                            _buildEnhancedDestinationOption(
+                                              country.name ?? 'Country',
+                                              Icons.flag,
+                                              'Country',
+                                              'Discover amazing hotels',
+                                              () {
+                                                _destinationController.text =
+                                                    country.name ?? '';
+                                                Navigator.pop(context);
+                                              },
+                                              primaryColor,
+                                            )),
+                                        SizedBox(height: 24),
+                                      ],
+
+                                      // Enhanced Cities Section
+                                      if (cities.isNotEmpty) ...[
+                                        _buildEnhancedSectionHeader(
+                                            'Cities',
+                                            Icons.location_city,
+                                            'Find city gems',
+                                            primaryColor),
+                                        SizedBox(height: 16),
+                                        ...cities.take(10).map((city) =>
+                                            _buildEnhancedDestinationOption(
+                                              city.name ?? 'City',
+                                              Icons.location_city,
+                                              'City',
+                                              'Local experiences await',
+                                              () {
+                                                _destinationController.text =
+                                                    city.name ?? '';
+                                                Navigator.pop(context);
+                                              },
+                                              primaryColor,
+                                            )),
+                                      ],
+                                    ],
+                                  );
+                                },
+                                loading: () => Center(
+                                    child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Container(
+                                      padding: EdgeInsets.all(20),
+                                      decoration: BoxDecoration(
+                                        color: primaryColor.withOpacity(0.1),
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
+                                      child: CircularProgressIndicator(
+                                          color: primaryColor),
+                                    ),
+                                    SizedBox(height: 16),
+                                    Text(
+                                      'Loading amazing destinations...',
+                                      style: TextStyle(
+                                        color: Colors.grey[600],
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ],
+                                )),
+                                error: (e, _) => Center(
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Container(
+                                        padding: EdgeInsets.all(20),
+                                        decoration: BoxDecoration(
+                                          color: Colors.red.withOpacity(0.1),
+                                          borderRadius:
+                                              BorderRadius.circular(20),
+                                        ),
+                                        child: Icon(
+                                          Icons.error_outline,
+                                          color: Colors.red[400],
+                                          size: 48,
+                                        ),
+                                      ),
+                                      SizedBox(height: 16),
+                                      Text(
+                                        'Oops! Something went wrong',
+                                        style: TextStyle(
+                                          color: Colors.red[400],
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                      SizedBox(height: 8),
+                                      Text(
+                                        'Please try again later',
+                                        style: TextStyle(
+                                          color: Colors.grey[500],
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                SizedBox(height: 20),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEnhancedSectionHeader(
+      String title, IconData icon, String subtitle, Color primaryColor) {
+    return Container(
+      margin: EdgeInsets.symmetric(vertical: 8),
+      padding: EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: primaryColor.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: primaryColor.withOpacity(0.1),
+          width: 1,
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: primaryColor.withOpacity(0.15),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: primaryColor.withOpacity(0.2),
+                width: 1,
+              ),
+            ),
+            child: Icon(
+              icon,
+              color: primaryColor,
+              size: 24,
+            ),
+          ),
+          SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  ),
+                ),
+                SizedBox(height: 4),
+                Text(
+                  subtitle,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey[600],
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEnhancedDestinationOption(String name, IconData icon,
+      String type, String description, VoidCallback onTap, Color primaryColor) {
+    return Container(
+      margin: EdgeInsets.symmetric(vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.grey[200]!),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 15,
+            offset: Offset(0, 5),
+            spreadRadius: 0,
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(20),
+          onTap: onTap,
+          child: Padding(
+            padding: EdgeInsets.all(20),
+            child: Row(
+              children: [
+                Container(
+                  padding: EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        primaryColor.withOpacity(0.15),
+                        primaryColor.withOpacity(0.25),
+                      ],
+                    ),
+                    borderRadius: BorderRadius.circular(18),
+                    border: Border.all(
+                      color: primaryColor.withOpacity(0.3),
+                      width: 1.5,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: primaryColor.withOpacity(0.2),
+                        blurRadius: 8,
+                        offset: Offset(0, 3),
+                      ),
+                    ],
+                  ),
+                  child: Icon(
+                    icon,
+                    color: primaryColor,
+                    size: 28,
+                  ),
+                ),
+                SizedBox(width: 20),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        name,
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                        ),
+                      ),
+                      SizedBox(height: 6),
+                      Text(
+                        type,
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: primaryColor,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      SizedBox(height: 4),
+                      Text(
+                        description,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey[600],
+                          fontWeight: FontWeight.w500,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  padding: EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: primaryColor.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: primaryColor.withOpacity(0.2),
+                      width: 1,
+                    ),
+                  ),
+                  child: Icon(
+                    Icons.arrow_forward_ios,
+                    color: primaryColor,
+                    size: 16,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   Future<void> _pickGuests() async {

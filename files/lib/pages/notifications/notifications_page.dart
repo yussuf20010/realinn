@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../../config/wp_config.dart';
 
 class NotificationsPage extends ConsumerStatefulWidget {
@@ -43,7 +44,7 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
               Expanded(
                 child: Center(
                   child: Text(
-                    'Notifications',
+                    'notifications'.tr(),
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: isTablet ? 28 : 24,
@@ -69,7 +70,7 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
         children: [
           // Header
           Text(
-            'Stay Updated',
+            'stay_updated'.tr(),
             style: TextStyle(
               fontSize: isTablet ? 28 : 24,
               fontWeight: FontWeight.bold,
@@ -78,7 +79,7 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
           ),
           SizedBox(height: 8),
           Text(
-            'Get the latest updates and offers',
+            'latest_updates_offers'.tr(),
             style: TextStyle(
               fontSize: isTablet ? 16 : 14,
               color: Colors.grey[600],
@@ -89,9 +90,9 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
           // Notifications list
           _buildNotificationItem(
             icon: Icons.local_offer,
-            title: 'Special Offer!',
-            message: 'Get 20% off on your next booking',
-            time: '2 hours ago',
+            title: 'special_offer'.tr(),
+            message: 'get_20_percent_off'.tr(),
+            time: '2 ${'hours_ago'.tr()}',
             isRead: false,
             isTablet: isTablet,
             primaryColor: primaryColor,
@@ -100,9 +101,9 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
 
           _buildNotificationItem(
             icon: Icons.flight_takeoff,
-            title: 'Booking Confirmed',
-            message: 'Your trip to Cairo has been confirmed',
-            time: '1 day ago',
+            title: 'booking_confirmed'.tr(),
+            message: 'trip_cairo_confirmed'.tr(),
+            time: '1 ${'day_ago'.tr()}',
             isRead: true,
             isTablet: isTablet,
             primaryColor: primaryColor,
@@ -111,9 +112,9 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
 
           _buildNotificationItem(
             icon: Icons.star,
-            title: 'New Loyalty Points',
-            message: 'You earned 150 points for your recent stay',
-            time: '2 days ago',
+            title: 'new_loyalty_points'.tr(),
+            message: 'earned_150_points'.tr(),
+            time: '2 ${'days_ago'.tr()}',
             isRead: true,
             isTablet: isTablet,
             primaryColor: primaryColor,
@@ -122,9 +123,9 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
 
           _buildNotificationItem(
             icon: Icons.location_on,
-            title: 'New Destination',
-            message: 'Explore our new hotels in Alexandria',
-            time: '3 days ago',
+            title: 'new_destination'.tr(),
+            message: 'explore_alexandria_hotels'.tr(),
+            time: '3 ${'days_ago'.tr()}',
             isRead: true,
             isTablet: isTablet,
             primaryColor: primaryColor,
@@ -133,9 +134,9 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
 
           _buildNotificationItem(
             icon: Icons.payment,
-            title: 'Payment Successful',
-            message: 'Your payment for Hotel Downtown has been processed',
-            time: '1 week ago',
+            title: 'payment_successful'.tr(),
+            message: 'payment_processed'.tr(),
+            time: '1 ${'week_ago'.tr()}',
             isRead: true,
             isTablet: isTablet,
             primaryColor: primaryColor,
@@ -144,9 +145,9 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
 
           _buildNotificationItem(
             icon: Icons.support_agent,
-            title: 'Support Ticket',
-            message: 'Your support request has been resolved',
-            time: '1 week ago',
+            title: 'support_ticket'.tr(),
+            message: 'support_request_resolved'.tr(),
+            time: '1 ${'week_ago'.tr()}',
             isRead: true,
             isTablet: isTablet,
             primaryColor: primaryColor,

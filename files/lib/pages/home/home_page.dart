@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../../config/wp_config.dart';
 import '../../config/dynamic_config.dart';
 import '../../models/hotel.dart';
 import '../../models/location.dart';
 import '../../controllers/location_controller.dart';
 import '../../controllers/hotel_controller.dart';
+import '../../core/constants/assets.dart';
 
 class HomePage extends ConsumerStatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -15,18 +17,13 @@ class HomePage extends ConsumerStatefulWidget {
 }
 
 class _HomePageState extends ConsumerState<HomePage> {
-  int _selectedTabIndex = 0;
   int _selectedDailyMonthlyIndex = 0;
-
-  // Search form controllers
   final TextEditingController _destinationController = TextEditingController();
   DateTime? _checkInDate;
   DateTime? _checkOutDate;
   int _rooms = 1;
   int _adults = 2;
   int _children = 0;
-
-  // Search results
   List<City> _cities = [];
   List<Country> _countries = [];
   List<Hotel> _allHotels = [];
@@ -34,7 +31,6 @@ class _HomePageState extends ConsumerState<HomePage> {
   bool _isLoadingLocations = true;
   bool _isLoadingHotels = true;
   String? _selectedDestination;
-  String? _selectedCountry;
 
   @override
   void initState() {
@@ -163,29 +159,85 @@ class _HomePageState extends ConsumerState<HomePage> {
     });
 
     try {
-      // Filter hotels based on selected destination
-      final filteredHotels = _allHotels.where((hotel) {
-        final matchesDestination = hotel.city
-                    ?.toLowerCase()
-                    .contains(_selectedDestination!.toLowerCase()) ==
-                true ||
-            hotel.country
-                    ?.toLowerCase()
-                    .contains(_selectedDestination!.toLowerCase()) ==
-                true;
-        return matchesDestination;
-      }).toList();
+      print('Searching for destination: $_selectedDestination');
+      print(
+          'Available countries: ${_countries.map((c) => '${c.id}:${c.name}').join(', ')}');
+      print(
+          'Available cities: ${_cities.map((c) => '${c.id}:${c.name}').join(', ')}');
+      print('Total hotels available: ${_allHotels.length}');
+      print(
+          'Sample hotel IDs: ${_allHotels.take(3).map((h) => '${h.name} (Country ID: ${h.countryId}, City ID: ${h.cityId})').join(', ')}');
+
+      // First, try to find the destination in countries and cities
+      Country? selectedCountry;
+      City? selectedCity;
+
+      // Check if it's a country
+      selectedCountry = _countries.firstWhere(
+        (country) =>
+            country.name?.toLowerCase() == _selectedDestination!.toLowerCase(),
+        orElse: () => Country(id: 0, name: ''),
+      );
+
+      // Check if it's a city
+      if (selectedCountry.id == 0) {
+        selectedCity = _cities.firstWhere(
+          (city) =>
+              city.name?.toLowerCase() == _selectedDestination!.toLowerCase(),
+          orElse: () => City(id: 0, name: '', countryId: 0),
+        );
+      }
+
+      List<Hotel> filteredHotels = [];
+
+      if (selectedCountry.id != 0) {
+        // Filter by country ID
+        filteredHotels = _allHotels
+            .where((hotel) => hotel.countryId == selectedCountry?.id)
+            .toList();
+        print(
+            'Found ${filteredHotels.length} hotels in country: ${selectedCountry.name ?? 'Unknown'}');
+        print(
+            'Hotels found: ${filteredHotels.map((h) => '${h.name} (Country ID: ${h.countryId})').join(', ')}');
+      } else if (selectedCity?.id != 0) {
+        // Filter by city ID
+        filteredHotels = _allHotels
+            .where((hotel) => hotel.cityId == selectedCity?.id)
+            .toList();
+        print(
+            'Found ${filteredHotels.length} hotels in city: ${selectedCity?.name ?? 'Unknown'}');
+        print(
+            'Hotels found: ${filteredHotels.map((h) => '${h.name} (City ID: ${h.cityId})').join(', ')}');
+      } else {
+        // Fallback: try to match by name (for backward compatibility)
+        filteredHotels = _allHotels.where((hotel) {
+          final matchesDestination = hotel.city
+                      ?.toLowerCase()
+                      .contains(_selectedDestination!.toLowerCase()) ==
+                  true ||
+              hotel.country
+                      ?.toLowerCase()
+                      .contains(_selectedDestination!.toLowerCase()) ==
+                  true;
+          return matchesDestination;
+        }).toList();
+        print('Fallback search found ${filteredHotels.length} hotels');
+      }
 
       // Navigate to search results
       if (mounted) {
         Navigator.pushNamed(context, '/search-results', arguments: {
           'hotels': filteredHotels,
           'searchQuery': _selectedDestination,
+          'checkInDate': _checkInDate,
+          'checkOutDate': _checkOutDate,
+          'rooms': _rooms,
         });
       }
     } catch (e) {
+      print('Search error: $e');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Search failed: $e')),
+        SnackBar(content: Text('search_failed'.tr(args: [e.toString()]))),
       );
     } finally {
       setState(() {
@@ -225,14 +277,14 @@ class _HomePageState extends ConsumerState<HomePage> {
           int tempChildren = _children;
 
           return AlertDialog(
-            title: Text('Select Rooms & Guests'),
+            title: Text('select_rooms_guests'.tr()),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('Rooms'),
+                    Text('rooms'.tr()),
                     Row(
                       children: [
                         IconButton(
@@ -257,7 +309,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('Adults'),
+                    Text('adults'.tr()),
                     Row(
                       children: [
                         IconButton(
@@ -282,7 +334,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('Children'),
+                    Text('children'.tr()),
                     Row(
                       children: [
                         IconButton(
@@ -309,7 +361,7 @@ class _HomePageState extends ConsumerState<HomePage> {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: Text('Cancel'),
+                child: Text('cancel'.tr()),
               ),
               ElevatedButton(
                 onPressed: () {
@@ -320,18 +372,13 @@ class _HomePageState extends ConsumerState<HomePage> {
                   });
                   Navigator.pop(context);
                 },
-                child: Text('Apply'),
+                child: Text('apply'.tr()),
               ),
             ],
           );
         },
       ),
     );
-  }
-
-  void _navigateToCityHotels(String cityName) {
-    print('Navigating to city hotels: $cityName');
-    Navigator.pushNamed(context, '/city-hotels', arguments: cityName);
   }
 
   void _navigateToCountryHotels(String countryName) {
@@ -341,7 +388,7 @@ class _HomePageState extends ConsumerState<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    final dynamicConfig = ref.watch(dynamicConfigProvider);
+    ref.watch(dynamicConfigProvider);
     final primaryColor = WPConfig.navbarColor;
     final isTablet = MediaQuery.of(context).size.width >= 768;
 
@@ -402,7 +449,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                   Expanded(
                     child: Center(
                       child: Image.asset(
-                        'assets/png/logo.png',
+                        AssetsManager.appbar,
                         height: isTablet ? 50 : 40,
                         fit: BoxFit.contain,
                       ),
@@ -412,12 +459,38 @@ class _HomePageState extends ConsumerState<HomePage> {
                   // Right side - Language and Profile
                   Row(
                     children: [
-                      IconButton(
-                        icon:
-                            Icon(Icons.language, color: Colors.white, size: 28),
-                        onPressed: () {
-                          _showLanguageDialog(context);
-                        },
+                      // Language Toggle
+                      Container(
+                        margin: EdgeInsets.symmetric(horizontal: 8),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: Colors.white.withOpacity(0.3),
+                            width: 1,
+                          ),
+                        ),
+                        child: Material(
+                          color: Colors.transparent,
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(20),
+                            onTap: () => _toggleLanguage(context),
+                            child: Container(
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 16, vertical: 8),
+                              child: Text(
+                                Localizations.localeOf(context)
+                                    .languageCode
+                                    .toUpperCase(),
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: isTablet ? 16 : 14,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
                       ),
                       IconButton(
                         icon: Icon(Icons.person, color: Colors.white, size: 28),
@@ -440,54 +513,90 @@ class _HomePageState extends ConsumerState<HomePage> {
     );
   }
 
-  void _showLanguageDialog(BuildContext context) {
-    showDialog(
+  void _toggleLanguage(BuildContext context) async {
+    final currentLocale = Localizations.localeOf(context);
+    final newLocale = currentLocale.languageCode == 'ar'
+        ? Locale('en', 'US')
+        : Locale('ar', 'SA');
+
+    final newLanguageName =
+        newLocale.languageCode == 'ar' ? 'العربية' : 'English';
+
+    print('Home Page - Current locale: ${currentLocale.languageCode}');
+    print('Home Page - New locale: ${newLocale.languageCode}');
+
+    // Show confirmation dialog
+    final shouldChange = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Select Language'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: Icon(Icons.language),
-              title: Text('English'),
-              subtitle: Text('English'),
-              onTap: () {
-                Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Language changed to English')),
-                );
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.language),
-              title: Text('العربية'),
-              subtitle: Text('Arabic'),
-              onTap: () {
-                Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('تم تغيير اللغة إلى العربية')),
-                );
-              },
-            ),
-          ],
-        ),
+        title: Text('change_language'.tr()),
+        content: Text('change_language_confirm'.tr(args: [newLanguageName])),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('Cancel'),
+            onPressed: () => Navigator.pop(context, false),
+            child: Text('cancel'.tr()),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text('confirm'.tr()),
           ),
         ],
       ),
     );
+
+    if (shouldChange != true) return;
+
+    try {
+      // Set the new locale
+      await EasyLocalization.of(context)!.setLocale(newLocale);
+      print(
+          'Home Page - Locale set successfully to: ${newLocale.languageCode}');
+
+      // Show success message
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('language_changed_success'.tr()),
+            backgroundColor: Colors.green,
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+
+      // Force a rebuild by calling setState
+      setState(() {});
+
+      // Also force a rebuild of the entire app to ensure RTL is applied
+      if (context.mounted) {
+        Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
+      }
+    } catch (e) {
+      print('Home Page - Error setting locale: $e');
+      // Show error dialog
+      if (context.mounted) {
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Text('error'.tr()),
+            content: Text('failed_change_language'.tr(args: [e.toString()])),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text('ok'.tr()),
+              ),
+            ],
+          ),
+        );
+      }
+    }
   }
 
   Widget _buildDailyMonthlyButtons(bool isTablet, Color primaryColor) {
-    final buttons = ['Daily', 'Monthly'];
+    final buttons = ['daily'.tr(), 'monthly'.tr()];
 
     return Container(
       height: 50,
-      padding: EdgeInsets.symmetric(horizontal: isTablet ? 16 : 12),
+      padding: EdgeInsets.symmetric(horizontal: isTablet ? 90 : 90),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: buttons.asMap().entries.map((entry) {
@@ -495,32 +604,36 @@ class _HomePageState extends ConsumerState<HomePage> {
           final button = entry.value;
           final isSelected = _selectedDailyMonthlyIndex == index;
 
-          return Container(
-            margin: EdgeInsets.symmetric(horizontal: 8),
-            child: GestureDetector(
-              onTap: () {
-                setState(() {
-                  _selectedDailyMonthlyIndex = index;
-                });
-              },
-              child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                decoration: BoxDecoration(
-                  color: isSelected ? Colors.white : Colors.transparent,
-                  borderRadius: BorderRadius.circular(25),
-                  border: Border.all(
-                    color: isSelected
-                        ? primaryColor
-                        : Colors.white.withOpacity(0.3),
-                    width: 1,
+          return Expanded(
+            child: Container(
+              margin: EdgeInsets.symmetric(horizontal: 8),
+              height: 50,
+              child: GestureDetector(
+                onTap: () {
+                  setState(() {
+                    _selectedDailyMonthlyIndex = index;
+                  });
+                },
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: isSelected ? Colors.white : Colors.transparent,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: isSelected
+                          ? primaryColor
+                          : Colors.white.withOpacity(0.3),
+                      width: 1,
+                    ),
                   ),
-                ),
-                child: Text(
-                  button,
-                  style: TextStyle(
-                    color: isSelected ? primaryColor : Colors.white,
-                    fontSize: isTablet ? 16 : 14,
-                    fontWeight: FontWeight.bold,
+                  child: Center(
+                    child: Text(
+                      button,
+                      style: TextStyle(
+                        color: isSelected ? primaryColor : Colors.white,
+                        fontSize: isTablet ? 16 : 14,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
                 ),
               ),
@@ -534,88 +647,139 @@ class _HomePageState extends ConsumerState<HomePage> {
   Widget _buildSearchInterface(bool isTablet, Color primaryColor) {
     return Container(
       margin: EdgeInsets.all(isTablet ? 16 : 12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.orange, width: 3),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 8,
-            offset: Offset(0, 2),
-          ),
-        ],
-      ),
       child: Padding(
         padding: EdgeInsets.all(isTablet ? 16 : 12),
         child: Column(
           children: [
-            // Destination field
-            _buildSearchField(
+            // Cell 1: Destination
+            _buildSearchCell(
               icon: Icons.search,
-              hintText: _selectedDestination ?? 'Enter destination',
+              text: _selectedDestination ?? 'Enter destination',
               onTap: _showDestinationPicker,
               isTablet: isTablet,
+              isFirst: true,
             ),
 
-            SizedBox(height: 8),
-
-            // Date selection field
-            _buildSearchField(
+            // Cell 2: Date
+            _buildSearchCell(
               icon: Icons.calendar_today,
-              hintText: _checkInDate != null && _checkOutDate != null
-                  ? '${_checkInDate!.day}/${_checkInDate!.month} - ${_checkOutDate!.day}/${_checkOutDate!.month}'
-                  : 'Select dates',
+              text: _checkInDate != null && _checkOutDate != null
+                  ? '${_formatDate(_checkInDate!)} - ${_formatDate(_checkOutDate!)}'
+                  : 'Enter date',
               onTap: _selectDates,
               isTablet: isTablet,
+              isFirst: false,
             ),
 
-            SizedBox(height: 8),
-
-            // Occupancy field
-            _buildSearchField(
+            // Cell 3: Rooms
+            _buildSearchCell(
               icon: Icons.person,
-              hintText: '$_rooms room · $_adults adults · $_children children',
+              text: '$_rooms room · $_adults adults · $_children children',
               onTap: _showOccupancyDialog,
               isTablet: isTablet,
+              isFirst: false,
             ),
 
-            SizedBox(height: 12),
+            // Cell 4: Search Button
+            _buildSearchButton(primaryColor, isTablet),
+          ],
+        ),
+      ),
+    );
+  }
 
-            // Search button
-            SizedBox(
-              width: double.infinity,
-              height: isTablet ? 60 : 50,
-              child: ElevatedButton(
-                onPressed: _isSearching ? null : _performSearch,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: primaryColor,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  elevation: 0,
+  Widget _buildSearchCell({
+    required IconData icon,
+    required String text,
+    required VoidCallback onTap,
+    required bool isTablet,
+    required bool isFirst,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: double.infinity,
+        height: isTablet ? 60 : 50,
+        padding:
+            EdgeInsets.symmetric(horizontal: 16, vertical: isTablet ? 16 : 14),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          border: Border(
+            top: isFirst
+                ? BorderSide(color: Colors.orange, width: 2)
+                : BorderSide.none,
+            bottom: BorderSide(color: Colors.orange, width: 2),
+            left: BorderSide(color: Colors.orange, width: 2),
+            right: BorderSide(color: Colors.orange, width: 2),
+          ),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              icon,
+              color: Colors.black87,
+              size: isTablet ? 24 : 22,
+            ),
+            SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                text,
+                style: TextStyle(
+                  color: Colors.black,
+                  fontSize: isTablet ? 16 : 15,
+                  fontWeight: FontWeight.bold,
                 ),
-                child: _isSearching
-                    ? SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          valueColor:
-                              AlwaysStoppedAnimation<Color>(Colors.white),
-                        ),
-                      )
-                    : Text(
-                        'Search',
-                        style: TextStyle(
-                          fontSize: isTablet ? 16 : 14,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSearchButton(Color primaryColor, bool isTablet) {
+    return Container(
+      width: double.infinity,
+      height: isTablet ? 60 : 50,
+      decoration: BoxDecoration(
+        border: Border(
+          bottom: BorderSide(color: Colors.orange, width: 2),
+          left: BorderSide(color: Colors.orange, width: 2),
+          right: BorderSide(color: Colors.orange, width: 2),
+        ),
+      ),
+      child: ElevatedButton(
+        onPressed: _isSearching ? null : _performSearch,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: primaryColor,
+          foregroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.zero,
+          ),
+          elevation: 0,
+          padding: EdgeInsets.zero,
+        ),
+        child: Container(
+          width: double.infinity,
+          height: double.infinity,
+          alignment: Alignment.center,
+          child: _isSearching
+              ? SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                  ),
+                )
+              : Text(
+                  'SEARCH',
+                  style: TextStyle(
+                    fontSize: isTablet ? 16 : 14,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1.0,
+                  ),
+                ),
         ),
       ),
     );
@@ -656,6 +820,79 @@ class _HomePageState extends ConsumerState<HomePage> {
     );
   }
 
+  Widget _buildCell({
+    required IconData icon,
+    required String label,
+    String? value,
+    required VoidCallback onTap,
+    required bool isTablet,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: Colors.orange, width: 2),
+        ),
+        child: Row(
+          children: [
+            Icon(icon, color: Colors.orange, size: isTablet ? 20 : 18),
+            SizedBox(width: 8),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    label,
+                    style: TextStyle(
+                      color: Colors.grey[600],
+                      fontSize: isTablet ? 12 : 11,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  SizedBox(height: 2),
+                  Text(
+                    value ?? '-',
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: isTablet ? 14 : 13,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ),
+            Icon(Icons.arrow_drop_down, color: Colors.orange),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _formatDate(DateTime date) {
+    final months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec'
+    ];
+    final day = date.day.toString().padLeft(2, '0');
+    final month = months[date.month - 1];
+    return '$day $month';
+  }
+
   Widget _buildMainContent(bool isTablet, Color primaryColor) {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: isTablet ? 20 : 16),
@@ -691,7 +928,7 @@ class _HomePageState extends ConsumerState<HomePage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Travel more, spend less',
+          'travel_more_spend_less'.tr(),
           style: TextStyle(
             fontSize: isTablet ? 15 : 15,
             fontWeight: FontWeight.bold,
@@ -713,19 +950,19 @@ class _HomePageState extends ConsumerState<HomePage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Genius',
+                      'genius'.tr(),
                       style: TextStyle(
                         color: Colors.white,
-                        fontSize: isTablet ? 13 : 13,
+                        fontSize: isTablet ? 12 : 12,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                     SizedBox(height: 4),
                     Text(
-                      'mahmoud, you\'re at Genius Level 1 in our loyalty program',
+                      'genius_level_message'.tr(),
                       style: TextStyle(
                         color: Colors.white,
-                        fontSize: isTablet ? 13 : 13,
+                        fontSize: isTablet ? 12 : 12,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -747,19 +984,19 @@ class _HomePageState extends ConsumerState<HomePage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      '10% discounts',
+                      'discounts_10'.tr(),
                       style: TextStyle(
                         color: Colors.black,
-                        fontSize: isTablet ? 13 : 13,
+                        fontSize: isTablet ? 12 : 12,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                     SizedBox(height: 8),
                     Text(
-                      'Enjoy discounts at partner properties worldwide',
+                      'discounts_description'.tr(),
                       style: TextStyle(
                         color: Colors.black,
-                        fontSize: isTablet ? 13 : 13,
+                        fontSize: isTablet ? 12 : 12,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -778,7 +1015,7 @@ class _HomePageState extends ConsumerState<HomePage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Offers',
+          'offers'.tr(),
           style: TextStyle(
             fontSize: isTablet ? 15 : 15,
             fontWeight: FontWeight.bold,
@@ -787,7 +1024,7 @@ class _HomePageState extends ConsumerState<HomePage> {
         ),
         SizedBox(height: 8),
         Text(
-          'Promotions, deals, and special offers for you',
+          'offers_description'.tr(),
           style: TextStyle(
             fontSize: isTablet ? 15 : 15,
             color: Colors.black,
@@ -817,7 +1054,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Quick escape, quality time',
+                      'quick_escape_quality_time'.tr(),
                       style: TextStyle(
                         fontSize: isTablet ? 15 : 15,
                         fontWeight: FontWeight.bold,
@@ -826,7 +1063,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                     ),
                     SizedBox(height: 4),
                     Text(
-                      'Save up to 20% with a Getaway Deal',
+                      'save_up_to_20_percent'.tr(),
                       style: TextStyle(
                         fontSize: isTablet ? 15 : 15,
                         color: Colors.black,
@@ -861,7 +1098,7 @@ class _HomePageState extends ConsumerState<HomePage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Explore Destinations',
+          'explore_destinations'.tr(),
           style: TextStyle(
             fontSize: isTablet ? 15 : 15,
             fontWeight: FontWeight.bold,
@@ -869,17 +1106,6 @@ class _HomePageState extends ConsumerState<HomePage> {
           ),
         ),
         SizedBox(height: 8),
-        Text(
-          'from our locations',
-          style: TextStyle(
-            fontSize: isTablet ? 15 : 15,
-            color: Colors.black,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        SizedBox(height: isTablet ? 20 : 16),
-
-        // Loading state
         if (_isLoadingLocations || _isLoadingHotels)
           Center(
             child: Padding(
@@ -889,7 +1115,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                   CircularProgressIndicator(color: primaryColor),
                   SizedBox(height: 16),
                   Text(
-                    'Loading destinations...',
+                    'loading_destinations'.tr(),
                     style: TextStyle(
                       fontSize: isTablet ? 15 : 15,
                       color: Colors.grey[600],
@@ -912,7 +1138,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                   ),
                   SizedBox(height: 16),
                   Text(
-                    'No destinations available',
+                    'no_destinations_available'.tr(),
                     style: TextStyle(
                       fontSize: isTablet ? 15 : 15,
                       color: Colors.grey[600],
@@ -921,7 +1147,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                   ),
                   SizedBox(height: 8),
                   Text(
-                    'Please check your API connection',
+                    'check_network_connection'.tr(),
                     style: TextStyle(
                       fontSize: isTablet ? 14 : 12,
                       color: Colors.grey[500],
@@ -937,7 +1163,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                       backgroundColor: primaryColor,
                       foregroundColor: Colors.white,
                     ),
-                    child: Text('Retry'),
+                    child: Text('retry'.tr()),
                   ),
                 ],
               ),
@@ -946,20 +1172,7 @@ class _HomePageState extends ConsumerState<HomePage> {
         else ...[
           // Countries section with cities inside
           if (_countries.isNotEmpty) ...[
-            Text(
-              'Countries',
-              style: TextStyle(
-                fontSize: isTablet ? 20 : 18,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-              ),
-            ),
             SizedBox(height: 12),
-            // Show first country with its cities
-            if (_countries.isNotEmpty) ...[
-              _buildCountryWithCities(_countries.first, isTablet, primaryColor),
-              SizedBox(height: 20),
-            ],
             // Show other countries
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
@@ -968,7 +1181,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                     .skip(1)
                     .take(3)
                     .map((country) => _buildDestinationCard(
-                          country.name ?? 'Unknown Country',
+                          country.name ?? 'unknown_country'.tr(),
                           '',
                           isTablet,
                           () => _navigateToCountryHotels(country.name ?? ''),
@@ -979,157 +1192,9 @@ class _HomePageState extends ConsumerState<HomePage> {
             ),
             SizedBox(height: 20),
           ],
-
-          // Cities section
-          if (_cities.isNotEmpty) ...[
-            Text(
-              'Cities',
-              style: TextStyle(
-                fontSize: isTablet ? 20 : 18,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-              ),
-            ),
-            SizedBox(height: 12),
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: _cities
-                    .take(6)
-                    .map((city) => _buildDestinationCard(
-                            city.name ?? 'Unknown', '', isTablet, () {
-                          _navigateToCityHotels(city.name ?? '');
-                        }))
-                    .toList(),
-              ),
-            ),
-          ],
         ],
       ],
     );
-  }
-
-  Widget _buildCountryWithCities(
-      Country country, bool isTablet, Color primaryColor) {
-    // Get cities for this country
-    final countryCities =
-        _cities.where((city) => city.countryId == country.id).toList();
-
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.all(isTablet ? 20 : 16),
-      decoration: BoxDecoration(
-        color: Colors.green[50],
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.green[200]!),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Country header
-          Row(
-            children: [
-              Icon(Icons.public,
-                  color: Colors.green[600], size: isTablet ? 24 : 20),
-              SizedBox(width: 8),
-              Text(
-                country.name ?? 'Unknown Country',
-                style: TextStyle(
-                  fontSize: isTablet ? 20 : 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                ),
-              ),
-              Spacer(),
-              Text(
-                'Click to explore',
-                style: TextStyle(
-                  fontSize: isTablet ? 14 : 12,
-                  color: Colors.green[600],
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: 16),
-
-          // Cities in this country
-          if (countryCities.isNotEmpty) ...[
-            Text(
-              'Cities in ${country.name}:',
-              style: TextStyle(
-                fontSize: isTablet ? 16 : 14,
-                fontWeight: FontWeight.w600,
-                color: Colors.black,
-              ),
-            ),
-            SizedBox(height: 12),
-            Wrap(
-              spacing: 12,
-              runSpacing: 8,
-              children: countryCities
-                  .take(4)
-                  .map((city) => GestureDetector(
-                        onTap: () => _navigateToCityHotels(city.name ?? ''),
-                        child: Container(
-                          padding:
-                              EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(20),
-                            border: Border.all(color: Colors.green[300]!),
-                          ),
-                          child: Text(
-                            city.name ?? 'Unknown',
-                            style: TextStyle(
-                              fontSize: isTablet ? 14 : 12,
-                              color: Colors.green[700],
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ),
-                      ))
-                  .toList(),
-            ),
-            if (countryCities.length > 4) ...[
-              SizedBox(height: 8),
-              Text(
-                '+${countryCities.length - 4} more cities',
-                style: TextStyle(
-                  fontSize: isTablet ? 12 : 10,
-                  color: Colors.green[600],
-                  fontStyle: FontStyle.italic,
-                ),
-              ),
-            ],
-          ] else ...[
-            Text(
-              'No cities available for this country',
-              style: TextStyle(
-                fontSize: isTablet ? 14 : 12,
-                color: Colors.grey[600],
-                fontStyle: FontStyle.italic,
-              ),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-
-  int _getHotelsInCountry(String countryName) {
-    return _allHotels
-        .where((hotel) =>
-            hotel.country?.toLowerCase().contains(countryName.toLowerCase()) ==
-            true)
-        .length;
-  }
-
-  int _getHotelsInCity(String cityName) {
-    return _allHotels
-        .where((hotel) =>
-            hotel.city?.toLowerCase().contains(cityName.toLowerCase()) == true)
-        .length;
   }
 
   Widget _buildDestinationCard(
@@ -1321,7 +1386,7 @@ class _HomePageState extends ConsumerState<HomePage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Why RealInn?',
+          'why_realinn'.tr(),
           style: TextStyle(
             fontSize: isTablet ? 13 : 13,
             fontWeight: FontWeight.bold,
@@ -1336,9 +1401,8 @@ class _HomePageState extends ConsumerState<HomePage> {
             children: [
               _buildFeatureCard(
                 icon: Icons.percent,
-                title: 'Mobile-only pricing',
-                description:
-                    'Save money on select stays when you book with the app',
+                title: 'mobile_only_pricing'.tr(),
+                description: 'mobile_pricing_description'.tr(),
                 isTablet: isTablet,
                 primaryColor: primaryColor,
                 backgroundColor: Colors.yellow[100]!,
@@ -1347,9 +1411,8 @@ class _HomePageState extends ConsumerState<HomePage> {
               SizedBox(width: 16),
               _buildFeatureCard(
                 icon: Icons.calendar_today,
-                title: 'Free cancellation',
-                description:
-                    'Find what works with flexible cancellation options',
+                title: 'free_cancellation'.tr(),
+                description: 'free_cancellation_description'.tr(),
                 isTablet: isTablet,
                 primaryColor: primaryColor,
                 backgroundColor: Colors.blue[100]!,
@@ -1358,8 +1421,8 @@ class _HomePageState extends ConsumerState<HomePage> {
               SizedBox(width: 16),
               _buildFeatureCard(
                 icon: Icons.security,
-                title: 'Secure Booking',
-                description: 'Your data is protected with bank-level security',
+                title: 'secure_booking'.tr(),
+                description: 'secure_booking_description'.tr(),
                 isTablet: isTablet,
                 primaryColor: primaryColor,
                 backgroundColor: Colors.green[100]!,
@@ -1368,8 +1431,8 @@ class _HomePageState extends ConsumerState<HomePage> {
               SizedBox(width: 16),
               _buildFeatureCard(
                 icon: Icons.support_agent,
-                title: '24/7 Support',
-                description: 'Get help anytime with our customer service',
+                title: 'support_24_7'.tr(),
+                description: 'support_24_7_description'.tr(),
                 isTablet: isTablet,
                 primaryColor: primaryColor,
                 backgroundColor: Colors.purple[100]!,
@@ -1418,7 +1481,7 @@ class _HomePageState extends ConsumerState<HomePage> {
           Text(
             title,
             style: TextStyle(
-              fontSize: isTablet ? 16 : 14,
+              fontSize: isTablet ? 12 : 10,
               fontWeight: FontWeight.bold,
               color: Colors.black,
             ),
@@ -1441,7 +1504,6 @@ class _HomePageState extends ConsumerState<HomePage> {
   }
 }
 
-// Destination picker dialog
 class DestinationPickerDialog extends StatelessWidget {
   final List<Country> countries;
   final List<City> cities;
@@ -1465,7 +1527,7 @@ class DestinationPickerDialog extends StatelessWidget {
             Padding(
               padding: EdgeInsets.all(16),
               child: Text(
-                'Select Destination',
+                'select_destination'.tr(),
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
@@ -1479,8 +1541,8 @@ class DestinationPickerDialog extends StatelessWidget {
                   children: [
                     TabBar(
                       tabs: [
-                        Tab(text: 'Countries (${countries.length})'),
-                        Tab(text: 'Cities (${cities.length})'),
+                        Tab(text: 'countries'.tr() + ' (${countries.length})'),
+                        Tab(text: 'cities'.tr() + ' (${cities.length})'),
                       ],
                     ),
                     Expanded(
@@ -1493,8 +1555,9 @@ class DestinationPickerDialog extends StatelessWidget {
                               final country = countries[index];
                               return ListTile(
                                 leading: Icon(Icons.public),
-                                title: Text(country.name ?? 'Unknown Country'),
-                                subtitle: Text('Click to select'),
+                                title: Text(
+                                    country.name ?? 'unknown_country'.tr()),
+                                subtitle: Text('click_to_select'.tr()),
                                 onTap: () {
                                   onDestinationSelected(country.name ?? '');
                                   Navigator.pop(context);
@@ -1509,8 +1572,8 @@ class DestinationPickerDialog extends StatelessWidget {
                               final city = cities[index];
                               return ListTile(
                                 leading: Icon(Icons.location_city),
-                                title: Text(city.name ?? 'Unknown City'),
-                                subtitle: Text('Click to select'),
+                                title: Text(city.name ?? 'unknown_city'.tr()),
+                                subtitle: Text('click_to_select'.tr()),
                                 onTap: () {
                                   onDestinationSelected(city.name ?? '');
                                   Navigator.pop(context);

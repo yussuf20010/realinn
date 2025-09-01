@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../../config/wp_config.dart';
 
 class ProfilePage extends ConsumerStatefulWidget {
@@ -43,7 +44,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               Expanded(
                 child: Center(
                   child: Text(
-                    'Profile',
+                    'profile'.tr(),
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: isTablet ? 20 : 15,
@@ -72,12 +73,12 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
 
           // Menu items
           _buildMenuSection(
-            title: 'Account',
+            title: 'account'.tr(),
             items: [
               _buildMenuItem(
                 icon: Icons.person_outline,
-                title: 'Personal Information',
-                subtitle: 'Update your profile details',
+                title: 'personal_information'.tr(),
+                subtitle: 'update_profile_details'.tr(),
                 onTap: () {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text('Personal Information')),
@@ -88,8 +89,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               ),
               _buildMenuItem(
                 icon: Icons.lock_outline,
-                title: 'Security',
-                subtitle: 'Password and privacy settings',
+                title: 'security'.tr(),
+                subtitle: 'password_privacy_settings'.tr(),
                 onTap: () {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text('Security Settings')),
@@ -100,8 +101,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               ),
               _buildMenuItem(
                 icon: Icons.notifications_outlined,
-                title: 'Notifications',
-                subtitle: 'Manage your notification preferences',
+                title: 'notifications'.tr(),
+                subtitle: 'notification_preferences'.tr(),
                 onTap: () {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text('Notification Settings')),
@@ -117,12 +118,12 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           SizedBox(height: 24),
 
           _buildMenuSection(
-            title: 'Travel',
+            title: 'travel'.tr(),
             items: [
               _buildMenuItem(
                 icon: Icons.favorite_outline,
-                title: 'Saved Hotels',
-                subtitle: 'Your favorite accommodations',
+                title: 'saved_hotels_title'.tr(),
+                subtitle: 'favorite_accommodations'.tr(),
                 onTap: () {
                   Navigator.pushNamed(context, '/favourites');
                 },
@@ -131,8 +132,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               ),
               _buildMenuItem(
                 icon: Icons.book_online_outlined,
-                title: 'My Bookings',
-                subtitle: 'View and manage your trips',
+                title: 'my_bookings'.tr(),
+                subtitle: 'view_manage_trips'.tr(),
                 onTap: () {
                   Navigator.pushNamed(context, '/bookings');
                 },
