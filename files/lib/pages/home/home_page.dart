@@ -394,15 +394,16 @@ class _HomePageState extends ConsumerState<HomePage> {
 
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: PreferredSize(
-        preferredSize: Size.fromHeight(160),
-        child: _buildCustomAppBar(context, primaryColor, isTablet),
-      ),
       body: SingleChildScrollView(
         child: Column(
           children: [
+            // App bar that scrolls with content
+            _buildCustomAppBar(context, primaryColor, isTablet),
+
             // Search interface
             _buildSearchInterface(isTablet, primaryColor),
+
+            SizedBox(height: 20),
 
             // Main content
             _buildMainContent(isTablet, primaryColor),
@@ -421,27 +422,27 @@ class _HomePageState extends ConsumerState<HomePage> {
           children: [
             // Main app bar content
             Container(
-              height: 80,
+              height: 80, // Decreased from 120 to 80
+              padding: EdgeInsets.symmetric(horizontal: 8),
               child: Row(
                 children: [
-                  // Left side - Notification and Customer Service
+                  // Left side - Notification and Chat
                   Row(
                     children: [
                       IconButton(
                         icon: Icon(Icons.notifications_outlined,
-                            color: Colors.white, size: 28),
+                            color: Colors.white, size: 24),
                         onPressed: () {
                           Navigator.pushNamed(context, '/notifications');
                         },
                       ),
                       IconButton(
-                        icon: Icon(Icons.support_agent,
-                            color: Colors.white, size: 28),
+                        icon: Icon(Icons.chat, color: Colors.white, size: 24),
                         onPressed: () {
                           Navigator.pushNamed(context, '/customer-service');
                         },
                       ),
-                      SizedBox(width: 16),
+                      SizedBox(width: 8),
                     ],
                   ),
 
@@ -450,7 +451,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                     child: Center(
                       child: Image.asset(
                         AssetsManager.appbar,
-                        height: isTablet ? 50 : 40,
+                        height: isTablet ? 40 : 32,
                         fit: BoxFit.contain,
                       ),
                     ),
@@ -461,10 +462,10 @@ class _HomePageState extends ConsumerState<HomePage> {
                     children: [
                       // Language Toggle
                       Container(
-                        margin: EdgeInsets.symmetric(horizontal: 8),
+                        margin: EdgeInsets.symmetric(horizontal: 4),
                         decoration: BoxDecoration(
                           color: Colors.white.withOpacity(0.2),
-                          borderRadius: BorderRadius.circular(20),
+                          borderRadius: BorderRadius.circular(16),
                           border: Border.all(
                             color: Colors.white.withOpacity(0.3),
                             width: 1,
@@ -473,11 +474,11 @@ class _HomePageState extends ConsumerState<HomePage> {
                         child: Material(
                           color: Colors.transparent,
                           child: InkWell(
-                            borderRadius: BorderRadius.circular(20),
+                            borderRadius: BorderRadius.circular(16),
                             onTap: () => _toggleLanguage(context),
                             child: Container(
                               padding: EdgeInsets.symmetric(
-                                  horizontal: 16, vertical: 8),
+                                  horizontal: 12, vertical: 6),
                               child: Text(
                                 Localizations.localeOf(context)
                                     .languageCode
@@ -485,7 +486,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                                 style: TextStyle(
                                   color: Colors.white,
                                   fontWeight: FontWeight.bold,
-                                  fontSize: isTablet ? 16 : 14,
+                                  fontSize: isTablet ? 14 : 12,
                                 ),
                               ),
                             ),
@@ -493,20 +494,17 @@ class _HomePageState extends ConsumerState<HomePage> {
                         ),
                       ),
                       IconButton(
-                        icon: Icon(Icons.person, color: Colors.white, size: 28),
+                        icon: Icon(Icons.person, color: Colors.white, size: 24),
                         onPressed: () {
                           Navigator.pushNamed(context, '/profile');
                         },
                       ),
-                      SizedBox(width: 16),
+                      SizedBox(width: 8),
                     ],
                   ),
                 ],
               ),
             ),
-
-            // Daily/Monthly buttons
-            _buildDailyMonthlyButtons(isTablet, primaryColor),
           ],
         ),
       ),
@@ -595,44 +593,44 @@ class _HomePageState extends ConsumerState<HomePage> {
     final buttons = ['daily'.tr(), 'monthly'.tr()];
 
     return Container(
-      height: 50,
-      padding: EdgeInsets.symmetric(horizontal: isTablet ? 90 : 90),
+      height: 50, // Match image height
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
         children: buttons.asMap().entries.map((entry) {
           final index = entry.key;
           final button = entry.value;
           final isSelected = _selectedDailyMonthlyIndex == index;
 
           return Expanded(
-            child: Container(
-              margin: EdgeInsets.symmetric(horizontal: 8),
-              height: 50,
-              child: GestureDetector(
-                onTap: () {
-                  setState(() {
-                    _selectedDailyMonthlyIndex = index;
-                  });
-                },
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: isSelected ? Colors.white : Colors.transparent,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      color: isSelected
-                          ? primaryColor
-                          : Colors.white.withOpacity(0.3),
-                      width: 1,
-                    ),
+            child: GestureDetector(
+              onTap: () {
+                setState(() {
+                  _selectedDailyMonthlyIndex = index;
+                });
+              },
+              child: Container(
+                height: 50, // Match image height
+                decoration: BoxDecoration(
+                  color: isSelected
+                      ? Colors.orange.withOpacity(0.1)
+                      : Colors.white,
+                  borderRadius: BorderRadius.only(
+                    topLeft: index == 0 ? Radius.circular(12) : Radius.zero,
+                    topRight: index == 1 ? Radius.circular(12) : Radius.zero,
                   ),
-                  child: Center(
-                    child: Text(
-                      button,
-                      style: TextStyle(
-                        color: isSelected ? primaryColor : Colors.white,
-                        fontSize: isTablet ? 16 : 14,
-                        fontWeight: FontWeight.bold,
-                      ),
+                  border: Border(
+                    right: index == 0
+                        ? BorderSide(color: Colors.orange, width: 2)
+                        : BorderSide.none,
+                    bottom: BorderSide(color: Colors.orange, width: 2),
+                  ),
+                ),
+                child: Center(
+                  child: Text(
+                    button,
+                    style: TextStyle(
+                      color: isSelected ? Colors.orange : Colors.black,
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
                 ),
@@ -645,51 +643,63 @@ class _HomePageState extends ConsumerState<HomePage> {
   }
 
   Widget _buildSearchInterface(bool isTablet, Color primaryColor) {
-    return Container(
-      margin: EdgeInsets.all(isTablet ? 16 : 12),
-      child: Padding(
-        padding: EdgeInsets.all(isTablet ? 16 : 12),
-        child: Column(
-          children: [
-            // Cell 1: Destination
-            _buildSearchCell(
-              icon: Icons.search,
-              text: _selectedDestination ?? 'Enter destination',
-              onTap: _showDestinationPicker,
-              isTablet: isTablet,
-              isFirst: true,
-            ),
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: isTablet ? 20 : 16),
+      child: Column(
+        children: [
+          // Add space before the table
+          SizedBox(height: 20),
 
-            // Cell 2: Date
-            _buildSearchCell(
-              icon: Icons.calendar_today,
-              text: _checkInDate != null && _checkOutDate != null
-                  ? '${_formatDate(_checkInDate!)} - ${_formatDate(_checkOutDate!)}'
-                  : 'Enter date',
-              onTap: _selectDates,
-              isTablet: isTablet,
-              isFirst: false,
+          // Main container with orange border that includes buttons and table (like image)
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius:
+                  BorderRadius.circular(12), // Keep rounded corners like image
+              border: Border.all(
+                  color: Colors.orange,
+                  width: 2), // Full orange border around entire container
             ),
+            child: Column(
+              children: [
+                // Daily/Monthly buttons positioned at the top
+                _buildDailyMonthlyButtons(isTablet, primaryColor),
 
-            // Cell 3: Rooms
-            _buildSearchCell(
-              icon: Icons.person,
-              text: '$_rooms room · $_adults adults · $_children children',
-              onTap: _showOccupancyDialog,
-              isTablet: isTablet,
-              isFirst: false,
+                // Search fields
+                _buildSearchCell(
+                  text: _selectedDestination ?? 'Destination',
+                  onTap: _showDestinationPicker,
+                  isTablet: isTablet,
+                  isFirst: true,
+                ),
+
+                _buildSearchCell(
+                  text: _checkInDate != null && _checkOutDate != null
+                      ? '${_formatDate(_checkInDate!)} - ${_formatDate(_checkOutDate!)}'
+                      : 'Date',
+                  onTap: _selectDates,
+                  isTablet: isTablet,
+                  isFirst: false,
+                ),
+
+                _buildSearchCell(
+                  text: '$_rooms room · $_adults adults · $_children children',
+                  onTap: _showOccupancyDialog,
+                  isTablet: isTablet,
+                  isFirst: false,
+                ),
+
+                // Search Button
+                _buildSearchButton(primaryColor, isTablet),
+              ],
             ),
-
-            // Cell 4: Search Button
-            _buildSearchButton(primaryColor, isTablet),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 
   Widget _buildSearchCell({
-    required IconData icon,
     required String text,
     required VoidCallback onTap,
     required bool isTablet,
@@ -699,39 +709,24 @@ class _HomePageState extends ConsumerState<HomePage> {
       onTap: onTap,
       child: Container(
         width: double.infinity,
-        height: isTablet ? 60 : 50,
-        padding:
-            EdgeInsets.symmetric(horizontal: 16, vertical: isTablet ? 16 : 14),
+        height: 50, // Match image height
+        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         decoration: BoxDecoration(
           color: Colors.white,
           border: Border(
-            top: isFirst
-                ? BorderSide(color: Colors.orange, width: 2)
-                : BorderSide.none,
-            bottom: BorderSide(color: Colors.orange, width: 2),
-            left: BorderSide(color: Colors.orange, width: 2),
-            right: BorderSide(color: Colors.orange, width: 2),
+            bottom: BorderSide(
+                color: Colors.orange, width: 2), // Orange divider lines only
           ),
         ),
-        child: Row(
-          children: [
-            Icon(
-              icon,
-              color: Colors.black87,
-              size: isTablet ? 24 : 22,
+        child: Center(
+          child: Text(
+            text,
+            style: TextStyle(
+              color: Colors.black,
+              fontSize: 15,
+              fontWeight: FontWeight.bold,
             ),
-            SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                text,
-                style: TextStyle(
-                  color: Colors.black,
-                  fontSize: isTablet ? 16 : 15,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );
@@ -740,46 +735,44 @@ class _HomePageState extends ConsumerState<HomePage> {
   Widget _buildSearchButton(Color primaryColor, bool isTablet) {
     return Container(
       width: double.infinity,
-      height: isTablet ? 60 : 50,
+      height: 50, // Match image height
       decoration: BoxDecoration(
-        border: Border(
-          bottom: BorderSide(color: Colors.orange, width: 2),
-          left: BorderSide(color: Colors.orange, width: 2),
-          right: BorderSide(color: Colors.orange, width: 2),
+        color: Colors.purple,
+        borderRadius: BorderRadius.only(
+          bottomLeft: Radius.circular(12),
+          bottomRight: Radius.circular(12),
         ),
       ),
-      child: ElevatedButton(
-        onPressed: _isSearching ? null : _performSearch,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: primaryColor,
-          foregroundColor: Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.zero,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: _isSearching ? null : _performSearch,
+          borderRadius: BorderRadius.only(
+            bottomLeft: Radius.circular(12),
+            bottomRight: Radius.circular(12),
           ),
-          elevation: 0,
-          padding: EdgeInsets.zero,
-        ),
-        child: Container(
-          width: double.infinity,
-          height: double.infinity,
-          alignment: Alignment.center,
-          child: _isSearching
-              ? SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+          child: Container(
+            width: double.infinity,
+            height: double.infinity,
+            alignment: Alignment.center,
+            child: _isSearching
+                ? SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                    ),
+                  )
+                : Text(
+                    'Search',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                )
-              : Text(
-                  'SEARCH',
-                  style: TextStyle(
-                    fontSize: isTablet ? 16 : 14,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 1.0,
-                  ),
-                ),
+          ),
         ),
       ),
     );
@@ -894,30 +887,118 @@ class _HomePageState extends ConsumerState<HomePage> {
   }
 
   Widget _buildMainContent(bool isTablet, Color primaryColor) {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: isTablet ? 20 : 16),
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Left side ad (only on tablet)
+        if (isTablet) ...[
+          Container(
+            width: 120,
+            margin: EdgeInsets.only(left: 16, top: 20),
+            child: _buildSideAd(isTablet, primaryColor),
+          ),
+          SizedBox(width: 16),
+        ],
+
+        // Main content
+        Expanded(
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: isTablet ? 0 : 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(height: isTablet ? 32 : 24),
+
+                // Travel more, spend less section
+                _buildTravelMoreSection(isTablet, primaryColor),
+
+                SizedBox(height: isTablet ? 32 : 24),
+
+                // Offers section
+                _buildOffersSection(isTablet, primaryColor),
+
+                SizedBox(height: isTablet ? 32 : 24),
+
+                // Explore locations section (from API)
+                _buildExploreLocationsSection(isTablet, primaryColor),
+
+                SizedBox(height: isTablet ? 32 : 24),
+
+                // Why RealInn section
+                _buildWhyRealInnSection(isTablet, primaryColor),
+
+                SizedBox(height: isTablet ? 32 : 24),
+              ],
+            ),
+          ),
+        ),
+
+        // Right side ad (only on tablet)
+        if (isTablet) ...[
+          SizedBox(width: 16),
+          Container(
+            width: 120,
+            margin: EdgeInsets.only(right: 16, top: 20),
+            child: _buildSideAd(isTablet, primaryColor),
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildSideAd(bool isTablet, Color primaryColor) {
+    return Container(
+      height: 300,
+      decoration: BoxDecoration(
+        color: Colors.grey[100],
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey[300]!, width: 1),
+      ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Travel more, spend less section
-          _buildTravelMoreSection(isTablet, primaryColor),
-
-          SizedBox(height: isTablet ? 32 : 24),
-
-          // Offers section
-          _buildOffersSection(isTablet, primaryColor),
-
-          SizedBox(height: isTablet ? 32 : 24),
-
-          // Explore locations section (from API)
-          _buildExploreLocationsSection(isTablet, primaryColor),
-
-          SizedBox(height: isTablet ? 32 : 24),
-
-          // Why RealInn section
-          _buildWhyRealInnSection(isTablet, primaryColor),
-
-          SizedBox(height: isTablet ? 32 : 24),
+          Container(
+            height: 200,
+            decoration: BoxDecoration(
+              color: primaryColor.withOpacity(0.1),
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(12),
+                topRight: Radius.circular(12),
+              ),
+            ),
+            child: Center(
+              child: Icon(
+                Icons.campaign,
+                color: primaryColor,
+                size: 40,
+              ),
+            ),
+          ),
+          Expanded(
+            child: Padding(
+              padding: EdgeInsets.all(8),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    'Ad Space',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                  SizedBox(height: 4),
+                  Text(
+                    'Non-intrusive',
+                    style: TextStyle(
+                      fontSize: 10,
+                      color: Colors.grey[500],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
         ],
       ),
     );

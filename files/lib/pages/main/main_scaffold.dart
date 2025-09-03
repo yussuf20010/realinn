@@ -28,8 +28,10 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
   final List<Widget> _pages = [
     HomePage(),
     FavouritesPage(),
-    BookingsPage(),
+
+    BookingsPage(), // This will be the Waiting List page
     HistoryPage(),
+
   ];
 
   @override
@@ -66,10 +68,12 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
               _buildNavItem(0, Icons.home, 'home'.tr(), isTablet, primaryColor),
               _buildNavItem(
                   1, Icons.favorite, 'favorites'.tr(), isTablet, primaryColor),
+
               _buildNavItem(
-                  2, Icons.book, 'booking'.tr(), isTablet, primaryColor),
+                  2, Icons.queue, 'waiting_list'.tr(), isTablet, primaryColor),
               _buildNavItem(
                   3, Icons.history, 'history'.tr(), isTablet, primaryColor),
+
             ],
           ),
         ),

@@ -256,41 +256,11 @@ class _CustomAppBarState extends ConsumerState<CustomAppBar> {
       leadingWidth: widget.showBackButton ? null : (isTablet ? 120 : 100),
       title: Image.asset(
         AssetsManager.appbar,
-        height: isTablet ? 55 : 40,
+        height: isTablet ? 30 : 30,
         fit: BoxFit.contain,
       ),
       centerTitle: true,
       actions: [
-        // Simple Language Toggle - Always visible
-        // Container(
-        //   margin: EdgeInsets.symmetric(horizontal: 8),
-        //   decoration: BoxDecoration(
-        //     color: Colors.white.withOpacity(0.2),
-        //     borderRadius: BorderRadius.circular(20),
-        //     border: Border.all(
-        //       color: Colors.white.withOpacity(0.3),
-        //       width: 1,
-        //     ),
-        //   ),
-        //   child: Material(
-        //     color: Colors.transparent,
-        //     child: InkWell(
-        //       borderRadius: BorderRadius.circular(20),
-        //       onTap: _toggleLanguage,
-        //       child: Container(
-        //         padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        //         child: Text(
-        //           context.locale.languageCode.toUpperCase(),
-        //           style: TextStyle(
-        //             color: Colors.white,
-        //             fontWeight: FontWeight.bold,
-        //             fontSize: isTablet ? 16 : 14,
-        //           ),
-        //         ),
-        //       ),
-        //     ),
-        //   ),
-        // ),
         if (widget.onNotificationPressed != null)
           IconButton(
             icon: Icon(Icons.notifications_outlined,
