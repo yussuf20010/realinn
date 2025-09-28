@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../../config/wp_config.dart';
 import '../../models/hotel.dart';
 import '../../models/selected_room.dart';
@@ -82,7 +83,7 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
               Expanded(
                 child: Center(
                   child: Text(
-                    widget.hotel.name ?? 'Hotel Name',
+                    widget.hotel.name ?? 'hotel_name'.tr(),
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: isTablet ? 20 : 18,
@@ -196,11 +197,11 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
           SizedBox(height: 16),
           Row(
             children: [
-              _buildInfoChip(Icons.wifi, 'Free WiFi', isTablet),
+              _buildInfoChip(Icons.wifi, 'free_wifi'.tr(), isTablet),
               SizedBox(width: 8),
-              _buildInfoChip(Icons.local_parking, 'Parking', isTablet),
+              _buildInfoChip(Icons.local_parking, 'parking'.tr(), isTablet),
               SizedBox(width: 8),
-              _buildInfoChip(Icons.restaurant, 'Restaurant', isTablet),
+              _buildInfoChip(Icons.restaurant, 'restaurant'.tr(), isTablet),
             ],
           ),
         ],
@@ -257,7 +258,7 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
           SizedBox(height: 16),
           // Title
           Text(
-            'Location',
+            'location'.tr(),
             style: TextStyle(
               fontSize: isTablet ? 20 : 18,
               fontWeight: FontWeight.bold,
@@ -282,7 +283,7 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
               Icon(Icons.directions, color: Colors.black, size: 16),
               SizedBox(width: 8),
               Text(
-                '1.2 km from city center',
+                'km_from_city_center'.tr(args: ['1.2']),
                 style: TextStyle(
                   fontSize: isTablet ? 14 : 12,
                   fontWeight: FontWeight.bold,
@@ -298,13 +299,13 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
 
   Widget _buildAmenitiesSection(Color primaryColor, bool isTablet) {
     final facilities = [
-      {'icon': Icons.smoke_free, 'name': 'Non-smoking rooms'},
-      {'icon': Icons.wifi, 'name': 'Internet'},
-      {'icon': Icons.local_bar, 'name': 'Bar'},
-      {'icon': Icons.room_service, 'name': 'Room service'},
-      {'icon': Icons.family_restroom, 'name': 'Family rooms'},
-      {'icon': Icons.balcony, 'name': 'Terrace'},
-      {'icon': Icons.support_agent, 'name': '24-hour front desk'},
+      {'icon': Icons.smoke_free, 'name': 'non_smoking_rooms'.tr()},
+      {'icon': Icons.wifi, 'name': 'internet'.tr()},
+      {'icon': Icons.local_bar, 'name': 'bar'.tr()},
+      {'icon': Icons.room_service, 'name': 'room_service'.tr()},
+      {'icon': Icons.family_restroom, 'name': 'family_rooms'.tr()},
+      {'icon': Icons.balcony, 'name': 'terrace'.tr()},
+      {'icon': Icons.support_agent, 'name': '24_hour_front_desk'.tr()},
     ];
 
     return Container(
@@ -316,7 +317,7 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
         children: [
           // Title
           Text(
-            'Most Popular Facilities',
+            'most_popular_facilities'.tr(),
             style: TextStyle(
               fontSize: isTablet ? 20 : 18,
               fontWeight: FontWeight.bold,
@@ -356,7 +357,7 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
           ),
           SizedBox(height: 16),
           Text(
-            'See all facilities',
+            'see_all_facilities'.tr(),
             style: TextStyle(
               fontSize: isTablet ? 14 : 12,
               color: primaryColor,
@@ -435,7 +436,7 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
           SizedBox(height: 16),
           // Title
           Text(
-            'Properties',
+            'properties'.tr(),
             style: TextStyle(
               fontSize: isTablet ? 20 : 18,
               fontWeight: FontWeight.bold,
@@ -482,7 +483,7 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Exceptional',
+                      'exceptional'.tr(),
                       style: TextStyle(
                         fontSize: isTablet ? 18 : 16,
                         fontWeight: FontWeight.bold,
@@ -491,7 +492,7 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
                     ),
                     SizedBox(height: 4),
                     Text(
-                      'See 4 detailed reviews',
+                      'see_detailed_reviews'.tr(args: ['4']),
                       style: TextStyle(
                         fontSize: isTablet ? 14 : 12,
                         color: Colors.black,
@@ -505,11 +506,11 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
           ),
           SizedBox(height: 20),
           // Rating Breakdown
-          _buildRatingBar('Cleanliness', 10.0, true, isTablet),
+          _buildRatingBar('cleanliness'.tr(), 10.0, true, isTablet),
           SizedBox(height: 12),
-          _buildRatingBar('Comfort', 9.6, false, isTablet),
+          _buildRatingBar('comfort'.tr(), 9.6, false, isTablet),
           SizedBox(height: 12),
-          _buildRatingBar('Facilities', 10.0, true, isTablet),
+          _buildRatingBar('facilities'.tr(), 10.0, true, isTablet),
           SizedBox(height: 8),
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
@@ -517,7 +518,7 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
               Icon(Icons.trending_up, color: Colors.green, size: 16),
               SizedBox(width: 4),
               Text(
-                'High score for Cairo',
+                'high_score_for'.tr(args: ['Cairo']),
                 style: TextStyle(
                   fontSize: isTablet ? 12 : 10,
                   color: Colors.black,
@@ -527,7 +528,7 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
           ),
           SizedBox(height: 16),
           Text(
-            'Show more',
+            'show_more'.tr(),
             style: TextStyle(
               fontSize: isTablet ? 14 : 12,
               color: primaryColor,
@@ -537,7 +538,7 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
           SizedBox(height: 20),
           // Guest Reviews Section
           Text(
-            'Guests who stayed here loved',
+            'guests_who_stayed_here_loved'.tr(),
             style: TextStyle(
               fontSize: isTablet ? 18 : 16,
               fontWeight: FontWeight.bold,
@@ -1081,7 +1082,6 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
       ),
     );
   }
-
 
   Widget _buildBottomBar(Color primaryColor, bool isTablet) {
     return Container(
@@ -1912,7 +1912,7 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
     if (_selectedRooms.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Please select at least one room'),
+          content: Text('please_select_at_least_one_room'.tr()),
           backgroundColor: Colors.red,
         ),
       );
@@ -1926,26 +1926,26 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
       // Map room IDs to room data
       if (roomId == 'deluxe_double_room_with_two_double_beds') {
         selectedRoomObjects.add(SelectedRoom(
-          name: 'Deluxe Double Room with Two Double Beds',
+          name: 'deluxe_double_room_with_two_double_beds'.tr(),
           pricePerNight: 21.0,
           maxAdults: 2,
           maxChildren: 0,
           imageUrl:
               'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=400&h=300&fit=crop',
           amenities: [
-            'Free WiFi',
-            'Attached bathroom',
-            'Air conditioning',
-            'Balcony',
-            'City view',
-            'Flat-screen TV',
-            'Soundproof',
-            'Minibar'
+            'free_wifi'.tr(),
+            'attached_bathroom'.tr(),
+            'air_conditioning'.tr(),
+            'balcony'.tr(),
+            'city_view'.tr(),
+            'flat_screen_tv'.tr(),
+            'soundproof'.tr(),
+            'minibar'.tr()
           ],
         ));
       } else if (roomId == 'comfort_triple_room') {
         selectedRoomObjects.add(SelectedRoom(
-          name: 'Comfort Triple Room',
+          name: 'comfort_triple_room'.tr(),
           pricePerNight: 25.0,
           maxAdults: 3,
           maxChildren: 0,

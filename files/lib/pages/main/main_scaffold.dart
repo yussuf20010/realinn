@@ -31,7 +31,6 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
 
     BookingsPage(), // This will be the Waiting List page
     HistoryPage(),
-
   ];
 
   @override
@@ -68,12 +67,10 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
               _buildNavItem(0, Icons.home, 'home'.tr(), isTablet, primaryColor),
               _buildNavItem(
                   1, Icons.favorite, 'favorites'.tr(), isTablet, primaryColor),
-
               _buildNavItem(
                   2, Icons.queue, 'waiting_list'.tr(), isTablet, primaryColor),
               _buildNavItem(
                   3, Icons.history, 'history'.tr(), isTablet, primaryColor),
-
             ],
           ),
         ),
@@ -96,14 +93,14 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
         children: [
           Icon(
             icon,
-            color: isSelected ? primaryColor : Colors.grey[600],
+            color: isSelected ? primaryColor : Colors.black,
             size: isTablet ? 28 : 24,
           ),
           SizedBox(height: isTablet ? 6 : 4),
           Text(
             label,
             style: TextStyle(
-              color: isSelected ? primaryColor : Colors.grey[600],
+              color: isSelected ? primaryColor : Colors.black,
               fontSize: isTablet ? 12 : 10,
               fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
             ),

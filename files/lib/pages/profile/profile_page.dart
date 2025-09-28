@@ -29,32 +29,93 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   Widget _buildCustomAppBar(
       BuildContext context, Color primaryColor, bool isTablet) {
     return Container(
-      color: primaryColor,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            primaryColor,
+            primaryColor.withOpacity(0.8),
+          ],
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: primaryColor.withOpacity(0.3),
+            blurRadius: 8,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
       child: SafeArea(
         child: Container(
-          height: 80,
+          height: 90,
+          padding: EdgeInsets.symmetric(horizontal: 16),
           child: Row(
             children: [
-              // Back button
-              IconButton(
-                icon: Icon(Icons.arrow_back, color: Colors.black, size: 28),
-                onPressed: () => Navigator.pop(context),
-              ),
-              // Title
-              Expanded(
-                child: Center(
-                  child: Text(
-                    'profile'.tr(),
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: isTablet ? 20 : 15,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+              // Back button with enhanced design
+              Container(
+                child: IconButton(
+                  icon: Icon(Icons.arrow_back, color: Colors.white, size: 24),
+                  onPressed: () => Navigator.pop(context),
                 ),
               ),
-              // Placeholder for symmetry
-              SizedBox(width: 56),
+
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Profile image
+                    Container(
+                      width: isTablet ? 36 : 32,
+                      height: isTablet ? 36 : 32,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: Colors.white,
+                          width: 2,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.1),
+                            blurRadius: 4,
+                            offset: Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Icon(
+                        Icons.person,
+                        color: primaryColor,
+                        size: isTablet ? 20 : 18,
+                      ),
+                    ),
+                    SizedBox(width: 8),
+                    // Profile name
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Mahmoud Ahmed',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: isTablet ? 18 : 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          'mahmoud.ahmed@email.com',
+                          style: TextStyle(
+                            color: Colors.white.withOpacity(0.8),
+                            fontSize: isTablet ? 14 : 12,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
             ],
           ),
         ),
@@ -63,279 +124,155 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   }
 
   Widget _buildMainContent(bool isTablet, Color primaryColor) {
-    return Column(
-      children: [
-        // Profile header - non-scrollable
-        Padding(
-          padding: EdgeInsets.all(isTablet ? 20 : 16),
-          child: _buildProfileHeader(isTablet, primaryColor),
-        ),
-
-        // Scrollable content
-        Expanded(
-          child: SingleChildScrollView(
-            padding: EdgeInsets.fromLTRB(
-                isTablet ? 20 : 16, 0, isTablet ? 20 : 16, isTablet ? 40 : 30),
-            child: Column(
-              children: [
-                SizedBox(height: 24),
-
-                // Menu items
-                _buildMenuSection(
-                  title: 'account'.tr(),
-                  items: [
-                    _buildMenuItem(
-                      icon: Icons.person_outline,
-                      title: 'personal_information'.tr(),
-                      subtitle: 'update_profile_details'.tr(),
-                      onTap: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Personal Information')),
-                        );
-                      },
-                      isTablet: isTablet,
-                      primaryColor: primaryColor,
-                    ),
-                    _buildMenuItem(
-                      icon: Icons.lock_outline,
-                      title: 'security'.tr(),
-                      subtitle: 'password_privacy_settings'.tr(),
-                      onTap: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Security Settings')),
-                        );
-                      },
-                      isTablet: isTablet,
-                      primaryColor: primaryColor,
-                    ),
-                    _buildMenuItem(
-                      icon: Icons.notifications_outlined,
-                      title: 'notifications'.tr(),
-                      subtitle: 'notification_preferences'.tr(),
-                      onTap: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Notification Settings')),
-                        );
-                      },
-                      isTablet: isTablet,
-                      primaryColor: primaryColor,
-                    ),
-                  ],
-                  isTablet: isTablet,
-                  primaryColor: primaryColor,
-                ),
-                SizedBox(height: 24),
-
-                _buildMenuSection(
-                  title: 'travel'.tr(),
-                  items: [
-                    _buildMenuItem(
-                      icon: Icons.favorite_outline,
-                      title: 'saved_hotels_title'.tr(),
-                      subtitle: 'favorite_accommodations'.tr(),
-                      onTap: () {
-                        Navigator.pushNamed(context, '/favourites');
-                      },
-                      isTablet: isTablet,
-                      primaryColor: primaryColor,
-                    ),
-                    _buildMenuItem(
-                      icon: Icons.book_online_outlined,
-                      title: 'my_bookings'.tr(),
-                      subtitle: 'view_manage_trips'.tr(),
-                      onTap: () {
-                        Navigator.pushNamed(context, '/bookings');
-                      },
-                      isTablet: isTablet,
-                      primaryColor: primaryColor,
-                    ),
-                    _buildMenuItem(
-                      icon: Icons.history,
-                      title: 'Travel History',
-                      subtitle: 'Past trips and experiences',
-                      onTap: () {
-                        Navigator.pushNamed(context, '/history');
-                      },
-                      isTablet: isTablet,
-                      primaryColor: primaryColor,
-                    ),
-                  ],
-                  isTablet: isTablet,
-                  primaryColor: primaryColor,
-                ),
-                SizedBox(height: 24),
-
-                _buildMenuSection(
-                  title: 'Support',
-                  items: [
-                    _buildMenuItem(
-                      icon: Icons.help_outline,
-                      title: 'Help Center',
-                      subtitle: 'Find answers to common questions',
-                      onTap: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Help Center')),
-                        );
-                      },
-                      isTablet: isTablet,
-                      primaryColor: primaryColor,
-                    ),
-                    _buildMenuItem(
-                      icon: Icons.support_agent,
-                      title: 'Contact Support',
-                      subtitle: 'Get help from our team',
-                      onTap: () {
-                        Navigator.pushNamed(context, '/customer-service');
-                      },
-                      isTablet: isTablet,
-                      primaryColor: primaryColor,
-                    ),
-                  ],
-                  isTablet: isTablet,
-                  primaryColor: primaryColor,
-                ),
-                SizedBox(height: 24),
-
-                // Logout button
-                SizedBox(
-                  width: double.infinity,
-                  height: isTablet ? 65 : 50,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      _showLogoutDialog(context);
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      foregroundColor: Colors.black,
-                      side: BorderSide(color: primaryColor, width: 2),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      elevation: 0,
-                    ),
-                    child: Text(
-                      'Logout',
-                      style: TextStyle(
-                        fontSize: isTablet ? 25 : 15,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black,
-                      ),
-                    ),
-                  ),
-                ),
-                SizedBox(height: 32),
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildProfileHeader(bool isTablet, Color primaryColor) {
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.all(isTablet ? 20 : 16),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Colors.white,
-            Colors.grey[50]!,
-          ],
-        ),
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.08),
-            blurRadius: 15,
-            offset: Offset(0, 5),
-            spreadRadius: 2,
-          ),
-        ],
-        border: Border.all(
-          color: primaryColor.withOpacity(0.1),
-          width: 1,
-        ),
-      ),
+    return SingleChildScrollView(
+      padding: EdgeInsets.fromLTRB(
+          isTablet ? 20 : 16, 20, isTablet ? 20 : 16, isTablet ? 40 : 30),
       child: Column(
         children: [
-          // Profile picture with enhanced styling
-          Container(
-            width: isTablet ? 80 : 70,
-            height: isTablet ? 80 : 70,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  primaryColor,
-                  primaryColor.withOpacity(0.8),
-                ],
+          // Menu items
+          _buildMenuSection(
+            title: 'account'.tr(),
+            items: [
+              _buildMenuItem(
+                icon: Icons.person_outline,
+                title: 'personal_information'.tr(),
+                subtitle: 'update_profile_details'.tr(),
+                onTap: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('personal_information'.tr())),
+                  );
+                },
+                isTablet: isTablet,
+                primaryColor: primaryColor,
               ),
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: primaryColor.withOpacity(0.3),
-                  blurRadius: 15,
-                  offset: Offset(0, 8),
-                ),
-              ],
-              border: Border.all(
-                color: Colors.white,
-                width: 4,
+              _buildMenuItem(
+                icon: Icons.lock_outline,
+                title: 'security'.tr(),
+                subtitle: 'password_privacy_settings'.tr(),
+                onTap: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('security_settings'.tr())),
+                  );
+                },
+                isTablet: isTablet,
+                primaryColor: primaryColor,
               ),
-            ),
-            child: Icon(
-              Icons.person,
-              color: Colors.white,
-              size: isTablet ? 40 : 35,
-            ),
+              _buildMenuItem(
+                icon: Icons.notifications_outlined,
+                title: 'notifications'.tr(),
+                subtitle: 'notification_preferences'.tr(),
+                onTap: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('notification_preferences'.tr())),
+                  );
+                },
+                isTablet: isTablet,
+                primaryColor: primaryColor,
+              ),
+            ],
+            isTablet: isTablet,
+            primaryColor: primaryColor,
           ),
-          SizedBox(height: 16),
+          SizedBox(height: 24),
 
-          // User info with enhanced styling
-          Container(
-            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            decoration: BoxDecoration(
-              color: Colors.grey[100],
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Column(
-              children: [
-                Text(
-                  'Mahmoud Ahmed',
-                  style: TextStyle(
-                    fontSize: isTablet ? 22 : 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
-                    letterSpacing: 0.5,
-                  ),
+          _buildMenuSection(
+            title: 'travel'.tr(),
+            items: [
+              _buildMenuItem(
+                icon: Icons.favorite_outline,
+                title: 'saved_hotels_title'.tr(),
+                subtitle: 'favorite_accommodations'.tr(),
+                onTap: () {
+                  Navigator.pushNamed(context, '/favourites');
+                },
+                isTablet: isTablet,
+                primaryColor: primaryColor,
+              ),
+              _buildMenuItem(
+                icon: Icons.book_online_outlined,
+                title: 'my_bookings'.tr(),
+                subtitle: 'view_manage_trips'.tr(),
+                onTap: () {
+                  Navigator.pushNamed(context, '/bookings');
+                },
+                isTablet: isTablet,
+                primaryColor: primaryColor,
+              ),
+              _buildMenuItem(
+                icon: Icons.history,
+                title: 'travel_history'.tr(),
+                subtitle: 'past_trips_experiences'.tr(),
+                onTap: () {
+                  Navigator.pushNamed(context, '/history');
+                },
+                isTablet: isTablet,
+                primaryColor: primaryColor,
+              ),
+            ],
+            isTablet: isTablet,
+            primaryColor: primaryColor,
+          ),
+          SizedBox(height: 24),
+
+          _buildMenuSection(
+            title: 'support'.tr(),
+            items: [
+              _buildMenuItem(
+                icon: Icons.help_outline,
+                title: 'help_center'.tr(),
+                subtitle: 'find_answers_common_questions'.tr(),
+                onTap: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('help_center'.tr())),
+                  );
+                },
+                isTablet: isTablet,
+                primaryColor: primaryColor,
+              ),
+              _buildMenuItem(
+                icon: Icons.support_agent,
+                title: 'contact_support'.tr(),
+                subtitle: 'get_help_from_team'.tr(),
+                onTap: () {
+                  Navigator.pushNamed(context, '/customer-service');
+                },
+                isTablet: isTablet,
+                primaryColor: primaryColor,
+              ),
+            ],
+            isTablet: isTablet,
+            primaryColor: primaryColor,
+          ),
+          SizedBox(height: 24),
+
+          // Logout button
+          SizedBox(
+            width: double.infinity,
+            height: isTablet ? 80 : 65,
+            child: ElevatedButton(
+              onPressed: () {
+                _showLogoutDialog(context);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.white,
+                foregroundColor: Colors.black,
+                side: BorderSide(color: primaryColor, width: 2),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
                 ),
-                SizedBox(height: 8),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.email_outlined,
-                      color: Colors.grey[600],
-                      size: isTablet ? 18 : 16,
-                    ),
-                    SizedBox(width: 8),
-                    Text(
-                      'mahmoud.ahmed@email.com',
-                      style: TextStyle(
-                        fontSize: isTablet ? 14 : 12,
-                        color: Colors.grey[700],
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
+                elevation: 0,
+              ),
+              child: Text(
+                'logout'.tr(),
+                style: TextStyle(
+                  fontSize: isTablet ? 24 : 20,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
                 ),
-              ],
+              ),
             ),
           ),
+          SizedBox(height: 32),
         ],
       ),
     );
@@ -396,17 +333,10 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           padding: EdgeInsets.all(isTablet ? 20 : 16),
           child: Row(
             children: [
-              Container(
-                padding: EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: primaryColor.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Icon(
-                  icon,
-                  color: Colors.black,
-                  size: isTablet ? 24 : 20,
-                ),
+              Icon(
+                icon,
+                color: Colors.black,
+                size: isTablet ? 24 : 20,
               ),
               SizedBox(width: 16),
               Expanded(
@@ -451,14 +381,14 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text(
-            'Logout',
+            'logout'.tr(),
             style: TextStyle(
               color: Colors.black,
               fontWeight: FontWeight.bold,
             ),
           ),
           content: Text(
-            'Are you sure you want to logout?',
+            'are_you_sure_logout'.tr(),
             style: TextStyle(
               color: Colors.black,
               fontWeight: FontWeight.bold,
@@ -468,7 +398,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
               child: Text(
-                'Cancel',
+                'cancel'.tr(),
                 style: TextStyle(
                   color: Colors.black,
                   fontWeight: FontWeight.bold,
@@ -480,7 +410,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 Navigator.of(context).pop();
                 // Handle logout
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Logged out successfully')),
+                  SnackBar(content: Text('logged_out_successfully'.tr())),
                 );
                 Navigator.pushNamedAndRemoveUntil(
                     context, '/', (route) => false);
@@ -490,7 +420,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 foregroundColor: Colors.white,
               ),
               child: Text(
-                'Logout',
+                'logout'.tr(),
                 style: TextStyle(
                   color: Colors.black,
                   fontWeight: FontWeight.bold,
