@@ -23,20 +23,20 @@ class _SearchBoxWidgetState extends ConsumerState<SearchBoxWidget> {
   int _selectedTab = 0;
   String _destination = '';
   DateTime? _checkInDate;
-  DateTime? _checkOutDate;
+  DateTime? _checkOutDate; 
   int _rooms = 1;
   int _adults = 2;
-  int _children = 0;
-
-  final List<String> _tabs = ['daily', 'monthly'];
-
-  @override
+  int _children = 0;  
+ 
+  final List<String> _tabs = ['daily', 'monthly'];    
+  
+  @override 
   Widget build(BuildContext context) {
-    final primaryColor = const Color(0xFFa93ae1); // Purple color from theme
-    final isTablet = MediaQuery.of(context).size.width >= 768;
+    final primaryColor = const Color(0xFFa93ae1); // Purple color from t heme
+    final isTablet = MediaQuery.of(context).size.width >= 768; 
     
-    // Adjustable background height (you can change this value)
-    final backgroundHeight = 60.0; // Purple background behind table, connects to app bar
+    // Adjustable background height (you can change this value) 
+    final backgroundHeight = 43.0; // Purple background behind table, connects to app bar
 
     return Container(
       margin: EdgeInsets.only(bottom: 20.h),
@@ -55,11 +55,10 @@ class _SearchBoxWidgetState extends ConsumerState<SearchBoxWidget> {
 
           // Search table with proper margins and borders
           Container(
-              margin: EdgeInsets.symmetric(horizontal: isTablet ? 20 : 16),
+              margin: EdgeInsets.symmetric(horizontal: isTablet ? 80 : 64),
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: primaryColor, width: 3),
+                border: Border.all(color: Colors.amber, width: 3),
               ),
             child: Column(
               children: [
@@ -110,91 +109,62 @@ class _SearchBoxWidgetState extends ConsumerState<SearchBoxWidget> {
   Widget _buildTabSelector(Color primaryColor, bool isTablet) {
     return Container(
       height: 40,
-      decoration: BoxDecoration(
-        border: Border(
-          bottom: BorderSide(color: primaryColor, width: 2),
+        child: Row(
+          children: [
+            // Daily button
+            Expanded(
+              child: GestureDetector(
+                onTap: () {
+                  setState(() {
+                    _selectedTab = 0;
+                  });
+                },
+                child: Container(
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: _selectedTab == 0 ? primaryColor.withOpacity(0.7) : primaryColor,
+                  ),
+                  child: Center(
+                    child: Text(
+                      _tabs[0].tr(),
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: isTablet ? 14 : 12,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            // Monthly button
+            Expanded(
+              child: GestureDetector(
+                onTap: () {
+                  setState(() {
+                    _selectedTab = 1;
+                  });
+                },
+                child: Container(
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: _selectedTab == 1 ? primaryColor.withOpacity(0.7) : primaryColor,
+                  ),
+                  child: Center(
+                    child: Text(
+                      _tabs[1].tr(),
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: isTablet ? 14 : 12,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
-      ),
-      child: Row(
-        children: [
-          // Daily button
-          Expanded(
-            child: GestureDetector(
-              onTap: () {
-                setState(() {
-                  _selectedTab = 0;
-                });
-              },
-              child: Container(
-                margin: EdgeInsets.all(4),
-                decoration: BoxDecoration(
-                  color: _selectedTab == 0 ? primaryColor.withOpacity(0.3) : Colors.white,
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: _selectedTab == 0 ? [
-                    BoxShadow(
-                      color: primaryColor.withOpacity(0.3),
-                      blurRadius: 8,
-                      spreadRadius: 1,
-                      offset: Offset(0, 2),
-                    ),
-                  ] : null,
-                ),
-                child: Center(
-                  child: Text(
-                    _tabs[0].tr(),
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontSize: isTablet ? 14 : 12,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-          // Divider between buttons
-          Container(
-            height: 40,
-            width: 2,
-            color: primaryColor,
-          ),
-          // Monthly button
-          Expanded(
-            child: GestureDetector(
-              onTap: () {
-                setState(() {
-                  _selectedTab = 1;
-                });
-              },
-              child: Container(
-                margin: EdgeInsets.all(4),
-                decoration: BoxDecoration(
-                  color: _selectedTab == 1 ? primaryColor.withOpacity(0.3) : Colors.white,
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: _selectedTab == 1 ? [
-                    BoxShadow(
-                      color: primaryColor.withOpacity(0.3),
-                      blurRadius: 8,
-                      spreadRadius: 1,
-                      offset: Offset(0, 2),
-                    ),
-                  ] : null,
-                ),
-                child: Center(
-                  child: Text(
-                    _tabs[1].tr(),
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontSize: isTablet ? 14 : 12,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
     );
   }
 
@@ -208,11 +178,12 @@ class _SearchBoxWidgetState extends ConsumerState<SearchBoxWidget> {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        height: 45,
+        height: 50,
         padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
+          color: Colors.white,
           border: Border(
-            bottom: BorderSide(color: primaryColor, width: 2),
+            bottom: BorderSide(color: Colors.amber, width: 2),
           ),
         ),
         child: Row(
@@ -220,7 +191,7 @@ class _SearchBoxWidgetState extends ConsumerState<SearchBoxWidget> {
             Icon(
               icon,
               color: Colors.black,
-              size: isTablet ? 18 : 16,
+              size: isTablet ? 20 : 18,
             ),
             SizedBox(width: 12),
             Expanded(
@@ -228,7 +199,7 @@ class _SearchBoxWidgetState extends ConsumerState<SearchBoxWidget> {
                 text,
                 style: TextStyle(
                   color: Colors.black,
-                  fontSize: isTablet ? 14 : 13,
+                  fontSize: isTablet ? 16 : 14,
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -243,30 +214,22 @@ class _SearchBoxWidgetState extends ConsumerState<SearchBoxWidget> {
   Widget _buildSearchButton(Color primaryColor, bool isTablet) {
     return Container(
       width: double.infinity,
-      height: 45,
+      height: 50,
       decoration: BoxDecoration(
         color: primaryColor,
-        borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(9),
-          bottomRight: Radius.circular(9),
-        ),
       ),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
           onTap: widget.isLoading ? null : _performSearch,
-          borderRadius: BorderRadius.only(
-            bottomLeft: Radius.circular(9),
-            bottomRight: Radius.circular(9),
-          ),
           child: Container(
             width: double.infinity,
             height: double.infinity,
             alignment: Alignment.center,
             child: widget.isLoading
                 ? SizedBox(
-                    width: 18,
-                    height: 18,
+                    width: 20,
+                    height: 20,
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
                       valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
@@ -276,7 +239,7 @@ class _SearchBoxWidgetState extends ConsumerState<SearchBoxWidget> {
                     'search'.tr(),
                     style: TextStyle(
                       color: Colors.white,
-                      fontSize: isTablet ? 16 : 14,
+                      fontSize: isTablet ? 18 : 16,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -585,10 +548,6 @@ class _DestinationSelectionModalState extends ConsumerState<DestinationSelection
       height: MediaQuery.of(context).size.height * 0.8,
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(20),
-          topRight: Radius.circular(20),
-        ),
       ),
       child: Column(
         children: [
@@ -599,7 +558,6 @@ class _DestinationSelectionModalState extends ConsumerState<DestinationSelection
             height: 4,
             decoration: BoxDecoration(
               color: Colors.grey[300],
-              borderRadius: BorderRadius.circular(2),
             ),
           ),
           
@@ -631,8 +589,7 @@ class _DestinationSelectionModalState extends ConsumerState<DestinationSelection
             child: Container(
               decoration: BoxDecoration(
                 color: Colors.grey[100],
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: primaryColor, width: 2),
+                border: Border.all(color: primaryColor, width: 3),
               ),
               child: TextField(
                 controller: _searchController,
@@ -662,10 +619,9 @@ class _DestinationSelectionModalState extends ConsumerState<DestinationSelection
                     margin: EdgeInsets.only(bottom: 8.h),
                     decoration: BoxDecoration(
                       color: isSelected ? primaryColor.withOpacity(0.1) : Colors.transparent,
-                      borderRadius: BorderRadius.circular(12.r),
                       border: Border.all(
                         color: isSelected ? primaryColor : Colors.grey[300]!,
-                        width: isSelected ? 2 : 1,
+                        width: isSelected ? 3 : 2,
                       ),
                     ),
                     child: ListTile(
@@ -720,9 +676,7 @@ class _DestinationSelectionModalState extends ConsumerState<DestinationSelection
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: primaryColor,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
+                  shape: RoundedRectangleBorder(),
                 ),
                 child: Text(
                   'apply_selection'.tr(),

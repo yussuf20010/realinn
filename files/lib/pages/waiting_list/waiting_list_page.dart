@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import '../../config/wp_config.dart';
 import '../../providers/waiting_list_provider.dart';
 import '../../models/selected_room.dart';
+import '../../core/constants/assets.dart';
 
 class WaitingListPage extends ConsumerWidget {
   const WaitingListPage({Key? key}) : super(key: key);
@@ -63,9 +65,10 @@ class WaitingListPage extends ConsumerWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.shopping_cart_outlined,
-              size: isTablet ? 80.sp : 60.sp,
+            SvgPicture.asset(
+              AssetsManager.pin_hotel,
+              width: isTablet ? 80.w : 60.w,
+              height: isTablet ? 80.h : 60.h,
               color: Colors.grey[400],
             ),
             SizedBox(height: isTablet ? 24.h : 16.h),

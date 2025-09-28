@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:realinn/core/constants/assets.dart';
 import '../home/home_page.dart';
 import '../favourites/favourites_page.dart';
 import '../waiting_list/waiting_list_page.dart';
@@ -91,11 +93,19 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            icon,
-            color: isSelected ? primaryColor : Colors.black,
-            size: isTablet ? 28.sp : 24.sp,
-          ),
+          // Use PNG image for waiting list (index 2), icon for others
+          index == 2
+              ? SvgPicture.asset(
+                  AssetsManager.waiting,
+                  width: isTablet ? 28.w : 24.w,
+                  height: isTablet ? 28.h : 24.h,
+                  color: isSelected ? primaryColor : Colors.black,
+                )
+              : Icon(
+                  icon,
+                  color: isSelected ? primaryColor : Colors.black,
+                  size: isTablet ? 28.sp : 24.sp,
+                ),
           SizedBox(height: isTablet ? 6.h : 4.h),
           Text(
             label,
