@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../config/wp_config.dart';
 import '../../models/hotel.dart';
 import '../../models/selected_room.dart';
 import '../../providers/favorites_provider.dart';
+import '../../providers/waiting_list_provider.dart';
 
 class HotelDetailsPage extends ConsumerStatefulWidget {
   final Hotel hotel;
@@ -36,19 +38,19 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
     return Scaffold(
       backgroundColor: Colors.grey[50],
       appBar: PreferredSize(
-        preferredSize: Size.fromHeight(100),
+        preferredSize: Size.fromHeight(100.h),
         child: _buildCustomAppBar(primaryColor, isTablet),
       ),
       body: SingleChildScrollView(
         child: Column(
           children: [
-            _buildHotelInfo(primaryColor, isTablet),
-            _buildPropertiesSection(primaryColor, isTablet),
+            _buildPropertiesSection(primaryColor, isTablet), // Images first
+            _buildHotelInfo(primaryColor, isTablet), // Description second
             _buildLocationSection(primaryColor, isTablet),
             _buildAmenitiesSection(primaryColor, isTablet),
             _buildReviewsSection(primaryColor, isTablet),
             _buildPropertyInfoSection(primaryColor, isTablet),
-            SizedBox(height: 100), // Space for bottom bar
+            SizedBox(height: 100.h), // Space for bottom bar
           ],
         ),
       ),
@@ -148,7 +150,7 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
   Widget _buildHotelInfo(Color primaryColor, bool isTablet) {
     return Container(
       color: Colors.white,
-      padding: EdgeInsets.all(20),
+      padding: EdgeInsets.all(20.w),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -238,7 +240,7 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
     return Container(
       color: Colors.white,
       margin: EdgeInsets.only(top: 8),
-      padding: EdgeInsets.all(20),
+      padding: EdgeInsets.all(20.w),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -311,7 +313,7 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
     return Container(
       color: Colors.white,
       margin: EdgeInsets.only(top: 8),
-      padding: EdgeInsets.all(20),
+      padding: EdgeInsets.all(20.w),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -385,7 +387,7 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
     return Container(
       color: Colors.white,
       margin: EdgeInsets.only(top: 8),
-      padding: EdgeInsets.all(20),
+      padding: EdgeInsets.all(20.w),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -452,7 +454,7 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
     return Container(
       color: Colors.white,
       margin: EdgeInsets.only(top: 8),
-      padding: EdgeInsets.all(20),
+      padding: EdgeInsets.all(20.w),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1021,7 +1023,7 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
     return Container(
       color: Colors.white,
       margin: EdgeInsets.only(top: 8),
-      padding: EdgeInsets.all(20),
+      padding: EdgeInsets.all(20.w),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1190,7 +1192,7 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
             children: [
               // Header with hotel info
               Container(
-                padding: EdgeInsets.all(20),
+                padding: EdgeInsets.all(20.w),
                 decoration: BoxDecoration(
                   color: Colors.grey[50],
                   borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
@@ -1275,7 +1277,7 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
               // Bottom action bar
               if (_selectedRooms.isNotEmpty)
                 Container(
-                  padding: EdgeInsets.all(20),
+                  padding: EdgeInsets.all(20.w),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     boxShadow: [
@@ -1454,7 +1456,7 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
             ],
           ),
           child: Padding(
-            padding: EdgeInsets.all(20),
+            padding: EdgeInsets.all(20.w),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
@@ -1964,19 +1966,37 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
       }
     }
 
-    // Navigate to booking page with the first selected room
-    // For multiple rooms, you might want to create a different booking flow
-    Navigator.pushNamed(
-      context,
-      '/create-booking',
-      arguments: {
-        'hotel': widget.hotel,
-        'selectedRoom': selectedRoomObjects.first,
-        'selectedRooms': selectedRoomObjects,
-        'checkInDate': widget.checkInDate,
-        'checkOutDate': widget.checkOutDate,
-        'rooms': widget.rooms,
-      },
+    // Add each selected room to waiting list
+    final waitingListNotifier = ref.read(waitingListProvider.notifier);
+    for (SelectedRoom room in selectedRoomObjects) {
+      waitingListNotifier.addToWaitingList(
+        hotel: widget.hotel,
+        room: room,
+        checkInDate: widget.checkInDate ?? DateTime.now(),
+        checkOutDate: widget.checkOutDate ?? DateTime.now().add(Duration(days: 1)),
+        quantity: _roomQuantities[room.name] ?? 1,
+      );
+    }
+
+    // Show success message
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('${selectedRoomObjects.length} room(s) added to waiting list'),
+        backgroundColor: Colors.green,
+        action: SnackBarAction(
+          label: 'View',
+          textColor: Colors.white,
+          onPressed: () {
+            Navigator.pushNamed(context, '/waiting-list');
+          },
+        ),
+      ),
     );
+
+    // Clear selected rooms
+    setState(() {
+      _selectedRooms.clear();
+      _roomQuantities.clear();
+    });
   }
 }

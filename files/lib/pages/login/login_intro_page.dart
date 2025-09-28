@@ -48,7 +48,7 @@ class LoginIntroPage extends ConsumerWidget {
                       AppSizedBox.h16,
                       AppSizedBox.h16,
                       Text(
-                        '${'welcome_newspro'.tr()} ${dynamicConfig.appName ?? WPConfig.appName}',
+                        '${'welcome_realinn'.tr()} ${dynamicConfig.appName ?? WPConfig.appName}',
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
                               fontWeight: FontWeight.bold,
                               color: AppColors.primary,

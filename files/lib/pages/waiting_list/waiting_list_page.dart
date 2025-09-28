@@ -4,9 +4,10 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../config/wp_config.dart';
 import '../../providers/waiting_list_provider.dart';
+import '../../models/selected_room.dart';
 
-class HistoryPage extends ConsumerWidget {
-  const HistoryPage({Key? key}) : super(key: key);
+class WaitingListPage extends ConsumerWidget {
+  const WaitingListPage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -18,53 +19,38 @@ class HistoryPage extends ConsumerWidget {
       backgroundColor: Colors.grey[50],
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(100.h),
-        child: _buildCustomAppBar(context, primaryColor, isTablet, ref),
+        child: _buildCustomAppBar(context, primaryColor, isTablet, waitingList, ref),
       ),
       body: waitingList.isEmpty
           ? _buildEmptyState(primaryColor, isTablet)
-          : _buildHistoryList(waitingList, primaryColor, isTablet, ref),
+          : _buildWaitingList(waitingList, primaryColor, isTablet, ref),
     );
   }
 
-  Widget _buildCustomAppBar(BuildContext context, Color primaryColor, bool isTablet, WidgetRef ref) {
-    final waitingList = ref.watch(waitingListProvider);
-    
+  Widget _buildCustomAppBar(BuildContext context, Color primaryColor, bool isTablet, List waitingList, WidgetRef ref) {
     return Container(
       color: primaryColor,
       child: SafeArea(
         child: Container(
           height: 80.h,
           padding: EdgeInsets.symmetric(horizontal: 16.w),
-          child: Row(
-            children: [
-              // Title
-              Expanded(
-                child: Center(
-                  child: Text(
-                    'history'.tr(),
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: isTablet ? 24.sp : 20.sp,
-                      fontWeight: FontWeight.bold,
+            child: Row(
+              children: [
+                // Title - Centered
+                Expanded(
+                  child: Center(
+                    child: Text(
+                      'waiting_list'.tr(),
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: isTablet ? 24.sp : 20.sp,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ),
-              ),
-              // Clear all button
-              if (waitingList.isNotEmpty)
-                TextButton(
-                  onPressed: () => _showClearAllDialog(context, ref),
-                  child: Text(
-                    'clear_all'.tr(),
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: isTablet ? 16.sp : 14.sp,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-            ],
-          ),
+              ],
+            ),
         ),
       ),
     );
@@ -78,13 +64,13 @@ class HistoryPage extends ConsumerWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
-              Icons.history,
+              Icons.shopping_cart_outlined,
               size: isTablet ? 80.sp : 60.sp,
               color: Colors.grey[400],
             ),
             SizedBox(height: isTablet ? 24.h : 16.h),
             Text(
-              'no_history_yet'.tr(),
+              'no_waiting_list_yet'.tr(),
               style: TextStyle(
                 fontSize: isTablet ? 24.sp : 20.sp,
                 fontWeight: FontWeight.bold,
@@ -93,7 +79,7 @@ class HistoryPage extends ConsumerWidget {
             ),
             SizedBox(height: isTablet ? 12.h : 8.h),
             Text(
-              'completed_past_bookings'.tr(),
+              'pending_bookings_will_appear'.tr(),
               style: TextStyle(
                 fontSize: isTablet ? 16.sp : 14.sp,
                 color: Colors.grey[500],
@@ -106,39 +92,32 @@ class HistoryPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildHistoryList(List waitingList, Color primaryColor, bool isTablet, WidgetRef ref) {
-    // Filter for completed and cancelled items (history)
-    final historyItems = waitingList.where((item) => 
-      item.status == 'confirmed' || item.status == 'cancelled'
+  Widget _buildWaitingList(List waitingList, Color primaryColor, bool isTablet, WidgetRef ref) {
+    // Filter for pending items only (waiting list)
+    final pendingItems = waitingList.where((item) => 
+      item.status == 'pending'
     ).toList();
 
-    if (historyItems.isEmpty) {
+    if (pendingItems.isEmpty) {
       return _buildEmptyState(primaryColor, isTablet);
     }
 
     return ListView.builder(
       padding: EdgeInsets.all(16.w),
-      itemCount: historyItems.length,
+      itemCount: pendingItems.length,
       itemBuilder: (context, index) {
-        final item = historyItems[index];
-        return _buildHistoryItem(item, primaryColor, isTablet, ref);
+        final item = pendingItems[index];
+        return _buildWaitingListItem(item, primaryColor, isTablet, ref);
       },
     );
   }
 
-  Widget _buildHistoryItem(dynamic item, Color primaryColor, bool isTablet, WidgetRef ref) {
+  Widget _buildWaitingListItem(dynamic item, Color primaryColor, bool isTablet, WidgetRef ref) {
     return Container(
       margin: EdgeInsets.only(bottom: 16.h),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12.r),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 8,
-            offset: Offset(0, 2),
-          ),
-        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -178,22 +157,22 @@ class HistoryPage extends ConsumerWidget {
                     ),
                   ),
                 ),
-                // Date badge
+                // Remove button
                 Positioned(
                   top: 12.h,
                   left: 12.w,
-                  child: Container(
-                    padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
-                    decoration: BoxDecoration(
-                      color: Colors.black.withOpacity(0.7),
-                      borderRadius: BorderRadius.circular(20.r),
-                    ),
-                    child: Text(
-                      _formatDate(item.addedAt),
-                      style: TextStyle(
+                  child: GestureDetector(
+                    onTap: () => _removeItem(ref, item.id),
+                    child: Container(
+                      padding: EdgeInsets.all(8.w),
+                      decoration: BoxDecoration(
+                        color: Colors.red.withOpacity(0.8),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.close,
                         color: Colors.white,
-                        fontSize: 12.sp,
-                        fontWeight: FontWeight.bold,
+                        size: 20.sp,
                       ),
                     ),
                   ),
@@ -209,7 +188,7 @@ class HistoryPage extends ConsumerWidget {
               children: [
                 // Hotel name
                 Text(
-                  item.hotel.name ?? 'Hotel Name',
+                  item.hotel.name ?? 'hotel_name'.tr(),
                   style: TextStyle(
                     fontSize: isTablet ? 18.sp : 16.sp,
                     fontWeight: FontWeight.bold,
@@ -247,7 +226,7 @@ class HistoryPage extends ConsumerWidget {
                     Icon(Icons.bed, size: 16.sp, color: Colors.grey[600]),
                     SizedBox(width: 8.w),
                     Text(
-                      '${item.quantity} room(s)',
+                      '${item.quantity} ${'room_s'.tr()}',
                       style: TextStyle(
                         fontSize: isTablet ? 14.sp : 12.sp,
                         color: Colors.grey[600],
@@ -255,11 +234,54 @@ class HistoryPage extends ConsumerWidget {
                     ),
                     Spacer(),
                     Text(
-                      '\$${item.room.pricePerNight.toStringAsFixed(0)}/night',
+                      '\$${item.room.pricePerNight.toStringAsFixed(0)}${'per_night'.tr()}',
                       style: TextStyle(
                         fontSize: isTablet ? 16.sp : 14.sp,
                         fontWeight: FontWeight.bold,
                         color: primaryColor,
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 16.h),
+                // Action buttons
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () => _updateStatus(ref, item.id, 'confirmed'),
+                        style: OutlinedButton.styleFrom(
+                          side: BorderSide(color: Colors.green),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8.r),
+                          ),
+                        ),
+                        child: Text(
+                          'confirm'.tr(),
+                          style: TextStyle(
+                            color: Colors.green,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: 12.w),
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () => _updateStatus(ref, item.id, 'cancelled'),
+                        style: OutlinedButton.styleFrom(
+                          side: BorderSide(color: Colors.red),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8.r),
+                          ),
+                        ),
+                        child: Text(
+                          'cancel'.tr(),
+                          style: TextStyle(
+                            color: Colors.red,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
                     ),
                   ],
@@ -283,58 +305,31 @@ class HistoryPage extends ConsumerWidget {
     }
   }
 
+  String _formatDate(DateTime date) {
+    return '${date.day}/${date.month}/${date.year}';
+  }
+
+  void _removeItem(WidgetRef ref, String id) {
+    ref.read(waitingListProvider.notifier).removeFromWaitingList(id);
+  }
+
+  void _updateStatus(WidgetRef ref, String id, String status) {
+    ref.read(waitingListProvider.notifier).updateStatus(id, status);
+  }
+
+
+
   String _getStatusText(String status) {
-    switch (status) {
+    switch (status.toLowerCase()) {
+      case 'pending':
+        return 'pending'.tr();
       case 'confirmed':
         return 'confirmed'.tr();
       case 'cancelled':
         return 'cancelled'.tr();
       default:
-        return 'pending'.tr();
+        return status.toUpperCase();
     }
   }
 
-  String _formatDate(DateTime date) {
-    return '${date.day}/${date.month}/${date.year}';
-  }
-
-  void _showBookingDetails(dynamic item) {
-    // Show booking details dialog
-    // This would show receipt, booking reference, etc.
-  }
-
-  void _rebookItem(dynamic item, WidgetRef ref) {
-    // Add item back to waiting list for rebooking
-    ref.read(waitingListProvider.notifier).addToWaitingList(
-      hotel: item.hotel,
-      room: item.room,
-      checkInDate: item.checkInDate,
-      checkOutDate: item.checkOutDate,
-      quantity: item.quantity,
-    );
-  }
-
-  void _showClearAllDialog(BuildContext context, WidgetRef ref) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text('clear_all_items'.tr()),
-        content: Text('are_you_sure_clear_all'.tr()),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('cancel'.tr()),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              ref.read(waitingListProvider.notifier).clearWaitingList();
-              Navigator.pop(context);
-            },
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: Text('clear_all'.tr(), style: TextStyle(color: Colors.white)),
-          ),
-        ],
-      ),
-    );
-  }
 }

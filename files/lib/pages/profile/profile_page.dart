@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../config/wp_config.dart';
 
 class ProfilePage extends ConsumerStatefulWidget {
@@ -126,7 +127,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   Widget _buildMainContent(bool isTablet, Color primaryColor) {
     return SingleChildScrollView(
       padding: EdgeInsets.fromLTRB(
-          isTablet ? 20 : 16, 20, isTablet ? 20 : 16, isTablet ? 40 : 30),
+          isTablet ? 20.w : 16.w, 20.h, isTablet ? 20.w : 16.w, isTablet ? 40.h : 30.h),
       child: Column(
         children: [
           // Menu items
@@ -173,7 +174,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             isTablet: isTablet,
             primaryColor: primaryColor,
           ),
-          SizedBox(height: 24),
+          SizedBox(height: 24.h),
 
           _buildMenuSection(
             title: 'travel'.tr(),
@@ -208,11 +209,21 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 isTablet: isTablet,
                 primaryColor: primaryColor,
               ),
+              _buildMenuItem(
+                icon: Icons.bookmark_outline,
+                title: 'waiting_list'.tr(),
+                subtitle: 'saved_for_later'.tr(),
+                onTap: () {
+                  Navigator.pushNamed(context, '/waiting-list');
+                },
+                isTablet: isTablet,
+                primaryColor: primaryColor,
+              ),
             ],
             isTablet: isTablet,
             primaryColor: primaryColor,
           ),
-          SizedBox(height: 24),
+          SizedBox(height: 24.h),
 
           _buildMenuSection(
             title: 'support'.tr(),
@@ -243,7 +254,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             isTablet: isTablet,
             primaryColor: primaryColor,
           ),
-          SizedBox(height: 24),
+          SizedBox(height: 24.h),
 
           // Logout button
           SizedBox(

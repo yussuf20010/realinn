@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:realinn/config/wp_config.dart';
 import 'package:realinn/controllers/hotel_controller.dart';
 import 'package:realinn/models/hotel.dart';
@@ -40,10 +41,14 @@ class _HotelsSearchPageState extends ConsumerState<HotelsSearchPage> {
   @override
   void initState() {
     super.initState();
-    if (widget.initialHotels != null) {
+    print('HotelsSearchPage initState - initialHotels: ${widget.initialHotels?.length ?? 0}');
+    print('Search query: ${widget.searchQuery}');
+    if (widget.initialHotels != null && widget.initialHotels!.isNotEmpty) {
       _hotels = widget.initialHotels!;
       _isLoading = false;
+      print('Using initial hotels: ${_hotels.length}');
     } else {
+      print('Loading hotels from provider');
       _loadHotels();
     }
   }
@@ -212,13 +217,13 @@ class _HotelsSearchPageState extends ConsumerState<HotelsSearchPage> {
       children: [
         // Blue background area
         Container(
-          height: isTablet ? 80 : 70,
+          height: isTablet ? 80.h : 70.h,
           color: primaryColor,
         ),
         // White content area with search box and buttons
         Container(
           color: Colors.white,
-          padding: EdgeInsets.symmetric(horizontal: isTablet ? 16 : 12),
+          padding: EdgeInsets.symmetric(horizontal: isTablet ? 16.w : 12.w),
           child: Column(
             children: [
               // Search Box with slight overlap
@@ -226,12 +231,12 @@ class _HotelsSearchPageState extends ConsumerState<HotelsSearchPage> {
                 offset:
                     Offset(0, isTablet ? -25 : -20), // Overlap into blue area
                 child: Container(
-                  height: isTablet ? 60 : 55,
-                  padding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                  height: isTablet ? 60.h : 55.h,
+                  padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 8.h),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.orange, width: 3),
+                    border: Border.all(color: primaryColor, width: 3.w),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withOpacity(0.1),
@@ -250,7 +255,7 @@ class _HotelsSearchPageState extends ConsumerState<HotelsSearchPage> {
                         constraints:
                             BoxConstraints(minWidth: 40, minHeight: 40),
                       ),
-                      SizedBox(width: 12),
+                      SizedBox(width: 12.w),
                       Expanded(
                         child: Row(
                           children: [
@@ -261,19 +266,19 @@ class _HotelsSearchPageState extends ConsumerState<HotelsSearchPage> {
                                   style: TextStyle(
                                     color: Colors.black,
                                     fontWeight: FontWeight.bold,
-                                    fontSize: isTablet ? 18 : 16,
+                                    fontSize: isTablet ? 18.sp : 16.sp,
                                   ),
                                   overflow: TextOverflow.ellipsis,
                                 ),
                               ),
                               if (hasDates) ...[
-                                SizedBox(width: 16),
+                                SizedBox(width: 16.w),
                                 Flexible(
                                   child: Text(
                                     dateText,
                                     style: TextStyle(
                                       color: Colors.black,
-                                      fontSize: isTablet ? 14 : 13,
+                                      fontSize: isTablet ? 14.sp : 13.sp,
                                     ),
                                     overflow: TextOverflow.ellipsis,
                                   ),
@@ -286,7 +291,7 @@ class _HotelsSearchPageState extends ConsumerState<HotelsSearchPage> {
                                   style: TextStyle(
                                     color: Colors.black,
                                     fontWeight: FontWeight.bold,
-                                    fontSize: isTablet ? 18 : 16,
+                                    fontSize: isTablet ? 18.sp : 16.sp,
                                   ),
                                   overflow: TextOverflow.ellipsis,
                                 ),
@@ -309,7 +314,7 @@ class _HotelsSearchPageState extends ConsumerState<HotelsSearchPage> {
                 ),
               ),
 
-              SizedBox(height: isTablet ? 20 : 16),
+              SizedBox(height: isTablet ? 20.h : 16.h),
 
               // Sort, Filter, Map buttons in white area
               Row(
@@ -322,7 +327,7 @@ class _HotelsSearchPageState extends ConsumerState<HotelsSearchPage> {
                       isTablet: isTablet,
                     ),
                   ),
-                  SizedBox(width: 12),
+                  SizedBox(width: 12.w),
                   Expanded(
                     child: _buildActionButton(
                       icon: Icons.tune,
@@ -331,7 +336,7 @@ class _HotelsSearchPageState extends ConsumerState<HotelsSearchPage> {
                       isTablet: isTablet,
                     ),
                   ),
-                  SizedBox(width: 12),
+                  SizedBox(width: 12.w),
                   Expanded(
                     child: _buildActionButton(
                       icon: Icons.map_outlined,
@@ -343,7 +348,7 @@ class _HotelsSearchPageState extends ConsumerState<HotelsSearchPage> {
                 ],
               ),
 
-              SizedBox(height: 16),
+              SizedBox(height: 16.h),
             ],
           ),
         ),
@@ -360,7 +365,7 @@ class _HotelsSearchPageState extends ConsumerState<HotelsSearchPage> {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        height: isTablet ? 50 : 45,
+        height: isTablet ? 50.h : 45.h,
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(8),
@@ -380,13 +385,13 @@ class _HotelsSearchPageState extends ConsumerState<HotelsSearchPage> {
               color: Colors.black,
               size: isTablet ? 22 : 20,
             ),
-            SizedBox(width: 8),
+            SizedBox(width: 8.w),
             Text(
               text,
               style: TextStyle(
                 color: Colors.black,
                 fontWeight: FontWeight.bold,
-                fontSize: isTablet ? 16 : 14,
+                fontSize: isTablet ? 16.sp : 14.sp,
               ),
             ),
           ],
@@ -803,142 +808,7 @@ class _HotelsSearchPageState extends ConsumerState<HotelsSearchPage> {
     });
   }
 
-  Widget _buildFilterBar(bool isTablet, Color primaryColor) {
-    return Container(
-      padding: EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.08),
-            blurRadius: 20,
-            offset: Offset(0, 8),
-            spreadRadius: 0,
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'sort_filter'.tr(),
-            style: TextStyle(
-              fontSize: isTablet ? 18 : 16,
-              fontWeight: FontWeight.bold,
-              color: Colors.black,
-            ),
-          ),
-          SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(
-                child: _buildFilterButton(
-                  'sort'.tr(),
-                  Icons.sort,
-                  () => _showSortModal(context, isTablet, primaryColor),
-                  isTablet,
-                  primaryColor,
-                ),
-              ),
-              SizedBox(width: 12),
-              Expanded(
-                child: _buildFilterButton(
-                  'rating'.tr(),
-                  Icons.star,
-                  () => _showRatingModal(context, isTablet, primaryColor),
-                  isTablet,
-                  primaryColor,
-                ),
-              ),
-              SizedBox(width: 12),
-              Expanded(
-                child: _buildFilterButton(
-                  'filters'.tr(),
-                  Icons.filter_list,
-                  () => _showFilterModal(context, isTablet, primaryColor),
-                  isTablet,
-                  primaryColor,
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
 
-  Widget _buildFilterButton(String label, IconData icon, VoidCallback onTap,
-      bool isTablet, Color primaryColor) {
-    // Check if this button is currently active
-    bool isActive = false;
-    if (label == 'sort'.tr()) {
-      isActive = _sortBy != 'recommended';
-    } else if (label == 'rating'.tr()) {
-      isActive = _minRating > 0;
-    } else if (label == 'filters'.tr()) {
-      isActive = _selectedAmenities.isNotEmpty;
-    }
-
-    return Container(
-      height: isTablet ? 56 : 48,
-      decoration: BoxDecoration(
-        color: isActive ? Colors.white : primaryColor,
-        borderRadius: BorderRadius.circular(16),
-        border: isActive ? Border.all(color: primaryColor, width: 2) : null,
-        boxShadow: [
-          BoxShadow(
-            color: isActive
-                ? primaryColor.withOpacity(0.3)
-                : primaryColor.withOpacity(0.3),
-            blurRadius: 12,
-            offset: Offset(0, 6),
-            spreadRadius: 0,
-          ),
-        ],
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(16),
-          onTap: onTap,
-          child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 16),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  icon,
-                  size: isTablet ? 20 : 18,
-                  color: isActive ? primaryColor : Colors.white,
-                ),
-                SizedBox(width: 8),
-                Text(
-                  label,
-                  style: TextStyle(
-                    color: isActive ? primaryColor : Colors.white,
-                    fontSize: isTablet ? 16 : 14,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                // Show indicator if active
-                if (isActive) ...[
-                  SizedBox(width: 8),
-                  Container(
-                    width: 8,
-                    height: 8,
-                    decoration: BoxDecoration(
-                      color: primaryColor,
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                ],
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
 
   Widget _buildResultsSummary(bool isTablet) {
     return Container(
@@ -1009,7 +879,7 @@ class _HotelsSearchPageState extends ConsumerState<HotelsSearchPage> {
                 size: isTablet ? 80 : 64,
                 color: Colors.grey[400],
               ),
-              SizedBox(height: 16),
+              SizedBox(height: 16.h),
               Text(
                 'no_hotels_found'.tr(),
                 style: TextStyle(
@@ -1023,7 +893,7 @@ class _HotelsSearchPageState extends ConsumerState<HotelsSearchPage> {
               Text(
                 'try_adjusting_search'.tr(),
                 style: TextStyle(
-                  fontSize: isTablet ? 16 : 14,
+                  fontSize: isTablet ? 16.sp : 14.sp,
                   color: Colors.grey[500],
                 ),
                 textAlign: TextAlign.center,
@@ -1050,7 +920,7 @@ class _HotelsSearchPageState extends ConsumerState<HotelsSearchPage> {
                 size: isTablet ? 80 : 64,
                 color: Colors.grey[400],
               ),
-              SizedBox(height: 16),
+              SizedBox(height: 16.h),
               Text(
                 'no_hotels_match_filters'.tr(),
                 style: TextStyle(
@@ -1064,12 +934,12 @@ class _HotelsSearchPageState extends ConsumerState<HotelsSearchPage> {
               Text(
                 'try_adjusting_filters'.tr(),
                 style: TextStyle(
-                  fontSize: isTablet ? 16 : 14,
+                  fontSize: isTablet ? 16.sp : 14.sp,
                   color: Colors.grey[500],
                 ),
                 textAlign: TextAlign.center,
               ),
-              SizedBox(height: 16),
+              SizedBox(height: 16.h),
               ElevatedButton(
                 onPressed: () {
                   setState(() {
@@ -1126,697 +996,13 @@ class _HotelsSearchPageState extends ConsumerState<HotelsSearchPage> {
     );
   }
 
-  void _showSortModal(BuildContext context, bool isTablet, Color primaryColor) {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      builder: (context) => _buildSortModal(context, isTablet, primaryColor),
-    );
-  }
 
-  void _showRatingModal(
-      BuildContext context, bool isTablet, Color primaryColor) {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      builder: (context) => _buildRatingModal(context, isTablet, primaryColor),
-    );
-  }
 
-  void _showFilterModal(
-      BuildContext context, bool isTablet, Color primaryColor) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => _buildFilterModal(context, isTablet, primaryColor),
-    );
-  }
 
-  Widget _buildSortModal(
-      BuildContext context, bool isTablet, Color primaryColor) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      child: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Header
-            Container(
-              padding: EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: primaryColor,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-                boxShadow: [
-                  BoxShadow(
-                    color: primaryColor.withOpacity(0.3),
-                    blurRadius: 20,
-                    offset: Offset(0, 10),
-                  ),
-                ],
-              ),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.sort,
-                    color: Colors.white,
-                    size: isTablet ? 28 : 24,
-                  ),
-                  SizedBox(width: 16),
-                  Text(
-                    'sort_hotels'.tr(),
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: isTablet ? 24 : 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  Spacer(),
-                  IconButton(
-                    icon: Icon(Icons.close, color: Colors.white, size: 24),
-                    onPressed: () => Navigator.pop(context),
-                  ),
-                ],
-              ),
-            ),
 
-            // Content
-            Container(
-              constraints: BoxConstraints(maxHeight: 400),
-              child: ListView(
-                padding: EdgeInsets.zero,
-                shrinkWrap: true,
-                children: [
-                  _buildSortOption(
-                    context,
-                    'recommended',
-                    'recommended'.tr(),
-                    Icons.recommend,
-                    'best_matches'.tr(),
-                    isTablet,
-                    primaryColor,
-                  ),
-                  _buildSortOption(
-                    context,
-                    'price_low',
-                    'price_low_to_high'.tr(),
-                    Icons.trending_up,
-                    'affordable_first'.tr(),
-                    isTablet,
-                    primaryColor,
-                  ),
-                  _buildSortOption(
-                    context,
-                    'price_high',
-                    'price_high_to_low'.tr(),
-                    Icons.trending_down,
-                    'luxury_first'.tr(),
-                    isTablet,
-                    primaryColor,
-                  ),
-                  _buildSortOption(
-                    context,
-                    'rating',
-                    'highest_rated'.tr(),
-                    Icons.star,
-                    'top_rated_first'.tr(),
-                    isTablet,
-                    primaryColor,
-                  ),
-                  _buildSortOption(
-                    context,
-                    'name',
-                    'alphabetical'.tr(),
-                    Icons.sort_by_alpha,
-                    'a_to_z_order'.tr(),
-                    isTablet,
-                    primaryColor,
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 
-  Widget _buildSortOption(BuildContext context, String value, String title,
-      IconData icon, String subtitle, bool isTablet, Color primaryColor) {
-    final isSelected = _sortBy == value;
 
-    return Container(
-      margin: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      decoration: BoxDecoration(
-        color: isSelected ? primaryColor.withOpacity(0.1) : Colors.transparent,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: isSelected ? primaryColor : Colors.grey[300]!,
-          width: isSelected ? 2 : 1,
-        ),
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(16),
-          onTap: () {
-            setState(() {
-              _sortBy = value;
-            });
-            Navigator.pop(context);
-          },
-          child: Padding(
-            padding: EdgeInsets.all(20),
-            child: Row(
-              children: [
-                Container(
-                  padding: EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: isSelected ? primaryColor : Colors.grey[100],
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(
-                    icon,
-                    color: isSelected ? Colors.white : Colors.grey[600],
-                    size: isTablet ? 24 : 20,
-                  ),
-                ),
-                SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        title,
-                        style: TextStyle(
-                          fontSize: isTablet ? 18 : 16,
-                          fontWeight: FontWeight.bold,
-                          color: isSelected ? primaryColor : Colors.black,
-                        ),
-                      ),
-                      SizedBox(height: 8),
-                      Text(
-                        subtitle,
-                        style: TextStyle(
-                          fontSize: isTablet ? 14 : 12,
-                          color: isSelected
-                              ? primaryColor.withOpacity(0.8)
-                              : Colors.grey[600],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                if (isSelected)
-                  Icon(
-                    Icons.check_circle,
-                    color: primaryColor,
-                    size: isTablet ? 24 : 20,
-                  ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
 
-  Widget _buildRatingModal(
-      BuildContext context, bool isTablet, Color primaryColor) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      child: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Enhanced Header with gradient
-            Container(
-              padding: EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    primaryColor,
-                    primaryColor.withOpacity(0.8),
-                  ],
-                ),
-                borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-                boxShadow: [
-                  BoxShadow(
-                    color: primaryColor.withOpacity(0.4),
-                    blurRadius: 25,
-                    offset: Offset(0, 15),
-                    spreadRadius: 0,
-                  ),
-                ],
-              ),
-              child: Row(
-                children: [
-                  Container(
-                    padding: EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(
-                        color: Colors.white.withOpacity(0.3),
-                        width: 1,
-                      ),
-                    ),
-                    child: Icon(
-                      Icons.star,
-                      color: Colors.white,
-                      size: isTablet ? 28 : 24,
-                    ),
-                  ),
-                  SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'filter_by_rating'.tr(),
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: isTablet ? 24 : 20,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        SizedBox(height: 4),
-                        Text(
-                          'choose_minimum_rating'.tr(),
-                          style: TextStyle(
-                            color: Colors.white.withOpacity(0.9),
-                            fontSize: isTablet ? 14 : 12,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: Colors.white.withOpacity(0.3),
-                        width: 1,
-                      ),
-                    ),
-                    child: IconButton(
-                      icon: Icon(Icons.close, color: Colors.white, size: 20),
-                      onPressed: () => Navigator.pop(context),
-                      padding: EdgeInsets.all(8),
-                      constraints: BoxConstraints(
-                        minWidth: 40,
-                        minHeight: 40,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            // Content
-            Padding(
-              padding: EdgeInsets.all(20),
-              child: Column(
-                children: [
-                  // Current rating display
-                  Container(
-                    padding: EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      color: primaryColor.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: primaryColor.withOpacity(0.3)),
-                    ),
-                    child: Column(
-                      children: [
-                        Text(
-                          'minimum_rating'.tr(),
-                          style: TextStyle(
-                            fontSize: isTablet ? 18 : 16,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black,
-                          ),
-                        ),
-                        SizedBox(height: 16),
-                        // Large rating number
-                        Text(
-                          '${_minRating.toStringAsFixed(1)}',
-                          style: TextStyle(
-                            fontSize: isTablet ? 48 : 40,
-                            fontWeight: FontWeight.bold,
-                            color: primaryColor,
-                          ),
-                        ),
-                        SizedBox(height: 16),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: List.generate(5, (index) {
-                            if (index < _minRating.floor()) {
-                              return Icon(Icons.star,
-                                  color: Colors.amber, size: 28);
-                            } else if (index == _minRating.floor() &&
-                                _minRating % 1 > 0) {
-                              return Icon(Icons.star_half,
-                                  color: Colors.amber, size: 28);
-                            } else {
-                              return Icon(Icons.star_border,
-                                  color: Colors.amber, size: 28);
-                            }
-                          }),
-                        ),
-                        SizedBox(height: 8),
-                        Text(
-                          _getRatingText(_minRating),
-                          style: TextStyle(
-                            fontSize: isTablet ? 16 : 14,
-                            color: primaryColor,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  SizedBox(height: 32),
-
-                  // Star Rating Selection
-                  Column(
-                    children: [
-                      Text(
-                        'adjust_rating'.tr(),
-                        style: TextStyle(
-                          fontSize: isTablet ? 16 : 14,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.black,
-                        ),
-                      ),
-                      SizedBox(height: 16),
-                      // Star rating container
-                      Container(
-                        padding: EdgeInsets.all(20),
-                        decoration: BoxDecoration(
-                          color: Colors.grey[50],
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: Colors.grey[200]!),
-                        ),
-                        child: Column(
-                          children: [
-                            // Current rating display
-                            Text(
-                              'current_rating'.tr() +
-                                  ': ${_minRating.toStringAsFixed(1)}',
-                              style: TextStyle(
-                                fontSize: isTablet ? 18 : 16,
-                                fontWeight: FontWeight.bold,
-                                color: primaryColor,
-                              ),
-                            ),
-                            SizedBox(height: 16),
-                            // Interactive stars
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: List.generate(5, (index) {
-                                final starRating = index + 1.0;
-
-                                return GestureDetector(
-                                  onTap: () {
-                                    setState(() {
-                                      _minRating = starRating;
-                                    });
-                                    print('Rating changed to: $starRating');
-                                  },
-                                  child: Container(
-                                    margin: EdgeInsets.symmetric(horizontal: 4),
-                                    child: Icon(
-                                      _minRating >= starRating
-                                          ? Icons.star
-                                          : Icons.star_border,
-                                      color: _minRating >= starRating
-                                          ? Colors.amber
-                                          : Colors.grey[400],
-                                      size: isTablet ? 40 : 36,
-                                    ),
-                                  ),
-                                );
-                              }),
-                            ),
-                            SizedBox(height: 16),
-                            // Rating text
-                            Text(
-                              _getRatingText(_minRating),
-                              style: TextStyle(
-                                fontSize: isTablet ? 16 : 14,
-                                color: primaryColor,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            SizedBox(height: 8),
-                            // Clear rating button
-                            TextButton(
-                              onPressed: () {
-                                setState(() {
-                                  _minRating = 0.0;
-                                });
-                              },
-                              child: Text(
-                                'clear_rating'.tr(),
-                                style: TextStyle(
-                                  color: Colors.grey[600],
-                                  fontSize: isTablet ? 14 : 12,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  SizedBox(height: 32),
-
-                  // Apply Button
-                  SizedBox(
-                    width: double.infinity,
-                    height: isTablet ? 64 : 56,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        print('Apply rating filter pressed');
-                        print('Current rating filter: $_minRating');
-                        Navigator.pop(context);
-                        setState(() {}); // Trigger rebuild to apply filters
-                        print('Filters applied, rebuilding...');
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: primaryColor,
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        elevation: 8,
-                        shadowColor: primaryColor.withOpacity(0.3),
-                      ),
-                      child: Text(
-                        'apply_rating_filter'.tr(),
-                        style: TextStyle(
-                          fontSize: isTablet ? 20 : 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  String _getRatingText(double rating) {
-    if (rating >= 4.5) return 'exceptional'.tr();
-    if (rating >= 4.0) return 'excellent'.tr();
-    if (rating >= 3.5) return 'very_good'.tr();
-    if (rating >= 3.0) return 'good'.tr();
-    if (rating >= 2.5) return 'average'.tr();
-    if (rating >= 2.0) return 'below_average'.tr();
-    return 'poor'.tr();
-  }
-
-  Widget _buildFilterModal(
-      BuildContext context, bool isTablet, Color primaryColor) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      child: SingleChildScrollView(
-        child: Column(mainAxisSize: MainAxisSize.min, children: [
-          // Header
-          Container(
-            padding: EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: primaryColor,
-              borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-              boxShadow: [
-                BoxShadow(
-                  color: primaryColor.withOpacity(0.3),
-                  blurRadius: 20,
-                  offset: Offset(0, 10),
-                ),
-              ],
-            ),
-            child: Row(
-              children: [
-                Icon(
-                  Icons.filter_list,
-                  color: Colors.white,
-                  size: isTablet ? 28 : 24,
-                ),
-                SizedBox(width: 16),
-                Text(
-                  'amenities_filters'.tr(),
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: isTablet ? 24 : 20,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                Spacer(),
-                IconButton(
-                  icon: Icon(Icons.close, color: Colors.white, size: 24),
-                  onPressed: () => Navigator.pop(context),
-                ),
-              ],
-            ),
-          ),
-
-          // Content
-          Padding(
-            padding: EdgeInsets.all(24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  'select_amenities_description'.tr(),
-                  style: TextStyle(
-                    fontSize: isTablet ? 16 : 14,
-                    color: Colors.grey[600],
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                SizedBox(height: 20),
-                Flexible(
-                  child: ListView(
-                    shrinkWrap: true,
-                    children: [
-                      _buildAmenityOption(
-                        'WiFi',
-                        Icons.wifi,
-                        'free_wireless_internet'.tr(),
-                        isTablet,
-                        primaryColor,
-                      ),
-                      _buildAmenityOption(
-                        'Pool',
-                        Icons.pool,
-                        'swimming_pool_access'.tr(),
-                        isTablet,
-                        primaryColor,
-                      ),
-                      _buildAmenityOption(
-                        'Gym',
-                        Icons.fitness_center,
-                        'Fitness center',
-                        isTablet,
-                        primaryColor,
-                      ),
-                      _buildAmenityOption(
-                        'Restaurant',
-                        Icons.restaurant,
-                        'On-site dining',
-                        isTablet,
-                        primaryColor,
-                      ),
-                      _buildAmenityOption(
-                        'Spa',
-                        Icons.spa,
-                        'Wellness & spa services',
-                        isTablet,
-                        primaryColor,
-                      ),
-                      _buildAmenityOption(
-                        'Parking',
-                        Icons.local_parking,
-                        'Free parking available',
-                        isTablet,
-                        primaryColor,
-                      ),
-                      _buildAmenityOption(
-                        'Air Conditioning',
-                        Icons.ac_unit,
-                        'Climate control',
-                        isTablet,
-                        primaryColor,
-                      ),
-                      _buildAmenityOption(
-                        'Room Service',
-                        Icons.room_service,
-                        '24/7 room service',
-                        isTablet,
-                        primaryColor,
-                      ),
-                    ],
-                  ),
-                ),
-                SizedBox(height: 24),
-
-                // Apply Button
-                SizedBox(
-                  width: double.infinity,
-                  height: isTablet ? 64 : 56,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      print('Apply filters pressed');
-                      print('Current amenities: $_selectedAmenities');
-                      Navigator.pop(context);
-                      setState(() {}); // Trigger rebuild to apply filters
-                      print('Filters applied, rebuilding...');
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: primaryColor,
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      elevation: 8,
-                      shadowColor: primaryColor.withOpacity(0.3),
-                    ),
-                    child: Text(
-                      'apply_filters'.tr(),
-                      style: TextStyle(
-                        fontSize: isTablet ? 20 : 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ]),
-      ),
-    );
-  }
 
   Widget _buildAmenityOption(String amenity, IconData icon, String description,
       bool isTablet, Color primaryColor) {
@@ -1873,7 +1059,7 @@ class _HotelsSearchPageState extends ConsumerState<HotelsSearchPage> {
                       Text(
                         amenity,
                         style: TextStyle(
-                          fontSize: isTablet ? 16 : 14,
+                          fontSize: isTablet ? 16.sp : 14.sp,
                           fontWeight: FontWeight.bold,
                           color: isSelected ? primaryColor : Colors.black,
                         ),

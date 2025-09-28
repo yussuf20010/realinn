@@ -3,6 +3,7 @@ import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:loader_overlay/loader_overlay.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'dart:ui' as ui;
 
 import 'config/wp_config.dart';
@@ -21,17 +22,17 @@ void main() async {
     ProviderScope(
       child: EasyLocalization(
         supportedLocales: AppLocales.supportedLocales,
-        path: 'assets/lang',
+        path: 'assets/lang', 
         startLocale: AppLocales.english,
         fallbackLocale: AppLocales.english,
-        child: NewsProApp(savedThemeMode: savedThemeMode),
+        child: RealInnApp(savedThemeMode: savedThemeMode),
       ),
     ),
   );
 }
 
-class NewsProApp extends StatelessWidget {
-  const NewsProApp({Key? key, this.savedThemeMode}) : super(key: key);
+class RealInnApp extends StatelessWidget {
+  const RealInnApp({Key? key, this.savedThemeMode}) : super(key: key);
   final AdaptiveThemeMode? savedThemeMode;
 
   @override
@@ -43,18 +44,22 @@ class NewsProApp extends StatelessWidget {
       dark: AppTheme.darkTheme,
       initial: savedThemeMode ?? AdaptiveThemeMode.light,
       builder: (theme, darkTheme) => GlobalLoaderOverlay(
-        child: MaterialApp(
-          title: dynamicConfig.appName ?? WPConfig.appName,
-          localizationsDelegates: context.localizationDelegates,
-          supportedLocales: context.supportedLocales,
-          locale: context.locale,
-          theme: theme,
-          darkTheme: darkTheme,
-          builder: (context, child) {
-            final mediaQuery = MediaQuery.of(context);
-            final width = mediaQuery.size.width;
-            final isTablet = width >= 768;
-            final textScale = isTablet ? 1.15 : 1.0;
+        child: ScreenUtilInit(
+          designSize: const Size(375, 812), // iPhone X design size
+          minTextAdapt: true,
+          splitScreenMode: true,
+          builder: (context, child) => MaterialApp(
+            title: dynamicConfig.appName ?? WPConfig.appName,
+            localizationsDelegates: context.localizationDelegates,
+            supportedLocales: context.supportedLocales,
+            locale: context.locale,
+            theme: theme,
+            darkTheme: darkTheme,
+            builder: (context, child) {
+              final mediaQuery = MediaQuery.of(context);
+              final width = mediaQuery.size.width;
+              final isTablet = width >= 768;
+              final textScale = isTablet ? 1.15 : 1.0;
 
             // Handle RTL for Arabic
             final isRTL = context.locale.languageCode == 'ar';
@@ -80,7 +85,7 @@ class NewsProApp extends StatelessWidget {
           debugShowCheckedModeBanner: false,
         ),
       ),
-    );
+      ));
   }
 }
 

@@ -12,22 +12,12 @@ import '../../pages/login/pages/login_page.dart';
 import '../../pages/login/pages/signup_page.dart';
 import '../../pages/main/main_scaffold.dart';
 import '../../pages/notifications/notifications_page.dart';
-import '../../pages/settings/pages/rate_review_page.dart';
-import '../../pages/settings/pages/faq_page.dart';
-import '../../pages/chat/chat_page.dart';
 import '../../pages/favourites/favourites_page.dart';
-import '../../pages/bookings/bookings_page.dart';
+import '../../pages/waiting_list/waiting_list_page.dart';
 import 'app_routes.dart';
 import 'unknown_page.dart';
-import '../../pages/settings/settings_page.dart';
-import '../../pages/settings/pages/privacy_policy_page.dart';
-import '../../pages/settings/pages/terms_conditions_page.dart';
-import '../../pages/settings/pages/about_page.dart';
-import '../../pages/settings/pages/help_support_page.dart';
 import '../../models/hotel.dart';
-import '../../pages/bookings/create_booking_page.dart';
 import '../../models/selected_room.dart';
-import '../../models/booking.dart';
 
 class RouteGenerator {
   static Route? onGenerate(RouteSettings settings) {
@@ -63,42 +53,20 @@ class RouteGenerator {
       case AppRoutes.profile:
         return CupertinoPageRoute(builder: (_) => const ProfilePage());
 
-      case AppRoutes.settings:
-        return CupertinoPageRoute(builder: (_) => const SettingsPage());
       case AppRoutes.notifications:
         return CupertinoPageRoute(builder: (_) => const NotificationsPage());
 
       case '/customer-service':
         return CupertinoPageRoute(builder: (_) => const CustomerServicePage());
 
-      case '/chat':
-        return CupertinoPageRoute(builder: (_) => const ChatPage());
-
       case '/favourites':
         return CupertinoPageRoute(builder: (_) => const FavouritesPage());
 
-      case '/bookings':
-        return CupertinoPageRoute(builder: (_) => const BookingsPage());
-
-      case '/create-booking':
-        final args = settings.arguments as Map<String, dynamic>?;
-        final hotel = args?['hotel'] as Hotel?;
-        final selectedRoom = args?['selectedRoom'] as SelectedRoom?;
-        final booking = args?['booking'] as Booking?;
-
-        if (hotel != null && selectedRoom != null) {
-          return CupertinoPageRoute(
-            builder: (_) => CreateBookingPage(
-              hotel: hotel,
-              selectedRoom: selectedRoom,
-              booking: booking,
-            ),
-          );
-        }
-        return errorRoute();
+      case '/waiting-list':
+        return CupertinoPageRoute(builder: (_) => MainScaffold(initialIndex: 2));
 
       case '/history':
-        return CupertinoPageRoute(builder: (_) => const HistoryPage());
+        return CupertinoPageRoute(builder: (_) => MainScaffold(initialIndex: 3));
 
       case '/search-results':
         final args = settings.arguments as Map<String, dynamic>?;
@@ -151,18 +119,6 @@ class RouteGenerator {
         }
         return errorRoute();
 
-      case AppRoutes.privacy:
-        return CupertinoPageRoute(builder: (_) => const PrivacyPolicyPage());
-      case AppRoutes.terms:
-        return CupertinoPageRoute(builder: (_) => const TermsConditionsPage());
-      case AppRoutes.about:
-        return CupertinoPageRoute(builder: (_) => const AboutPage());
-      case AppRoutes.help:
-        return CupertinoPageRoute(builder: (_) => const HelpSupportPage());
-      case AppRoutes.rate:
-        return CupertinoPageRoute(builder: (_) => const RateReviewPage());
-      case AppRoutes.faq:
-        return CupertinoPageRoute(builder: (_) => const FaqPage());
 
       default:
         return errorRoute();

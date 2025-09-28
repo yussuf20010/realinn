@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../home/home_page.dart';
 import '../favourites/favourites_page.dart';
-import '../bookings/bookings_page.dart';
+import '../waiting_list/waiting_list_page.dart';
 import '../history/history_page.dart';
 import '../../config/wp_config.dart';
 
@@ -28,8 +29,7 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
   final List<Widget> _pages = [
     HomePage(),
     FavouritesPage(),
-
-    BookingsPage(), // This will be the Waiting List page
+    WaitingListPage(), // Waiting List page
     HistoryPage(),
   ];
 
@@ -58,9 +58,9 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
       ),
       child: SafeArea(
         child: Container(
-          height: isTablet ? 80 : 70,
+          height: isTablet ? 80.h : 70.h,
           padding:
-              EdgeInsets.symmetric(horizontal: isTablet ? 24 : 16, vertical: 8),
+              EdgeInsets.symmetric(horizontal: isTablet ? 24.w : 16.w, vertical: 8.h),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
@@ -68,7 +68,7 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
               _buildNavItem(
                   1, Icons.favorite, 'favorites'.tr(), isTablet, primaryColor),
               _buildNavItem(
-                  2, Icons.queue, 'waiting_list'.tr(), isTablet, primaryColor),
+                  2, Icons.shopping_cart_outlined, 'waiting_list'.tr(), isTablet, primaryColor),
               _buildNavItem(
                   3, Icons.history, 'history'.tr(), isTablet, primaryColor),
             ],
@@ -94,14 +94,14 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
           Icon(
             icon,
             color: isSelected ? primaryColor : Colors.black,
-            size: isTablet ? 28 : 24,
+            size: isTablet ? 28.sp : 24.sp,
           ),
-          SizedBox(height: isTablet ? 6 : 4),
+          SizedBox(height: isTablet ? 6.h : 4.h),
           Text(
             label,
             style: TextStyle(
               color: isSelected ? primaryColor : Colors.black,
-              fontSize: isTablet ? 12 : 10,
+              fontSize: isTablet ? 12.sp : 10.sp,
               fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
             ),
           ),

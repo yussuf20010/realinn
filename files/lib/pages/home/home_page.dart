@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../config/wp_config.dart';
 import '../../config/dynamic_config.dart';
 import '../../models/hotel.dart';
@@ -8,6 +9,7 @@ import '../../models/location.dart';
 import '../../controllers/location_controller.dart';
 import '../../controllers/hotel_controller.dart';
 import '../../core/constants/assets.dart';
+import 'components/search_box_widget.dart';
 
 class HomePage extends ConsumerStatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -17,13 +19,10 @@ class HomePage extends ConsumerStatefulWidget {
 }
 
 class _HomePageState extends ConsumerState<HomePage> {
-  int _selectedDailyMonthlyIndex = 0;
   final TextEditingController _destinationController = TextEditingController();
   DateTime? _checkInDate;
   DateTime? _checkOutDate;
   int _rooms = 1;
-  int _adults = 2;
-  int _children = 0;
   List<City> _cities = [];
   List<Country> _countries = [];
   List<Hotel> _allHotels = [];
@@ -31,7 +30,9 @@ class _HomePageState extends ConsumerState<HomePage> {
   bool _isLoadingLocations = true;
   bool _isLoadingHotels = true;
   String? _selectedDestination;
-  String _selectedBox = 'stays'; // 'stays' or 'service_providers'
+  int _selectedServiceType = 0;
+
+  final List<String> _serviceTypes = ['stays', 'services'];
 
   @override
   void initState() {
@@ -97,7 +98,6 @@ class _HomePageState extends ConsumerState<HomePage> {
       print('Error loading hotels: $e');
       setState(() {
         _isLoadingHotels = false;
-        // Load fallback data
         _allHotels = [
           Hotel(
             id: '1',
@@ -126,23 +126,7 @@ class _HomePageState extends ConsumerState<HomePage> {
     }
   }
 
-  void _showDestinationPicker() {
-    showDialog(
-      context: context,
-      builder: (context) => DestinationPickerDialog(
-        countries: _countries,
-        cities: _cities,
-        onDestinationSelected: _selectDestination,
-      ),
-    );
-  }
 
-  void _selectDestination(String destination) {
-    setState(() {
-      _selectedDestination = destination;
-      _destinationController.text = destination;
-    });
-  }
 
   Future<void> _performSearch() async {
     if (_selectedDestination == null || _selectedDestination!.isEmpty) {
@@ -227,6 +211,8 @@ class _HomePageState extends ConsumerState<HomePage> {
 
       // Navigate to search results
       if (mounted) {
+        print('Navigating to search results with ${filteredHotels.length} hotels');
+        print('Search query: $_selectedDestination');
         Navigator.pushNamed(context, '/search-results', arguments: {
           'hotels': filteredHotels,
           'searchQuery': _selectedDestination,
@@ -247,144 +233,21 @@ class _HomePageState extends ConsumerState<HomePage> {
     }
   }
 
-  Future<void> _selectDates() async {
-    final DateTimeRange? picked = await showDateRangePicker(
-      context: context,
-      firstDate: DateTime.now(),
-      lastDate: DateTime.now().add(Duration(days: 365)),
-      initialDateRange: _checkInDate != null && _checkOutDate != null
-          ? DateTimeRange(start: _checkInDate!, end: _checkOutDate!)
-          : DateTimeRange(
-              start: DateTime.now().add(Duration(days: 1)),
-              end: DateTime.now().add(Duration(days: 2)),
-            ),
-    );
-
-    if (picked != null) {
-      setState(() {
-        _checkInDate = picked.start;
-        _checkOutDate = picked.end;
-      });
-    }
-  }
-
-  void _showOccupancyDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setState) {
-          int tempRooms = _rooms;
-          int tempAdults = _adults;
-          int tempChildren = _children;
-
-          return AlertDialog(
-            title: Text('select_rooms_guests'.tr()),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text('rooms'.tr()),
-                    Row(
-                      children: [
-                        IconButton(
-                          onPressed: () {
-                            if (tempRooms > 1) {
-                              setState(() => tempRooms--);
-                            }
-                          },
-                          icon: Icon(Icons.remove),
-                        ),
-                        Text('$tempRooms'),
-                        IconButton(
-                          onPressed: () {
-                            setState(() => tempRooms++);
-                          },
-                          icon: Icon(Icons.add),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text('adults'.tr()),
-                    Row(
-                      children: [
-                        IconButton(
-                          onPressed: () {
-                            if (tempAdults > 1) {
-                              setState(() => tempAdults--);
-                            }
-                          },
-                          icon: Icon(Icons.remove),
-                        ),
-                        Text('$tempAdults'),
-                        IconButton(
-                          onPressed: () {
-                            setState(() => tempAdults++);
-                          },
-                          icon: Icon(Icons.add),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text('children'.tr()),
-                    Row(
-                      children: [
-                        IconButton(
-                          onPressed: () {
-                            if (tempChildren > 0) {
-                              setState(() => tempChildren--);
-                            }
-                          },
-                          icon: Icon(Icons.remove),
-                        ),
-                        Text('$tempChildren'),
-                        IconButton(
-                          onPressed: () {
-                            setState(() => tempChildren++);
-                          },
-                          icon: Icon(Icons.add),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ],
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: Text('cancel'.tr()),
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  setState(() {
-                    _rooms = tempRooms;
-                    _adults = tempAdults;
-                    _children = tempChildren;
-                  });
-                  Navigator.pop(context);
-                },
-                child: Text('apply'.tr()),
-              ),
-            ],
-          );
-        },
-      ),
-    );
-  }
-
   void _navigateToCountryHotels(String countryName) {
     print('Navigating to country hotels: $countryName');
     Navigator.pushNamed(context, '/country-hotels', arguments: countryName);
+  }
+
+  void _handleSearchBoxSearch(String destination, DateTime? checkIn, DateTime? checkOut, int rooms, int adults, int children) {
+                  setState(() {
+      _selectedDestination = destination;
+      _checkInDate = checkIn;
+      _checkOutDate = checkOut;
+      _rooms = rooms;
+    });
+
+    // Perform the search using the existing search logic
+    _performSearch();
   }
 
   @override
@@ -396,18 +259,24 @@ class _HomePageState extends ConsumerState<HomePage> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: PreferredSize(
-        preferredSize: Size.fromHeight(80),
+        preferredSize: Size.fromHeight(120),
         child: _buildCustomAppBar(context, primaryColor, isTablet),
       ),
       body: SingleChildScrollView(
         child: Column(
           children: [
-            // Two boxes (Stays and Service Providers)
-            _buildSelectionBoxes(isTablet, primaryColor),
+              if (_selectedServiceType == 0) ...[
+                SearchBoxWidget(
+                  onSearch: _handleSearchBoxSearch,
+                  isLoading: _isSearching,
+                ),
+                SizedBox(height: 16),
+              ],
 
-            // Search interface (only show if stays is selected)
-            if (_selectedBox == 'stays')
-              _buildSearchInterface(isTablet, primaryColor),
+              // Add space when Services is selected
+              if (_selectedServiceType == 1) ...[
+                SizedBox(height: 40),
+              ],
 
             _buildMainContent(isTablet, primaryColor),
           ],
@@ -418,12 +287,18 @@ class _HomePageState extends ConsumerState<HomePage> {
 
   Widget _buildCustomAppBar(
       BuildContext context, Color primaryColor, bool isTablet) {
-    return AppBar(
-      backgroundColor: primaryColor,
-      elevation: 0,
-      automaticallyImplyLeading: false,
-      toolbarHeight: 80,
-      title: Row(
+    return Container(
+      color: primaryColor,
+      child: SafeArea(
+        child: Column(
+          children: [
+            // Main App Bar with Icons, Logo, and Service Buttons
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
+              child: Column(
+                children: [
+                  // Top Row - Icons and Logo
+                  Row(
         children: [
           // Left side - Notification and Chat
           Row(
@@ -441,7 +316,6 @@ class _HomePageState extends ConsumerState<HomePage> {
                   Navigator.pushNamed(context, '/customer-service');
                 },
               ),
-              SizedBox(width: 8),
             ],
           ),
 
@@ -497,12 +371,84 @@ class _HomePageState extends ConsumerState<HomePage> {
                   Navigator.pushNamed(context, '/profile');
                 },
               ),
-              SizedBox(width: 8),
             ],
           ),
         ],
+                  ),
+                  
+                  // Service Type Selector - Centered below icons
+                  SizedBox(height: 10.h),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: _serviceTypes.asMap().entries.map((entry) {
+                      final index = entry.key;
+                      final serviceType = entry.value;
+                      final isSelected = _selectedServiceType == index;
+
+                      return Container(
+                        width: isTablet ? 120.w : 100.w,
+                        margin: EdgeInsets.symmetric(horizontal: 6.w),
+                        child: GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              _selectedServiceType = index; 
+                            }); 
+                          },
+                          child: Container(
+                            height: 25.h,
+                            decoration: BoxDecoration(
+                              color: Colors.transparent,
+                              borderRadius: BorderRadius.circular(25),
+                              boxShadow: isSelected ? [
+                                BoxShadow(
+                                  color: Colors.white.withOpacity(0.3),
+                                  blurRadius: 4,
+                                  offset: Offset(0, 1),
+                                ),
+                              ] : null,
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  _getServiceIcon(serviceType),
+                                  color: Colors.white,
+                                  size: isTablet ? 18.sp : 16.sp,
+                                ),
+                                SizedBox(width: 6.w),
+                                Text(
+                                  serviceType.tr(),
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: isTablet ? 14.sp : 12.sp,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
+  }
+
+  IconData _getServiceIcon(String serviceType) {
+    switch (serviceType) {
+      case 'stays':
+        return Icons.bed;
+      case 'services':
+        return Icons.restaurant;
+      default:
+        return Icons.bed;
+    }
   }
 
   void _toggleLanguage(BuildContext context) async {
@@ -583,315 +529,10 @@ class _HomePageState extends ConsumerState<HomePage> {
     }
   }
 
-  Widget _buildDailyMonthlyButtons(bool isTablet, Color primaryColor) {
-    final buttons = ['daily'.tr(), 'monthly'.tr()];
 
-    return Container(
-      child: Row(
-        children: buttons.asMap().entries.map((entry) {
-          final index = entry.key;
-          final button = entry.value;
-          final isSelected = _selectedDailyMonthlyIndex == index;
 
-          return Expanded(
-            child: GestureDetector(
-              onTap: () {
-                setState(() {
-                  _selectedDailyMonthlyIndex = index;
-                });
-              },
-              child: Container(
-                height: 40, // Reduced height to match cells
-                decoration: BoxDecoration(
-                  color: isSelected ? primaryColor : Colors.white,
-                  border: Border.all(
-                    color: primaryColor,
-                    width: 2,
-                  ),
-                ),
-                child: Center(
-                  child: Text(
-                    button,
-                    style: TextStyle(
-                      color: isSelected ? Colors.white : Colors.black,
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          );
-        }).toList(),
-      ),
-    );
-  }
 
-  Widget _buildSelectionBoxes(bool isTablet, Color primaryColor) {
-    return Container(
-      color: primaryColor,
-      padding:
-          EdgeInsets.symmetric(horizontal: isTablet ? 20 : 16, vertical: 12),
-      child: Row(
-        children: [
-          // Stays box
-          Expanded(
-            child: GestureDetector(
-              onTap: () {
-                setState(() {
-                  _selectedBox = 'stays';
-                });
-              },
-              child: Container(
-                height: 45,
-                decoration: BoxDecoration(
-                  color: _selectedBox == 'stays' ? primaryColor : Colors.white,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: Colors.white,
-                    width: 2,
-                  ),
-                ),
-                child: Center(
-                  child: Text(
-                    'stays'.tr(),
-                    style: TextStyle(
-                      fontSize: isTablet ? 14 : 13,
-                      fontWeight: FontWeight.bold,
-                      color:
-                          _selectedBox == 'stays' ? Colors.white : primaryColor,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
 
-          SizedBox(width: 12),
-
-          // Service Providers box
-          Expanded(
-            child: GestureDetector(
-              onTap: () {
-                setState(() {
-                  _selectedBox = 'service_providers';
-                });
-              },
-              child: Container(
-                height: 45,
-                decoration: BoxDecoration(
-                  color: _selectedBox == 'service_providers'
-                      ? primaryColor
-                      : Colors.white,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: Colors.white,
-                    width: 2,
-                  ),
-                ),
-                child: Center(
-                  child: Text(
-                    'service_providers'.tr(),
-                    style: TextStyle(
-                      fontSize: isTablet ? 14 : 13,
-                      fontWeight: FontWeight.bold,
-                      color: _selectedBox == 'service_providers'
-                          ? Colors.white
-                          : primaryColor,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSearchInterface(bool isTablet, Color primaryColor) {
-    return Column(
-      children: [
-        // Colored background that extends down behind the table
-        Container(
-          color: primaryColor,
-          height: 40, // Colored background heigh t
-          width: double.infinity,
-        ),
-
-        Transform.translate(
-          offset: Offset(0, -40), // Move up to overlap with colored area
-          child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: isTablet ? 20 : 16),
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(
-                    12), // Keep rounded corners like image
-                border: Border.all(
-                    color: primaryColor,
-                    width:
-                        2), // Full primary color border around entire container
-              ),
-              child: Column(
-                children: [
-                  // Daily/Monthly buttons positioned at the top
-                  _buildDailyMonthlyButtons(isTablet, primaryColor),
-
-                  // Search fields
-                  _buildSearchCell(
-                    text: _selectedDestination ?? 'destination'.tr(),
-                    onTap: _showDestinationPicker,
-                    isTablet: isTablet,
-                    isFirst: true,
-                    primaryColor: primaryColor,
-                    icon: Icons.location_on,
-                  ),
-
-                  _buildSearchCell(
-                    text: _checkInDate != null && _checkOutDate != null
-                        ? '${_formatDate(_checkInDate!)} - ${_formatDate(_checkOutDate!)}'
-                        : 'date'.tr(),
-                    onTap: _selectDates,
-                    isTablet: isTablet,
-                    isFirst: false,
-                    primaryColor: primaryColor,
-                    icon: Icons.calendar_today,
-                  ),
-
-                  _buildSearchCell(
-                    text:
-                        '$_rooms ${'room'.tr()} · $_adults ${'adults'.tr()} · $_children ${'children'.tr()}',
-                    onTap: _showOccupancyDialog,
-                    isTablet: isTablet,
-                    isFirst: false,
-                    primaryColor: primaryColor,
-                    icon: Icons.people,
-                  ),
-
-                  // Search Button
-                  _buildSearchButton(primaryColor, isTablet),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildSearchCell({
-    required String text,
-    required VoidCallback onTap,
-    required bool isTablet,
-    required bool isFirst,
-    required Color primaryColor,
-    IconData? icon,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: double.infinity,
-        height: 40, // Reduced height
-        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          border: Border(
-            bottom: BorderSide(
-                color: primaryColor, width: 2), // Primary color divider lines
-          ),
-        ),
-        child: Row(
-          children: [
-            if (icon != null) ...[
-              Icon(
-                icon,
-                color: Colors.black,
-                size: isTablet ? 20 : 18,
-              ),
-              SizedBox(width: 12),
-            ],
-            Expanded(
-              child: Text(
-                text,
-                style: TextStyle(
-                  color: Colors.black,
-                  fontSize: 15,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSearchButton(Color primaryColor, bool isTablet) {
-    return Container(
-      width: double.infinity,
-      height: 40, // Reduced height to match cells
-      decoration: BoxDecoration(
-        color: Colors.purple,
-        borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(12),
-          bottomRight: Radius.circular(12),
-        ),
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: _isSearching ? null : _performSearch,
-          borderRadius: BorderRadius.only(
-            bottomLeft: Radius.circular(12),
-            bottomRight: Radius.circular(12),
-          ),
-          child: Container(
-            width: double.infinity,
-            height: double.infinity,
-            alignment: Alignment.center,
-            child: _isSearching
-                ? SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                    ),
-                  )
-                : Text(
-                    'search'.tr(),
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  String _formatDate(DateTime date) {
-    final months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec'
-    ];
-    final day = date.day.toString().padLeft(2, '0');
-    final month = months[date.month - 1];
-    return '$day $month';
-  }
 
   Widget _buildMainContent(bool isTablet, Color primaryColor) {
     return Row(
@@ -1680,3 +1321,4 @@ class DestinationPickerDialog extends StatelessWidget {
     );
   }
 }
+

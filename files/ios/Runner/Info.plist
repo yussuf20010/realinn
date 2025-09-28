@@ -16,7 +16,7 @@
 		<key>CFBundleDevelopmentRegion</key>
 		<string>$(DEVELOPMENT_LANGUAGE)</string>
 		<key>CFBundleDisplayName</key>
-		<string>NewsPro</string>
+		<string>RealInn</string>
 		<key>CFBundleExecutable</key>
 		<string>$(EXECUTABLE_NAME)</string>
 		<key>CFBundleIdentifier</key>
@@ -98,7 +98,7 @@
 		<true/>
 		<key>com.apple.developer.associated-domains</key>
 		<array>
-			<string>applinks:newspro.uixxy.com</string>
+			<string>applinks:realinn.uixxy.com</string>
 		</array>
 	</dict>
 </plist>

@@ -4,8 +4,8 @@ import 'package:easy_localization/easy_localization.dart';
 import '../config/wp_config.dart';
 import '../config/dynamic_config.dart';
 import '../core/constants/assets.dart';
-import '../pages/settings/pages/customer_support_page.dart';
 import '../pages/profile/profile_page.dart';
+import '../pages/customer_service/customer_service_page.dart';
 
 class CustomAppBar extends ConsumerStatefulWidget
     implements PreferredSizeWidget {
@@ -102,7 +102,7 @@ class _CustomAppBarState extends ConsumerState<CustomAppBar> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => CustomerSupportPage(),
+        builder: (context) => CustomerServicePage(),
       ),
     );
   }

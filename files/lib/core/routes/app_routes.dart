@@ -15,8 +15,6 @@ class AppRoutes {
   static const String notification = '/notification';
   static const String explore = '/explore';
   static const String profile = '/profile';
-  static const String booking = '/bookings';
-  static const String createBooking = '/create-booking';
 
   static const String service = '/service';
   static const String allProperties = '/allProperties';

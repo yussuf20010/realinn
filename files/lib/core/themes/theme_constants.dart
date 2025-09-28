@@ -9,7 +9,7 @@
 //   /// Add your custom font name here, which you added in [pubspec.yaml] file
 //   static const fontName = 'Montserrat';
 //
-//   /// A light theme for NewsPro
+//   /// A light theme for RealInn
 //   static ThemeData get lightTheme => ThemeData(
 //         colorScheme: ColorScheme.fromSwatch(
 //           primarySwatch: AppUiHelper.generateMaterialColor(
@@ -113,7 +113,7 @@
 //         ),
 //       );
 //
-//   /// A light theme for NewsPro
+//   /// A light theme for RealInn
 //   static ThemeData get darkTheme => ThemeData(
 //         colorScheme: ColorScheme.fromSwatch(
 //           primarySwatch: AppUiHelper.generateMaterialColor(
@@ -233,7 +233,7 @@ class AppTheme {
   static const fontName = 'Montserrat';
   static const Color kPrimary = Color(0xFFa93ae2);
 
-  /// A light theme for NewsPro
+  /// A light theme for RealInn
   static ThemeData get lightTheme => ThemeData(
     colorScheme: ColorScheme.fromSwatch(
       primarySwatch: AppUiHelper.generateMaterialColor(
@@ -337,7 +337,7 @@ class AppTheme {
     ),
   );
 
-  /// A light theme for NewsPro
+  /// A light theme for RealInn
   static ThemeData get darkTheme => ThemeData(
     colorScheme: ColorScheme.fromSwatch(
       primarySwatch: AppUiHelper.generateMaterialColor(
