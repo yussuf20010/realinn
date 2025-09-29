@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../config/wp_config.dart';
 import '../config/dynamic_config.dart';
 import '../core/constants/assets.dart';
@@ -111,7 +112,7 @@ class _CustomAppBarState extends ConsumerState<CustomAppBar> {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final isTablet = screenWidth >= 768;
-    final toolbarHeight = isTablet ? 80.0 : 64.0;
+    final toolbarHeight = isTablet ? 80.h : 64.h;
     ref.watch(dynamicConfigProvider);
     final primaryColor = WPConfig.navbarColor; // Use constant color directly
 
@@ -129,17 +130,17 @@ class _CustomAppBarState extends ConsumerState<CustomAppBar> {
             : null,
         title: Image.asset(
           AssetsManager.appbar,
-          height: isTablet ? 64 : 40,
+          height: isTablet ? 64.h : 40.h,
           fit: BoxFit.contain,
         ),
         centerTitle: true,
         actions: [
           // Simple Language Toggle for backAndLogoOnly mode
           Container(
-            margin: EdgeInsets.symmetric(horizontal: 8),
+            margin: EdgeInsets.symmetric(horizontal: 8.w),
             decoration: BoxDecoration(
               color: Colors.white.withOpacity(0.2),
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.circular(20.r),
               border: Border.all(
                 color: Colors.white.withOpacity(0.3),
                 width: 1,
@@ -148,16 +149,17 @@ class _CustomAppBarState extends ConsumerState<CustomAppBar> {
             child: Material(
               color: Colors.transparent,
               child: InkWell(
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(20.r),
                 onTap: _toggleLanguage,
                 child: Container(
-                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding:
+                      EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
                   child: Text(
                     context.locale.languageCode.toUpperCase(),
                     style: TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
-                      fontSize: isTablet ? 16 : 14,
+                      fontSize: isTablet ? 16.sp : 14.sp,
                     ),
                   ),
                 ),
@@ -186,7 +188,7 @@ class _CustomAppBarState extends ConsumerState<CustomAppBar> {
             style: TextStyle(
               color: Colors.white,
               fontWeight: FontWeight.bold,
-              fontSize: isTablet ? 26 : 20,
+              fontSize: isTablet ? 26.sp : 20.sp,
             ),
           ),
         ),
@@ -194,10 +196,10 @@ class _CustomAppBarState extends ConsumerState<CustomAppBar> {
         actions: [
           // Simple Language Toggle for minimal mode
           Container(
-            margin: EdgeInsets.symmetric(horizontal: 8),
+            margin: EdgeInsets.symmetric(horizontal: 8.w),
             decoration: BoxDecoration(
               color: Colors.white.withOpacity(0.2),
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.circular(20.r),
               border: Border.all(
                 color: Colors.white.withOpacity(0.3),
                 width: 1,
@@ -206,16 +208,17 @@ class _CustomAppBarState extends ConsumerState<CustomAppBar> {
             child: Material(
               color: Colors.transparent,
               child: InkWell(
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(20.r),
                 onTap: _toggleLanguage,
                 child: Container(
-                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding:
+                      EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
                   child: Text(
                     context.locale.languageCode.toUpperCase(),
                     style: TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
-                      fontSize: isTablet ? 16 : 14,
+                      fontSize: isTablet ? 16.sp : 14.sp,
                     ),
                   ),
                 ),
@@ -242,21 +245,21 @@ class _CustomAppBarState extends ConsumerState<CustomAppBar> {
                   children: [
                     IconButton(
                       icon: Icon(Icons.person_outline,
-                          color: Colors.white, size: isTablet ? 24 : 20),
+                          color: Colors.white, size: isTablet ? 24.sp : 20.sp),
                       onPressed: _openProfile,
                     ),
                     IconButton(
                       icon: Icon(Icons.support_agent_outlined,
-                          color: Colors.white, size: isTablet ? 24 : 20),
+                          color: Colors.white, size: isTablet ? 24.sp : 20.sp),
                       onPressed: _openCustomerSupport,
                     ),
                   ],
                 )
               : null,
-      leadingWidth: widget.showBackButton ? null : (isTablet ? 120 : 100),
+      leadingWidth: widget.showBackButton ? null : (isTablet ? 120.w : 100.w),
       title: Image.asset(
         AssetsManager.appbar,
-        height: isTablet ? 30 : 30,
+        height: isTablet ? 30.h : 30.h,
         fit: BoxFit.contain,
       ),
       centerTitle: true,
@@ -264,7 +267,7 @@ class _CustomAppBarState extends ConsumerState<CustomAppBar> {
         if (widget.onNotificationPressed != null)
           IconButton(
             icon: Icon(Icons.notifications_outlined,
-                color: Colors.white, size: isTablet ? 24 : 20),
+                color: Colors.white, size: isTablet ? 24.sp : 20.sp),
             onPressed: widget.onNotificationPressed,
           ),
       ],

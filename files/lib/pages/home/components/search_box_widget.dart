@@ -6,7 +6,8 @@ import '../../../controllers/location_controller.dart';
 import '../../../models/location.dart';
 
 class SearchBoxWidget extends ConsumerStatefulWidget {
-  final Function(String destination, DateTime? checkIn, DateTime? checkOut, int rooms, int adults, int children) onSearch;
+  final Function(String destination, DateTime? checkIn, DateTime? checkOut,
+      int rooms, int adults, int children) onSearch;
   final bool isLoading;
 
   const SearchBoxWidget({
@@ -23,23 +24,27 @@ class _SearchBoxWidgetState extends ConsumerState<SearchBoxWidget> {
   int _selectedTab = 0;
   String _destination = '';
   DateTime? _checkInDate;
-  DateTime? _checkOutDate; 
+  DateTime? _checkOutDate;
   int _rooms = 1;
   int _adults = 2;
-  int _children = 0;  
- 
-  final List<String> _tabs = ['daily', 'monthly'];    
-  
-  @override 
+  int _children = 0;
+
+  final List<String> _tabs = ['daily', 'monthly'];
+
+  @override
   Widget build(BuildContext context) {
     final primaryColor = const Color(0xFFa93ae1); // Purple color from t heme
-    final isTablet = MediaQuery.of(context).size.width >= 768; 
-    
-    // Adjustable background height (you can change this value) 
-    final backgroundHeight = 43.0; // Purple background behind table, connects to app bar
+    final screenSize = MediaQuery.of(context).size;
+    final isTablet = screenSize.width >= 768;
+    final isLandscape = screenSize.width > screenSize.height;
+
+    // Adjustable background height using ScreenUtil - responsive to orientation
+    final backgroundHeight = isLandscape
+        ? 35.h
+        : 43.h; // Purple background behind table, connects to app bar
 
     return Container(
-      margin: EdgeInsets.only(bottom: 20.h),
+      margin: EdgeInsets.only(bottom: isLandscape ? 12.h : 20.h),
       child: Stack(
         children: [
           // Purple background - extends full width to stick to app bar
@@ -51,29 +56,35 @@ class _SearchBoxWidgetState extends ConsumerState<SearchBoxWidget> {
             child: Container(
               color: primaryColor,
             ),
-          ), 
+          ),
 
-          // Search table with proper margins and borders
+          // Search table with proper margins and borders - increased width
           Container(
-              margin: EdgeInsets.symmetric(horizontal: isTablet ? 80 : 64),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                border: Border.all(color: Colors.amber, width: 3),
-              ),
+            margin: EdgeInsets.symmetric(
+                horizontal: isLandscape
+                    ? (isTablet ? 20.w : 10.w)
+                    : (isTablet
+                        ? 40.w
+                        : 20.w)), // Reduced margins for wider search box
+            decoration: BoxDecoration(
+              color: Colors.white,
+              border: Border.all(color: Colors.amber, width: 3),
+            ),
             child: Column(
               children: [
                 // Daily/Monthly Tabs
-                _buildTabSelector(primaryColor, isTablet),
-                
+                _buildTabSelector(primaryColor, isTablet, isLandscape),
+
                 // Destination Field
                 _buildSearchField(
                   icon: Icons.search,
-                  text: _destination.isEmpty ? 'destination'.tr() : _destination,
+                  text:
+                      _destination.isEmpty ? 'destination'.tr() : _destination,
                   onTap: _selectDestination,
                   isTablet: isTablet,
                   primaryColor: primaryColor,
                 ),
-                
+
                 // Date Field
                 _buildSearchField(
                   icon: Icons.calendar_today,
@@ -84,7 +95,7 @@ class _SearchBoxWidgetState extends ConsumerState<SearchBoxWidget> {
                   isTablet: isTablet,
                   primaryColor: primaryColor,
                 ),
-                
+
                 // Occupancy Field
                 _buildSearchField(
                   icon: Icons.people,
@@ -93,7 +104,7 @@ class _SearchBoxWidgetState extends ConsumerState<SearchBoxWidget> {
                   isTablet: isTablet,
                   primaryColor: primaryColor,
                 ),
-                
+
                 // Search Button
                 _buildSearchButton(primaryColor, isTablet),
               ],
@@ -104,67 +115,74 @@ class _SearchBoxWidgetState extends ConsumerState<SearchBoxWidget> {
     );
   }
 
+  Widget _buildTabSelector(
+      Color primaryColor, bool isTablet, bool isLandscape) {
+    final tabHeight = isLandscape ? 30.h : 40.h;
+    final textSize =
+        isLandscape ? (isTablet ? 12.sp : 10.sp) : (isTablet ? 14.sp : 12.sp);
 
-
-  Widget _buildTabSelector(Color primaryColor, bool isTablet) {
     return Container(
-      height: 40,
-        child: Row(
-          children: [
-            // Daily button
-            Expanded(
-              child: GestureDetector(
-                onTap: () {
-                  setState(() {
-                    _selectedTab = 0;
-                  });
-                },
-                child: Container(
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: _selectedTab == 0 ? primaryColor.withOpacity(0.7) : primaryColor,
-                  ),
-                  child: Center(
-                    child: Text(
-                      _tabs[0].tr(),
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: isTablet ? 14 : 12,
-                        fontWeight: FontWeight.bold,
-                      ),
+      height: tabHeight,
+      child: Row(
+        children: [
+          // Daily button
+          Expanded(
+            child: GestureDetector(
+              onTap: () {
+                setState(() {
+                  _selectedTab = 0;
+                });
+              },
+              child: Container(
+                height: tabHeight,
+                decoration: BoxDecoration(
+                  color: _selectedTab == 0
+                      ? primaryColor.withOpacity(0.7)
+                      : primaryColor,
+                ),
+                child: Center(
+                  child: Text(
+                    _tabs[0].tr(),
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: textSize,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
                 ),
               ),
             ),
-            // Monthly button
-            Expanded(
-              child: GestureDetector(
-                onTap: () {
-                  setState(() {
-                    _selectedTab = 1;
-                  });
-                },
-                child: Container(
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: _selectedTab == 1 ? primaryColor.withOpacity(0.7) : primaryColor,
-                  ),
-                  child: Center(
-                    child: Text(
-                      _tabs[1].tr(),
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: isTablet ? 14 : 12,
-                        fontWeight: FontWeight.bold,
-                      ),
+          ),
+          // Monthly button
+          Expanded(
+            child: GestureDetector(
+              onTap: () {
+                setState(() {
+                  _selectedTab = 1;
+                });
+              },
+              child: Container(
+                height: tabHeight,
+                decoration: BoxDecoration(
+                  color: _selectedTab == 1
+                      ? primaryColor.withOpacity(0.7)
+                      : primaryColor,
+                ),
+                child: Center(
+                  child: Text(
+                    _tabs[1].tr(),
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: textSize,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
                 ),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -178,8 +196,8 @@ class _SearchBoxWidgetState extends ConsumerState<SearchBoxWidget> {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        height: 50,
-        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        height: 50.h,
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
         decoration: BoxDecoration(
           color: Colors.white,
           border: Border(
@@ -191,15 +209,15 @@ class _SearchBoxWidgetState extends ConsumerState<SearchBoxWidget> {
             Icon(
               icon,
               color: Colors.black,
-              size: isTablet ? 20 : 18,
+              size: isTablet ? 20.sp : 18.sp,
             ),
-            SizedBox(width: 12),
+            SizedBox(width: 12.w),
             Expanded(
               child: Text(
                 text,
                 style: TextStyle(
                   color: Colors.black,
-                  fontSize: isTablet ? 16 : 14,
+                  fontSize: isTablet ? 16.sp : 14.sp,
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -210,11 +228,10 @@ class _SearchBoxWidgetState extends ConsumerState<SearchBoxWidget> {
     );
   }
 
-
   Widget _buildSearchButton(Color primaryColor, bool isTablet) {
     return Container(
       width: double.infinity,
-      height: 50,
+      height: 50.h,
       decoration: BoxDecoration(
         color: primaryColor,
       ),
@@ -228,8 +245,8 @@ class _SearchBoxWidgetState extends ConsumerState<SearchBoxWidget> {
             alignment: Alignment.center,
             child: widget.isLoading
                 ? SizedBox(
-                    width: 20,
-                    height: 20,
+                    width: 20.w,
+                    height: 20.h,
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
                       valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
@@ -239,7 +256,7 @@ class _SearchBoxWidgetState extends ConsumerState<SearchBoxWidget> {
                     'search'.tr(),
                     style: TextStyle(
                       color: Colors.white,
-                      fontSize: isTablet ? 18 : 16,
+                      fontSize: isTablet ? 18.sp : 16.sp,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -298,14 +315,20 @@ class _SearchBoxWidgetState extends ConsumerState<SearchBoxWidget> {
           int tempChildren = _children;
 
           return AlertDialog(
-            title: Text('select_rooms_guests'.tr()),
+            title: Text(
+              'select_rooms_guests'.tr(),
+              style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
+            ),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('rooms'.tr()),
+                    Text(
+                      'rooms'.tr(),
+                      style: TextStyle(fontSize: 16.sp),
+                    ),
                     Row(
                       children: [
                         IconButton(
@@ -314,23 +337,31 @@ class _SearchBoxWidgetState extends ConsumerState<SearchBoxWidget> {
                               setState(() => tempRooms--);
                             }
                           },
-                          icon: Icon(Icons.remove),
+                          icon: Icon(Icons.remove, size: 20.sp),
                         ),
-                        Text('$tempRooms'),
+                        Text(
+                          '$tempRooms',
+                          style: TextStyle(
+                              fontSize: 16.sp, fontWeight: FontWeight.bold),
+                        ),
                         IconButton(
                           onPressed: () {
                             setState(() => tempRooms++);
                           },
-                          icon: Icon(Icons.add),
+                          icon: Icon(Icons.add, size: 20.sp),
                         ),
                       ],
                     ),
                   ],
                 ),
+                SizedBox(height: 16.h),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('adults'.tr()),
+                    Text(
+                      'adults'.tr(),
+                      style: TextStyle(fontSize: 16.sp),
+                    ),
                     Row(
                       children: [
                         IconButton(
@@ -339,23 +370,31 @@ class _SearchBoxWidgetState extends ConsumerState<SearchBoxWidget> {
                               setState(() => tempAdults--);
                             }
                           },
-                          icon: Icon(Icons.remove),
+                          icon: Icon(Icons.remove, size: 20.sp),
                         ),
-                        Text('$tempAdults'),
+                        Text(
+                          '$tempAdults',
+                          style: TextStyle(
+                              fontSize: 16.sp, fontWeight: FontWeight.bold),
+                        ),
                         IconButton(
                           onPressed: () {
                             setState(() => tempAdults++);
                           },
-                          icon: Icon(Icons.add),
+                          icon: Icon(Icons.add, size: 20.sp),
                         ),
                       ],
                     ),
                   ],
                 ),
+                SizedBox(height: 16.h),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('children'.tr()),
+                    Text(
+                      'children'.tr(),
+                      style: TextStyle(fontSize: 16.sp),
+                    ),
                     Row(
                       children: [
                         IconButton(
@@ -364,14 +403,18 @@ class _SearchBoxWidgetState extends ConsumerState<SearchBoxWidget> {
                               setState(() => tempChildren--);
                             }
                           },
-                          icon: Icon(Icons.remove),
+                          icon: Icon(Icons.remove, size: 20.sp),
                         ),
-                        Text('$tempChildren'),
+                        Text(
+                          '$tempChildren',
+                          style: TextStyle(
+                              fontSize: 16.sp, fontWeight: FontWeight.bold),
+                        ),
                         IconButton(
                           onPressed: () {
                             setState(() => tempChildren++);
                           },
-                          icon: Icon(Icons.add),
+                          icon: Icon(Icons.add, size: 20.sp),
                         ),
                       ],
                     ),
@@ -382,7 +425,10 @@ class _SearchBoxWidgetState extends ConsumerState<SearchBoxWidget> {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: Text('cancel'.tr()),
+                child: Text(
+                  'cancel'.tr(),
+                  style: TextStyle(fontSize: 14.sp),
+                ),
               ),
               ElevatedButton(
                 onPressed: () {
@@ -393,7 +439,10 @@ class _SearchBoxWidgetState extends ConsumerState<SearchBoxWidget> {
                   });
                   Navigator.pop(context);
                 },
-                child: Text('apply'.tr()),
+                child: Text(
+                  'apply'.tr(),
+                  style: TextStyle(fontSize: 14.sp),
+                ),
               ),
             ],
           );
@@ -403,13 +452,24 @@ class _SearchBoxWidgetState extends ConsumerState<SearchBoxWidget> {
   }
 
   void _performSearch() {
-    widget.onSearch(_destination, _checkInDate, _checkOutDate, _rooms, _adults, _children);
+    widget.onSearch(
+        _destination, _checkInDate, _checkOutDate, _rooms, _adults, _children);
   }
 
   String _formatDate(DateTime date) {
     final months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec'
     ];
     final day = date.day.toString().padLeft(2, '0');
     final month = months[date.month - 1];
@@ -428,10 +488,12 @@ class DestinationSelectionModal extends ConsumerStatefulWidget {
   }) : super(key: key);
 
   @override
-  ConsumerState<DestinationSelectionModal> createState() => _DestinationSelectionModalState();
+  ConsumerState<DestinationSelectionModal> createState() =>
+      _DestinationSelectionModalState();
 }
 
-class _DestinationSelectionModalState extends ConsumerState<DestinationSelectionModal> {
+class _DestinationSelectionModalState
+    extends ConsumerState<DestinationSelectionModal> {
   final TextEditingController _searchController = TextEditingController();
   String _selectedDestination = '';
   List<String> _destinations = [];
@@ -451,7 +513,7 @@ class _DestinationSelectionModalState extends ConsumerState<DestinationSelection
 
   List<String> _extractDestinations(LocationResponse locationResponse) {
     List<String> destinations = [];
-    
+
     // Add cities
     if (locationResponse.cities != null) {
       for (var city in locationResponse.cities!) {
@@ -465,7 +527,7 @@ class _DestinationSelectionModalState extends ConsumerState<DestinationSelection
             );
             countryName = country.name ?? '';
           }
-          
+
           if (countryName.isNotEmpty) {
             destinations.add('${city.name}, $countryName');
           } else {
@@ -474,7 +536,7 @@ class _DestinationSelectionModalState extends ConsumerState<DestinationSelection
         }
       }
     }
-    
+
     // Add countries
     if (locationResponse.countries != null) {
       for (var country in locationResponse.countries!) {
@@ -483,7 +545,7 @@ class _DestinationSelectionModalState extends ConsumerState<DestinationSelection
         }
       }
     }
-    
+
     return destinations;
   }
 
@@ -496,8 +558,9 @@ class _DestinationSelectionModalState extends ConsumerState<DestinationSelection
   void _filterDestinations() {
     setState(() {
       _filteredDestinations = _destinations
-          .where((destination) =>
-              destination.toLowerCase().contains(_searchController.text.toLowerCase()))
+          .where((destination) => destination
+              .toLowerCase()
+              .contains(_searchController.text.toLowerCase()))
           .toList();
     });
   }
@@ -506,10 +569,10 @@ class _DestinationSelectionModalState extends ConsumerState<DestinationSelection
   Widget build(BuildContext context) {
     final primaryColor = const Color(0xFFa93ae1);
     final isTablet = MediaQuery.of(context).size.width >= 768;
-    
+
     // Watch location data
     final locationResponse = ref.watch(locationProvider);
-    
+
     // Update destinations when data is available
     locationResponse.when(
       data: (data) {
@@ -553,23 +616,23 @@ class _DestinationSelectionModalState extends ConsumerState<DestinationSelection
         children: [
           // Handle bar
           Container(
-            margin: EdgeInsets.only(top: 12),
-            width: 40,
-            height: 4,
+            margin: EdgeInsets.only(top: 12.h),
+            width: 40.w,
+            height: 4.h,
             decoration: BoxDecoration(
               color: Colors.grey[300],
             ),
           ),
-          
+
           // Header
           Padding(
-            padding: EdgeInsets.all(20),
+            padding: EdgeInsets.all(20.w),
             child: Row(
               children: [
                 Text(
                   'select_destination'.tr(),
                   style: TextStyle(
-                    fontSize: isTablet ? 24 : 20,
+                    fontSize: isTablet ? 24.sp : 20.sp,
                     fontWeight: FontWeight.bold,
                     color: Colors.black,
                   ),
@@ -582,10 +645,10 @@ class _DestinationSelectionModalState extends ConsumerState<DestinationSelection
               ],
             ),
           ),
-          
+
           // Search bar
           Padding(
-            padding: EdgeInsets.symmetric(horizontal: 20),
+            padding: EdgeInsets.symmetric(horizontal: 20.w),
             child: Container(
               decoration: BoxDecoration(
                 color: Colors.grey[100],
@@ -597,14 +660,15 @@ class _DestinationSelectionModalState extends ConsumerState<DestinationSelection
                   hintText: 'search_destinations'.tr(),
                   prefixIcon: Icon(Icons.search, color: primaryColor),
                   border: InputBorder.none,
-                  contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  contentPadding:
+                      EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
                 ),
               ),
             ),
           ),
-          
+
           SizedBox(height: 20.h),
-          
+
           // Destinations list
           Expanded(
             child: locationResponse.when(
@@ -618,7 +682,9 @@ class _DestinationSelectionModalState extends ConsumerState<DestinationSelection
                   return Container(
                     margin: EdgeInsets.only(bottom: 8.h),
                     decoration: BoxDecoration(
-                      color: isSelected ? primaryColor.withOpacity(0.1) : Colors.transparent,
+                      color: isSelected
+                          ? primaryColor.withOpacity(0.1)
+                          : Colors.transparent,
                       border: Border.all(
                         color: isSelected ? primaryColor : Colors.grey[300]!,
                         width: isSelected ? 3 : 2,
@@ -629,12 +695,18 @@ class _DestinationSelectionModalState extends ConsumerState<DestinationSelection
                         destination,
                         style: TextStyle(
                           color: isSelected ? primaryColor : Colors.black,
-                          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                          fontWeight:
+                              isSelected ? FontWeight.bold : FontWeight.normal,
+                          fontSize: isTablet ? 16.sp : 14.sp,
                         ),
                       ),
                       trailing: isSelected
-                          ? Icon(Icons.check_circle, color: primaryColor)
-                          : Icon(Icons.radio_button_unchecked, color: Colors.grey[400]),
+                          ? Icon(Icons.check_circle,
+                              color: primaryColor,
+                              size: isTablet ? 24.sp : 20.sp)
+                          : Icon(Icons.radio_button_unchecked,
+                              color: Colors.grey[400],
+                              size: isTablet ? 24.sp : 20.sp),
                       onTap: () {
                         setState(() {
                           _selectedDestination = destination;
@@ -662,7 +734,7 @@ class _DestinationSelectionModalState extends ConsumerState<DestinationSelection
               ),
             ),
           ),
-          
+
           // Apply button
           Padding(
             padding: EdgeInsets.all(20.w),
@@ -682,7 +754,7 @@ class _DestinationSelectionModalState extends ConsumerState<DestinationSelection
                   'apply_selection'.tr(),
                   style: TextStyle(
                     color: Colors.white,
-                    fontSize: isTablet ? 16 : 14,
+                    fontSize: isTablet ? 16.sp : 14.sp,
                     fontWeight: FontWeight.bold,
                   ),
                 ),

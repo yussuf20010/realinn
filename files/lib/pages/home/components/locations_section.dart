@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../config/wp_config.dart';
 import '../../../controllers/location_controller.dart';
 import '../../../models/location.dart' as location_model;
@@ -463,7 +464,7 @@ class LocationsSection extends ConsumerWidget {
                       'Loading...',
                       style: TextStyle(
                         color: Colors.grey[600],
-                        fontSize: 12,
+                        fontSize: 12.sp,
                       ),
                     ),
                   ],

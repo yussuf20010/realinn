@@ -126,8 +126,6 @@ class _HomePageState extends ConsumerState<HomePage> {
     }
   }
 
-
-
   Future<void> _performSearch() async {
     if (_selectedDestination == null || _selectedDestination!.isEmpty) {
       // If no destination selected, show all hotels page
@@ -211,7 +209,8 @@ class _HomePageState extends ConsumerState<HomePage> {
 
       // Navigate to search results
       if (mounted) {
-        print('Navigating to search results with ${filteredHotels.length} hotels');
+        print(
+            'Navigating to search results with ${filteredHotels.length} hotels');
         print('Search query: $_selectedDestination');
         Navigator.pushNamed(context, '/search-results', arguments: {
           'hotels': filteredHotels,
@@ -238,8 +237,9 @@ class _HomePageState extends ConsumerState<HomePage> {
     Navigator.pushNamed(context, '/country-hotels', arguments: countryName);
   }
 
-  void _handleSearchBoxSearch(String destination, DateTime? checkIn, DateTime? checkOut, int rooms, int adults, int children) {
-                  setState(() {
+  void _handleSearchBoxSearch(String destination, DateTime? checkIn,
+      DateTime? checkOut, int rooms, int adults, int children) {
+    setState(() {
       _selectedDestination = destination;
       _checkInDate = checkIn;
       _checkOutDate = checkOut;
@@ -254,29 +254,34 @@ class _HomePageState extends ConsumerState<HomePage> {
   Widget build(BuildContext context) {
     ref.watch(dynamicConfigProvider);
     final primaryColor = WPConfig.navbarColor;
-    final isTablet = MediaQuery.of(context).size.width >= 768;
+    final screenSize = MediaQuery.of(context).size;
+    final isTablet = screenSize.width >= 768;
+    final isLandscape = screenSize.width > screenSize.height;
+
+    // Adjust app bar height based on orientation
+    final appBarHeight = isLandscape ? (isTablet ? 100.h : 80.h) : 120.h;
 
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: PreferredSize(
-        preferredSize: Size.fromHeight(120),
-        child: _buildCustomAppBar(context, primaryColor, isTablet),
+        preferredSize: Size.fromHeight(appBarHeight),
+        child: _buildCustomAppBar(context, primaryColor, isTablet, isLandscape),
       ),
       body: SingleChildScrollView(
         child: Column(
           children: [
-              if (_selectedServiceType == 0) ...[
-                SearchBoxWidget(
-                  onSearch: _handleSearchBoxSearch,
-                  isLoading: _isSearching,
-                ),
-                SizedBox(height: 16),
-              ],
+            if (_selectedServiceType == 0) ...[
+              SearchBoxWidget(
+                onSearch: _handleSearchBoxSearch,
+                isLoading: _isSearching,
+              ),
+              SizedBox(height: 16),
+            ],
 
-              // Add space when Services is selected
-              if (_selectedServiceType == 1) ...[
-                SizedBox(height: 40),
-              ],
+            // Add space when Services is selected
+            if (_selectedServiceType == 1) ...[
+              SizedBox(height: 40),
+            ],
 
             _buildMainContent(isTablet, primaryColor),
           ],
@@ -285,8 +290,8 @@ class _HomePageState extends ConsumerState<HomePage> {
     );
   }
 
-  Widget _buildCustomAppBar(
-      BuildContext context, Color primaryColor, bool isTablet) {
+  Widget _buildCustomAppBar(BuildContext context, Color primaryColor,
+      bool isTablet, bool isLandscape) {
     return Container(
       color: primaryColor,
       child: SafeArea(
@@ -294,90 +299,107 @@ class _HomePageState extends ConsumerState<HomePage> {
           children: [
             // Main App Bar with Icons, Logo, and Service Buttons
             Container(
-              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
+              padding: EdgeInsets.symmetric(
+                  horizontal: 16.w, vertical: isLandscape ? 6.h : 10.h),
               child: Column(
                 children: [
                   // Top Row - Icons and Logo
                   Row(
-        children: [
-          // Left side - Notification and Chat
-          Row(
-            children: [
-              IconButton(
-                icon: Icon(Icons.notifications_outlined,
-                    color: Colors.white, size: 24),
-                onPressed: () {
-                  Navigator.pushNamed(context, '/notifications');
-                },
-              ),
-              IconButton(
-                icon: Icon(Icons.chat, color: Colors.white, size: 24),
-                onPressed: () {
-                  Navigator.pushNamed(context, '/customer-service');
-                },
-              ),
-            ],
-          ),
-
-          // Center - Logo
-          Expanded(
-            child: Center(
-                child: Image.asset(
-              AssetsManager.appbar,
-              height: isTablet ? 40 : 32,
-              fit: BoxFit.contain,
-            )),
-          ),
-
-          // Right side - Language and Profile
-          Row(
-            children: [
-              // Language Toggle
-              Container(
-                margin: EdgeInsets.symmetric(horizontal: 4),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: Colors.white.withOpacity(0.3),
-                    width: 1,
-                  ),
-                ),
-                child: Material(
-                  color: Colors.transparent,
-                  child: InkWell(
-                    borderRadius: BorderRadius.circular(16),
-                    onTap: () => _toggleLanguage(context),
-                    child: Container(
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                      child: Text(
-                        Localizations.localeOf(context)
-                            .languageCode
-                            .toUpperCase(),
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: isTablet ? 14 : 12,
-                        ),
+                    children: [
+                      // Left side - Notification and Chat
+                      Row(
+                        children: [
+                          IconButton(
+                            icon: Icon(Icons.notifications_outlined,
+                                color: Colors.white,
+                                size: isLandscape
+                                    ? (isTablet ? 20.sp : 18.sp)
+                                    : (isTablet ? 24.sp : 20.sp)),
+                            onPressed: () {
+                              Navigator.pushNamed(context, '/notifications');
+                            },
+                          ),
+                          IconButton(
+                            icon: Icon(Icons.chat,
+                                color: Colors.white,
+                                size: isLandscape
+                                    ? (isTablet ? 20.sp : 18.sp)
+                                    : (isTablet ? 24.sp : 20.sp)),
+                            onPressed: () {
+                              Navigator.pushNamed(context, '/customer-service');
+                            },
+                          ),
+                        ],
                       ),
-                    ),
+
+                      // Center - Logo
+                      Expanded(
+                        child: Center(
+                            child: Image.asset(
+                          AssetsManager.appbar,
+                          height: isLandscape
+                              ? (isTablet ? 30.h : 24.h)
+                              : (isTablet ? 40.h : 32.h),
+                          fit: BoxFit.contain,
+                        )),
+                      ),
+
+                      // Right side - Language and Profile
+                      Row(
+                        children: [
+                          // Language Toggle
+                          Container(
+                            margin: EdgeInsets.symmetric(horizontal: 4.w),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(16.r),
+                              border: Border.all(
+                                color: Colors.white.withOpacity(0.3),
+                                width: 1,
+                              ),
+                            ),
+                            child: Material(
+                              color: Colors.transparent,
+                              child: InkWell(
+                                borderRadius: BorderRadius.circular(16.r),
+                                onTap: () => _toggleLanguage(context),
+                                child: Container(
+                                  padding: EdgeInsets.symmetric(
+                                      horizontal: isLandscape ? 8.w : 12.w,
+                                      vertical: isLandscape ? 4.h : 6.h),
+                                  child: Text(
+                                    Localizations.localeOf(context)
+                                        .languageCode
+                                        .toUpperCase(),
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: isLandscape
+                                          ? (isTablet ? 12.sp : 10.sp)
+                                          : (isTablet ? 14.sp : 12.sp),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          IconButton(
+                            icon: Icon(Icons.person,
+                                color: Colors.white,
+                                size: isLandscape
+                                    ? (isTablet ? 20.sp : 18.sp)
+                                    : (isTablet ? 24.sp : 20.sp)),
+                            onPressed: () {
+                              Navigator.pushNamed(context, '/profile');
+                            },
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
-                ),
-              ),
-              IconButton(
-                icon: Icon(Icons.person, color: Colors.white, size: 24),
-                onPressed: () {
-                  Navigator.pushNamed(context, '/profile');
-                },
-              ),
-            ],
-          ),
-        ],
-                  ),
-                  
+
                   // Service Type Selector - Centered below icons
-                  SizedBox(height: 10.h),
+                  SizedBox(height: isLandscape ? 6.h : 10.h),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: _serviceTypes.asMap().entries.map((entry) {
@@ -386,26 +408,30 @@ class _HomePageState extends ConsumerState<HomePage> {
                       final isSelected = _selectedServiceType == index;
 
                       return Container(
-                        width: isTablet ? 120.w : 100.w,
+                        width: isLandscape
+                            ? (isTablet ? 100.w : 80.w)
+                            : (isTablet ? 120.w : 100.w),
                         margin: EdgeInsets.symmetric(horizontal: 6.w),
                         child: GestureDetector(
                           onTap: () {
                             setState(() {
-                              _selectedServiceType = index; 
-                            }); 
+                              _selectedServiceType = index;
+                            });
                           },
                           child: Container(
-                            height: 25.h,
+                            height: isLandscape ? 20.h : 25.h,
                             decoration: BoxDecoration(
                               color: Colors.transparent,
-                              borderRadius: BorderRadius.circular(25),
-                              boxShadow: isSelected ? [
-                                BoxShadow(
-                                  color: Colors.white.withOpacity(0.3),
-                                  blurRadius: 4,
-                                  offset: Offset(0, 1),
-                                ),
-                              ] : null,
+                              borderRadius: BorderRadius.circular(25.r),
+                              boxShadow: isSelected
+                                  ? [
+                                      BoxShadow(
+                                        color: Colors.white.withOpacity(0.3),
+                                        blurRadius: 4,
+                                        offset: Offset(0, 1),
+                                      ),
+                                    ]
+                                  : null,
                             ),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
@@ -413,15 +439,24 @@ class _HomePageState extends ConsumerState<HomePage> {
                                 Icon(
                                   _getServiceIcon(serviceType),
                                   color: Colors.white,
-                                  size: isTablet ? 18.sp : 16.sp,
+                                  size: isLandscape
+                                      ? (isTablet ? 14.sp : 12.sp)
+                                      : (isTablet ? 18.sp : 16.sp),
                                 ),
-                                SizedBox(width: 6.w),
-                                Text(
-                                  serviceType.tr(),
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: isTablet ? 14.sp : 12.sp,
-                                    fontWeight: FontWeight.bold,
+                                SizedBox(width: isLandscape ? 4.w : 6.w),
+                                Flexible(
+                                  child: Text(
+                                    serviceType.tr(),
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: isLandscape
+                                          ? (isTablet ? 12.sp : 10.sp)
+                                          : (isTablet ? 14.sp : 12.sp),
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
                                   ),
                                 ),
                               ],
@@ -467,16 +502,28 @@ class _HomePageState extends ConsumerState<HomePage> {
     final shouldChange = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('change_language'.tr()),
-        content: Text('change_language_confirm'.tr(args: [newLanguageName])),
+        title: Text(
+          'change_language'.tr(),
+          style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
+        ),
+        content: Text(
+          'change_language_confirm'.tr(args: [newLanguageName]),
+          style: TextStyle(fontSize: 16.sp),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: Text('cancel'.tr()),
+            child: Text(
+              'cancel'.tr(),
+              style: TextStyle(fontSize: 14.sp),
+            ),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
-            child: Text('confirm'.tr()),
+            child: Text(
+              'confirm'.tr(),
+              style: TextStyle(fontSize: 14.sp),
+            ),
           ),
         ],
       ),
@@ -515,12 +562,21 @@ class _HomePageState extends ConsumerState<HomePage> {
         showDialog(
           context: context,
           builder: (context) => AlertDialog(
-            title: Text('error'.tr()),
-            content: Text('failed_change_language'.tr(args: [e.toString()])),
+            title: Text(
+              'error'.tr(),
+              style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
+            ),
+            content: Text(
+              'failed_change_language'.tr(args: [e.toString()]),
+              style: TextStyle(fontSize: 16.sp),
+            ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: Text('ok'.tr()),
+                child: Text(
+                  'ok'.tr(),
+                  style: TextStyle(fontSize: 14.sp),
+                ),
               ),
             ],
           ),
@@ -529,11 +585,6 @@ class _HomePageState extends ConsumerState<HomePage> {
     }
   }
 
-
-
-
-
-
   Widget _buildMainContent(bool isTablet, Color primaryColor) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -541,39 +592,39 @@ class _HomePageState extends ConsumerState<HomePage> {
         // Left side ad (only on tablet)
         if (isTablet) ...[
           Container(
-            width: 120,
-            margin: EdgeInsets.only(left: 16, top: 8),
+            width: 120.w,
+            margin: EdgeInsets.only(left: 16.w, top: 8.h),
             child: _buildSideAd(isTablet, primaryColor),
           ),
-          SizedBox(width: 16),
+          SizedBox(width: 16.w),
         ],
 
         // Main content
         Expanded(
           child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: isTablet ? 0 : 16),
+            padding: EdgeInsets.symmetric(horizontal: isTablet ? 0 : 16.w),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Travel more, spend less section
                 _buildTravelMoreSection(isTablet, primaryColor),
 
-                SizedBox(height: isTablet ? 16 : 12),
+                SizedBox(height: isTablet ? 16.h : 12.h),
 
                 // Offers section
                 _buildOffersSection(isTablet, primaryColor),
 
-                SizedBox(height: isTablet ? 16 : 12),
+                SizedBox(height: isTablet ? 16.h : 12.h),
 
                 // Explore locations section (from API)
                 _buildExploreLocationsSection(isTablet, primaryColor),
 
-                SizedBox(height: isTablet ? 16 : 12),
+                SizedBox(height: isTablet ? 16.h : 12.h),
 
                 // Why RealInn section
                 _buildWhyRealInnSection(isTablet, primaryColor),
 
-                SizedBox(height: isTablet ? 16 : 12),
+                SizedBox(height: isTablet ? 16.h : 12.h),
               ],
             ),
           ),
@@ -581,10 +632,10 @@ class _HomePageState extends ConsumerState<HomePage> {
 
         // Right side ad (only on tablet)
         if (isTablet) ...[
-          SizedBox(width: 16),
+          SizedBox(width: 16.w),
           Container(
-            width: 120,
-            margin: EdgeInsets.only(right: 16, top: 20),
+            width: 120.w,
+            margin: EdgeInsets.only(right: 16.w, top: 20.h),
             child: _buildSideAd(isTablet, primaryColor),
           ),
         ],
@@ -594,50 +645,50 @@ class _HomePageState extends ConsumerState<HomePage> {
 
   Widget _buildSideAd(bool isTablet, Color primaryColor) {
     return Container(
-      height: 300,
+      height: 300.h,
       decoration: BoxDecoration(
         color: Colors.grey[100],
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(12.r),
         border: Border.all(color: Colors.grey[300]!, width: 1),
       ),
       child: Column(
         children: [
           Container(
-            height: 200,
+            height: 200.h,
             decoration: BoxDecoration(
               color: primaryColor.withOpacity(0.1),
               borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(12),
-                topRight: Radius.circular(12),
+                topLeft: Radius.circular(12.r),
+                topRight: Radius.circular(12.r),
               ),
             ),
             child: Center(
               child: Icon(
                 Icons.campaign,
                 color: primaryColor,
-                size: 40,
+                size: 40.sp,
               ),
             ),
           ),
           Expanded(
             child: Padding(
-              padding: EdgeInsets.all(8),
+              padding: EdgeInsets.all(8.w),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
                     'ad_space'.tr(),
                     style: TextStyle(
-                      fontSize: 12,
+                      fontSize: 12.sp,
                       fontWeight: FontWeight.bold,
                       color: Colors.grey[600],
                     ),
                   ),
-                  SizedBox(height: 4),
+                  SizedBox(height: 4.h),
                   Text(
                     'non_intrusive'.tr(),
                     style: TextStyle(
-                      fontSize: 10,
+                      fontSize: 10.sp,
                       color: Colors.grey[500],
                     ),
                   ),
@@ -657,21 +708,21 @@ class _HomePageState extends ConsumerState<HomePage> {
         Text(
           'travel_more_spend_less'.tr(),
           style: TextStyle(
-            fontSize: isTablet ? 15 : 15,
+            fontSize: 15.sp,
             fontWeight: FontWeight.bold,
             color: Colors.black,
           ),
         ),
-        SizedBox(height: isTablet ? 8 : 6),
+        SizedBox(height: isTablet ? 8.h : 6.h),
         Row(
           children: [
             Expanded(
               child: Container(
-                height: isTablet ? 140 : 120, // Fixed height
-                padding: EdgeInsets.all(isTablet ? 20 : 16),
+                height: isTablet ? 140.h : 120.h, // Fixed height
+                padding: EdgeInsets.all(isTablet ? 20.w : 16.w),
                 decoration: BoxDecoration(
                   color: primaryColor,
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(12.r),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -680,16 +731,16 @@ class _HomePageState extends ConsumerState<HomePage> {
                       'genius'.tr(),
                       style: TextStyle(
                         color: Colors.white,
-                        fontSize: isTablet ? 12 : 12,
+                        fontSize: 10.sp,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    SizedBox(height: 4),
+                    SizedBox(height: 4.h),
                     Text(
                       'genius_level_message'.tr(),
                       style: TextStyle(
                         color: Colors.white,
-                        fontSize: isTablet ? 12 : 12,
+                        fontSize: 10.sp,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -697,14 +748,14 @@ class _HomePageState extends ConsumerState<HomePage> {
                 ),
               ),
             ),
-            SizedBox(width: 16),
+            SizedBox(width: 16.w),
             Expanded(
               child: Container(
-                height: isTablet ? 140 : 120, // Fixed height
-                padding: EdgeInsets.all(isTablet ? 20 : 16),
+                height: isTablet ? 140.h : 120.h, // Fixed height
+                padding: EdgeInsets.all(isTablet ? 20.w : 16.w),
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(12.r),
                   border: Border.all(color: primaryColor),
                 ),
                 child: Column(
@@ -714,16 +765,16 @@ class _HomePageState extends ConsumerState<HomePage> {
                       'discounts_10'.tr(),
                       style: TextStyle(
                         color: Colors.black,
-                        fontSize: isTablet ? 12 : 12,
+                        fontSize: 10.sp,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    SizedBox(height: 8),
+                    SizedBox(height: 8.h),
                     Text(
                       'discounts_description'.tr(),
                       style: TextStyle(
                         color: Colors.black,
-                        fontSize: isTablet ? 12 : 12,
+                        fontSize: 10.sp,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -744,27 +795,27 @@ class _HomePageState extends ConsumerState<HomePage> {
         Text(
           'offers'.tr(),
           style: TextStyle(
-            fontSize: isTablet ? 15 : 15,
+            fontSize: 15.sp,
             fontWeight: FontWeight.bold,
             color: Colors.black,
           ),
         ),
-        SizedBox(height: 8),
+        SizedBox(height: 8.h),
         Text(
           'offers_description'.tr(),
           style: TextStyle(
-            fontSize: isTablet ? 15 : 15,
+            fontSize: 15.sp,
             color: Colors.black,
             fontWeight: FontWeight.bold,
           ),
         ),
-        SizedBox(height: isTablet ? 20 : 16),
+        SizedBox(height: isTablet ? 20.h : 16.h),
         Container(
-          height: isTablet ? 120 : 100, // Fixed height
-          padding: EdgeInsets.all(isTablet ? 20 : 16),
+          height: isTablet ? 120.h : 105.h, // Fixed height
+          padding: EdgeInsets.all(isTablet ? 20.w : 16.w),
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(12.r),
             border: Border.all(color: primaryColor, width: 2),
             boxShadow: [
               BoxShadow(
@@ -783,16 +834,15 @@ class _HomePageState extends ConsumerState<HomePage> {
                     Text(
                       'quick_escape_quality_time'.tr(),
                       style: TextStyle(
-                        fontSize: isTablet ? 15 : 15,
+                        fontSize: 12.sp,
                         fontWeight: FontWeight.bold,
                         color: Colors.black,
                       ),
                     ),
-                    SizedBox(height: 4),
                     Text(
                       'save_up_to_20_percent'.tr(),
                       style: TextStyle(
-                        fontSize: isTablet ? 15 : 15,
+                        fontSize: 13.sp,
                         color: Colors.black,
                         fontWeight: FontWeight.bold,
                       ),
@@ -801,16 +851,16 @@ class _HomePageState extends ConsumerState<HomePage> {
                 ),
               ),
               Container(
-                width: isTablet ? 80 : 60,
-                height: isTablet ? 80 : 60,
+                width: isTablet ? 80.w : 60.w,
+                height: isTablet ? 80.h : 60.h,
                 decoration: BoxDecoration(
                   color: Colors.blue[100],
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(8.r),
                 ),
                 child: Icon(
                   Icons.people,
                   color: Colors.blue[600],
-                  size: isTablet ? 32 : 24,
+                  size: isTablet ? 32.sp : 24.sp,
                 ),
               ),
             ],
@@ -827,24 +877,24 @@ class _HomePageState extends ConsumerState<HomePage> {
         Text(
           'explore_destinations'.tr(),
           style: TextStyle(
-            fontSize: isTablet ? 15 : 15,
+            fontSize: 15.sp,
             fontWeight: FontWeight.bold,
             color: Colors.black,
           ),
         ),
-        SizedBox(height: 8),
+        SizedBox(height: 8.h),
         if (_isLoadingLocations || _isLoadingHotels)
           Center(
             child: Padding(
-              padding: EdgeInsets.all(32),
+              padding: EdgeInsets.all(32.w),
               child: Column(
                 children: [
                   CircularProgressIndicator(color: primaryColor),
-                  SizedBox(height: 16),
+                  SizedBox(height: 16.h),
                   Text(
                     'loading_destinations'.tr(),
                     style: TextStyle(
-                      fontSize: isTablet ? 15 : 15,
+                      fontSize: 15.sp,
                       color: Colors.grey[600],
                     ),
                   ),
@@ -855,32 +905,32 @@ class _HomePageState extends ConsumerState<HomePage> {
         else if (_countries.isEmpty && _cities.isEmpty)
           Center(
             child: Padding(
-              padding: EdgeInsets.all(32),
+              padding: EdgeInsets.all(32.w),
               child: Column(
                 children: [
                   Icon(
                     Icons.location_off,
-                    size: isTablet ? 64 : 48,
+                    size: isTablet ? 64.sp : 48.sp,
                     color: Colors.grey[400],
                   ),
-                  SizedBox(height: 16),
+                  SizedBox(height: 16.h),
                   Text(
                     'no_destinations_available'.tr(),
                     style: TextStyle(
-                      fontSize: isTablet ? 15 : 15,
+                      fontSize: 15.sp,
                       color: Colors.grey[600],
                       fontWeight: FontWeight.w500,
                     ),
                   ),
-                  SizedBox(height: 8),
+                  SizedBox(height: 8.h),
                   Text(
                     'check_network_connection'.tr(),
                     style: TextStyle(
-                      fontSize: isTablet ? 14 : 12,
+                      fontSize: isTablet ? 14.sp : 12.sp,
                       color: Colors.grey[500],
                     ),
                   ),
-                  SizedBox(height: 16),
+                  SizedBox(height: 16.h),
                   ElevatedButton(
                     onPressed: () {
                       _loadLocationData();
@@ -899,7 +949,7 @@ class _HomePageState extends ConsumerState<HomePage> {
         else ...[
           // Countries section with cities inside
           if (_countries.isNotEmpty) ...[
-            SizedBox(height: 12),
+            SizedBox(height: 12.h),
             // Show other countries
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
@@ -917,7 +967,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                     .toList(),
               ),
             ),
-            SizedBox(height: 20),
+            SizedBox(height: 20.h),
           ],
         ],
       ],
@@ -930,11 +980,11 @@ class _HomePageState extends ConsumerState<HomePage> {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: isTablet ? 200 : 150,
-        height: isTablet ? 120 : 100,
-        margin: EdgeInsets.only(right: isTablet ? 16 : 12),
+        width: isTablet ? 200.w : 150.w,
+        height: isTablet ? 120.h : 100.h,
+        margin: EdgeInsets.only(right: isTablet ? 16.w : 12.w),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(12.r),
           color: isCountry
               ? Colors.green[100]
               : Colors.blue[100], // Fallback color
@@ -956,7 +1006,7 @@ class _HomePageState extends ConsumerState<HomePage> {
         ),
         child: Container(
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(12.r),
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
@@ -967,7 +1017,7 @@ class _HomePageState extends ConsumerState<HomePage> {
             ),
           ),
           child: Padding(
-            padding: EdgeInsets.all(12),
+            padding: EdgeInsets.all(12.w),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.end,
@@ -977,16 +1027,16 @@ class _HomePageState extends ConsumerState<HomePage> {
                     Icon(
                       isCountry ? Icons.public : Icons.location_city,
                       color: Colors.white,
-                      size: isTablet ? 16 : 14,
+                      size: isTablet ? 16.sp : 14.sp,
                     ),
-                    SizedBox(width: 4),
+                    SizedBox(width: 4.w),
                     Expanded(
                       child: Text(
                         city,
                         style: TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
-                          fontSize: isTablet ? 18 : 16,
+                          fontSize: isTablet ? 18.sp : 16.sp,
                         ),
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -994,12 +1044,12 @@ class _HomePageState extends ConsumerState<HomePage> {
                   ],
                 ),
                 if (properties.isNotEmpty) ...[
-                  SizedBox(height: 4),
+                  SizedBox(height: 4.h),
                   Text(
                     properties,
                     style: TextStyle(
                       color: Colors.white,
-                      fontSize: isTablet ? 12 : 10,
+                      fontSize: isTablet ? 12.sp : 10.sp,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -1115,12 +1165,12 @@ class _HomePageState extends ConsumerState<HomePage> {
         Text(
           'why_realinn'.tr(),
           style: TextStyle(
-            fontSize: isTablet ? 13 : 13,
+            fontSize: 13.sp,
             fontWeight: FontWeight.bold,
             color: Colors.black,
           ),
         ),
-        SizedBox(height: isTablet ? 15 : 12),
+        SizedBox(height: isTablet ? 15.h : 12.h),
         // Horizontal scrollable feature cards with same size
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
@@ -1135,7 +1185,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                 backgroundColor: Colors.yellow[100]!,
                 iconColor: Colors.yellow[800]!,
               ),
-              SizedBox(width: 16),
+              SizedBox(width: 16.w),
               _buildFeatureCard(
                 icon: Icons.calendar_today,
                 title: 'free_cancellation'.tr(),
@@ -1145,7 +1195,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                 backgroundColor: Colors.blue[100]!,
                 iconColor: Colors.blue[600]!,
               ),
-              SizedBox(width: 16),
+              SizedBox(width: 16.w),
               _buildFeatureCard(
                 icon: Icons.security,
                 title: 'secure_booking'.tr(),
@@ -1155,7 +1205,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                 backgroundColor: Colors.green[100]!,
                 iconColor: Colors.green[600]!,
               ),
-              SizedBox(width: 16),
+              SizedBox(width: 16.w),
               _buildFeatureCard(
                 icon: Icons.support_agent,
                 title: 'support_24_7'.tr(),
@@ -1182,12 +1232,12 @@ class _HomePageState extends ConsumerState<HomePage> {
     required Color iconColor,
   }) {
     return Container(
-      width: isTablet ? 250 : 200,
-      height: isTablet ? 160 : 140,
-      padding: EdgeInsets.all(isTablet ? 20 : 16),
+      width: isTablet ? 250.w : 200.w,
+      height: isTablet ? 160.h : 160.h,
+      padding: EdgeInsets.all(isTablet ? 20.w : 16.w),
       decoration: BoxDecoration(
         color: backgroundColor,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(12.r),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.1),
@@ -1202,25 +1252,25 @@ class _HomePageState extends ConsumerState<HomePage> {
           Icon(
             icon,
             color: iconColor,
-            size: isTablet ? 32 : 28,
+            size: isTablet ? 32.sp : 28.sp,
           ),
-          SizedBox(height: 12),
+          SizedBox(height: 12.h),
           Text(
             title,
             style: TextStyle(
-              fontSize: isTablet ? 12 : 10,
+              fontSize: isTablet ? 12.sp : 10.sp,
               fontWeight: FontWeight.bold,
               color: Colors.black,
             ),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),
-          SizedBox(height: 8),
+          SizedBox(height: 8.h),
           Text(
             description,
             style: TextStyle(
-              fontSize: isTablet ? 12 : 10,
-              color: Colors.black87,
+              fontSize: isTablet ? 14.sp : 11.sp,
+              color: Colors.black,
             ),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
@@ -1247,16 +1297,16 @@ class DestinationPickerDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     return Dialog(
       child: Container(
-        width: 400,
-        height: 600,
+        width: 400.w,
+        height: 600.h,
         child: Column(
           children: [
             Padding(
-              padding: EdgeInsets.all(16),
+              padding: EdgeInsets.all(16.w),
               child: Text(
                 'select_destination'.tr(),
                 style: TextStyle(
-                  fontSize: 20,
+                  fontSize: 20.sp,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -1321,4 +1371,3 @@ class DestinationPickerDialog extends StatelessWidget {
     );
   }
 }
-

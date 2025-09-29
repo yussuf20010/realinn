@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../config/dynamic_config.dart';
 import '../../../../providers/favorites_provider.dart';
 
 import '../../../models/hotel.dart';
 import '../../../models/location.dart' as location_model;
-
 
 class HotelCard extends ConsumerWidget {
   final Hotel hotel;
@@ -49,7 +49,7 @@ class HotelCard extends ConsumerWidget {
                         horizontal: 0, vertical: isTablet ? 12 : 8),
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius: BorderRadius.circular(16.r),
                       boxShadow: [
                         BoxShadow(
                           color: Colors.black.withOpacity(0.08),
@@ -104,7 +104,7 @@ class HotelCard extends ConsumerWidget {
         Expanded(
           flex: 6,
           child: Padding(
-            padding: EdgeInsets.all(12),
+            padding: EdgeInsets.all(12.w),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -120,7 +120,7 @@ class HotelCard extends ConsumerWidget {
                             hotel.name ?? 'Hotel Name',
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
-                              fontSize: 16,
+                              fontSize: 16.sp,
                               color: Colors.black,
                             ),
                             maxLines: 1,
@@ -130,7 +130,7 @@ class HotelCard extends ConsumerWidget {
                             Text(
                               '- ${city!.name}',
                               style: TextStyle(
-                                fontSize: 14,
+                                fontSize: 14.sp,
                                 fontWeight: FontWeight.bold,
                                 color: Colors.black,
                               ),
@@ -157,7 +157,7 @@ class HotelCard extends ConsumerWidget {
                                   : Icons.favorite_border,
                               key: ValueKey(isFavorite),
                               color: isFavorite ? Colors.red : Colors.blue[400],
-                              size: 20,
+                              size: 20.sp,
                             ),
                           ),
                         );
@@ -166,7 +166,7 @@ class HotelCard extends ConsumerWidget {
                   ],
                 ),
 
-                SizedBox(height: 8),
+                SizedBox(height: 8.h),
 
                 // Rating Section (Compact for mobile)
                 Wrap(
@@ -179,21 +179,21 @@ class HotelCard extends ConsumerWidget {
                       children: List.generate(5, (index) {
                         if (index < (hotel.rate ?? 0).floor()) {
                           return Icon(Icons.star,
-                              color: Colors.amber, size: 14);
+                              color: Colors.amber, size: 14.sp);
                         } else if (index == (hotel.rate ?? 0).floor() &&
                             (hotel.rate ?? 0) % 1 > 0) {
                           return Icon(Icons.star_half,
-                              color: Colors.amber, size: 14);
+                              color: Colors.amber, size: 14.sp);
                         } else {
                           return Icon(Icons.star_border,
-                              color: Colors.amber, size: 14);
+                              color: Colors.amber, size: 14.sp);
                         }
                       }),
                     ),
                   ],
                 ),
 
-                SizedBox(height: 6),
+                SizedBox(height: 6.h),
 
                 // Review Score (Compact)
                 Wrap(
@@ -204,21 +204,21 @@ class HotelCard extends ConsumerWidget {
                       padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                       decoration: BoxDecoration(
                         color: primaryColor,
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(8.r),
                       ),
                       child: Text(
                         '${hotel.rate?.toStringAsFixed(1) ?? "N/A"}',
                         style: TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
-                          fontSize: 10,
+                          fontSize: 10.sp,
                         ),
                       ),
                     ),
                     Text(
                       _getRatingText(hotel.rate),
                       style: TextStyle(
-                        fontSize: 10,
+                        fontSize: 10.sp,
                         fontWeight: FontWeight.bold,
                         color: Colors.black,
                       ),
@@ -226,7 +226,7 @@ class HotelCard extends ConsumerWidget {
                     Text(
                       ' · ${_getReviewCount()} reviews',
                       style: TextStyle(
-                        fontSize: 10,
+                        fontSize: 10.sp,
                         fontWeight: FontWeight.bold,
                         color: Colors.black,
                       ),
@@ -235,7 +235,7 @@ class HotelCard extends ConsumerWidget {
                   ],
                 ),
 
-                SizedBox(height: 8),
+                SizedBox(height: 8.h),
 
                 // Location Details (Compact)
                 if (hotel.latitude != null && hotel.longitude != null) ...[
@@ -243,13 +243,13 @@ class HotelCard extends ConsumerWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Icon(Icons.location_on,
-                          color: Colors.blue[600], size: 12),
-                      SizedBox(width: 2),
+                          color: Colors.blue[600], size: 12.sp),
+                      SizedBox(width: 2.w),
                       Flexible(
                         child: Text(
                           '${_calculateDistance(hotel.latitude!, hotel.longitude!)} km from downtown',
                           style: TextStyle(
-                            fontSize: 10,
+                            fontSize: 10.sp,
                             fontWeight: FontWeight.bold,
                             color: Colors.black,
                           ),
@@ -258,18 +258,18 @@ class HotelCard extends ConsumerWidget {
                       ),
                     ],
                   ),
-                  SizedBox(height: 4),
+                  SizedBox(height: 4.h),
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Icon(Icons.beach_access,
-                          color: Colors.blue[600], size: 12),
-                      SizedBox(width: 2),
+                          color: Colors.blue[600], size: 12.sp),
+                      SizedBox(width: 2.w),
                       Flexible(
                         child: Text(
                           '${_calculateBeachDistance(hotel.latitude!, hotel.longitude!)} m from beach',
                           style: TextStyle(
-                            fontSize: 10,
+                            fontSize: 10.sp,
                             fontWeight: FontWeight.bold,
                             color: Colors.black,
                           ),
@@ -278,21 +278,21 @@ class HotelCard extends ConsumerWidget {
                       ),
                     ],
                   ),
-                  SizedBox(height: 6),
+                  SizedBox(height: 6.h),
                 ],
 
                 // Room Type
                 Text(
                   'Hotel room: ${_getBedInfo()}',
                   style: TextStyle(
-                    fontSize: 10,
+                    fontSize: 10.sp,
                     fontWeight: FontWeight.bold,
                     color: Colors.black,
                   ),
                   overflow: TextOverflow.ellipsis,
                 ),
 
-                SizedBox(height: 8),
+                SizedBox(height: 8.h),
 
                 // Pricing Section (Compact)
                 Column(
@@ -305,19 +305,19 @@ class HotelCard extends ConsumerWidget {
                           child: Text(
                             'US\$${hotel.oldPrice ?? hotel.priceRange ?? "0"}',
                             style: TextStyle(
-                              fontSize: 14,
+                              fontSize: 14.sp,
                               color: Colors.red,
                               decoration: TextDecoration.lineThrough,
                             ),
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
-                        SizedBox(width: 6),
+                        SizedBox(width: 6.w),
                         Flexible(
                           child: Text(
                             'US\$${hotel.priceRange ?? "0"}',
                             style: TextStyle(
-                              fontSize: 14,
+                              fontSize: 14.sp,
                               fontWeight: FontWeight.bold,
                               color: Colors.black,
                             ),
@@ -329,7 +329,7 @@ class HotelCard extends ConsumerWidget {
                     Text(
                       '+US\$${_calculateTaxes(hotel.priceRange)} taxes and fees',
                       style: TextStyle(
-                        fontSize: 10,
+                        fontSize: 10.sp,
                         fontWeight: FontWeight.bold,
                         color: Colors.black,
                       ),
@@ -338,13 +338,13 @@ class HotelCard extends ConsumerWidget {
                   ],
                 ),
 
-                SizedBox(height: 6),
+                SizedBox(height: 6.h),
 
                 // Availability Warning (Compact)
                 Text(
                   'Only ${_getRandomAvailability()} left at this price on',
                   style: TextStyle(
-                    fontSize: 10,
+                    fontSize: 10.sp,
                     fontWeight: FontWeight.bold,
                     color: Colors.red,
                   ),
@@ -355,7 +355,7 @@ class HotelCard extends ConsumerWidget {
                   child: Text(
                     'RealInn',
                     style: TextStyle(
-                      fontSize: 10,
+                      fontSize: 10.sp,
                       color: primaryColor,
                       decoration: TextDecoration.underline,
                     ),
@@ -385,7 +385,7 @@ class HotelCard extends ConsumerWidget {
 
         // Hotel Details Section (Below image for tablet)
         Padding(
-          padding: EdgeInsets.all(20),
+          padding: EdgeInsets.all(20.w),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -401,7 +401,7 @@ class HotelCard extends ConsumerWidget {
                           hotel.name ?? 'Hotel Name',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
-                            fontSize: 24,
+                            fontSize: 24.sp,
                             color: Colors.black,
                           ),
                           maxLines: 2,
@@ -411,7 +411,7 @@ class HotelCard extends ConsumerWidget {
                           Text(
                             '- ${city!.name}',
                             style: TextStyle(
-                              fontSize: 18,
+                              fontSize: 18.sp,
                               fontWeight: FontWeight.bold,
                               color: Colors.black,
                             ),
@@ -436,7 +436,7 @@ class HotelCard extends ConsumerWidget {
                             isFavorite ? Icons.favorite : Icons.favorite_border,
                             key: ValueKey(isFavorite),
                             color: isFavorite ? Colors.red : Colors.blue[400],
-                            size: 28,
+                            size: 28.sp,
                           ),
                         ),
                       );
@@ -445,7 +445,7 @@ class HotelCard extends ConsumerWidget {
                 ],
               ),
 
-              SizedBox(height: 12),
+              SizedBox(height: 12.h),
 
               // Rating Section (Expanded for tablet)
               Wrap(
@@ -471,7 +471,7 @@ class HotelCard extends ConsumerWidget {
                 ],
               ),
 
-              SizedBox(height: 12),
+              SizedBox(height: 12.h),
 
               // Review Score (Expanded)
               Wrap(
@@ -482,21 +482,21 @@ class HotelCard extends ConsumerWidget {
                     padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
                       color: primaryColor,
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius: BorderRadius.circular(16.r),
                     ),
                     child: Text(
                       '${hotel.rate?.toStringAsFixed(1) ?? "N/A"}',
                       style: TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
-                        fontSize: 16,
+                        fontSize: 16.sp,
                       ),
                     ),
                   ),
                   Text(
                     _getRatingText(hotel.rate),
                     style: TextStyle(
-                      fontSize: 16,
+                      fontSize: 16.sp,
                       fontWeight: FontWeight.bold,
                       color: Colors.black,
                     ),
@@ -504,7 +504,7 @@ class HotelCard extends ConsumerWidget {
                   Text(
                     ' · ${_getReviewCount()} reviews',
                     style: TextStyle(
-                      fontSize: 16,
+                      fontSize: 16.sp,
                       fontWeight: FontWeight.bold,
                       color: Colors.black,
                     ),
@@ -521,12 +521,12 @@ class HotelCard extends ConsumerWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(Icons.location_on, color: Colors.blue[600], size: 20),
-                    SizedBox(width: 8),
+                    SizedBox(width: 8.w),
                     Flexible(
                       child: Text(
                         '${_calculateDistance(hotel.latitude!, hotel.longitude!)} km from downtown',
                         style: TextStyle(
-                          fontSize: 16,
+                          fontSize: 16.sp,
                           fontWeight: FontWeight.bold,
                           color: Colors.black,
                         ),
@@ -535,17 +535,17 @@ class HotelCard extends ConsumerWidget {
                     ),
                   ],
                 ),
-                SizedBox(height: 8),
+                SizedBox(height: 8.h),
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(Icons.beach_access, color: Colors.blue[600], size: 20),
-                    SizedBox(width: 8),
+                    SizedBox(width: 8.w),
                     Flexible(
                       child: Text(
                         '${_calculateBeachDistance(hotel.latitude!, hotel.longitude!)} m from beach',
                         style: TextStyle(
-                          fontSize: 16,
+                          fontSize: 16.sp,
                           fontWeight: FontWeight.bold,
                           color: Colors.black,
                         ),
@@ -554,14 +554,14 @@ class HotelCard extends ConsumerWidget {
                     ),
                   ],
                 ),
-                SizedBox(height: 12),
+                SizedBox(height: 12.h),
               ],
 
               // Room Type
               Text(
                 'Hotel room: ${_getBedInfo()}',
                 style: TextStyle(
-                  fontSize: 16,
+                  fontSize: 16.sp,
                   fontWeight: FontWeight.bold,
                   color: Colors.black,
                 ),
@@ -581,19 +581,19 @@ class HotelCard extends ConsumerWidget {
                         child: Text(
                           'US\$${hotel.oldPrice ?? hotel.priceRange ?? "0"}',
                           style: TextStyle(
-                            fontSize: 18,
+                            fontSize: 18.sp,
                             color: Colors.red,
                             decoration: TextDecoration.lineThrough,
                           ),
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                      SizedBox(width: 12),
+                      SizedBox(width: 12.w),
                       Flexible(
                         child: Text(
                           'US\$${hotel.priceRange ?? "0"}',
                           style: TextStyle(
-                            fontSize: 22,
+                            fontSize: 22.sp,
                             fontWeight: FontWeight.bold,
                             color: Colors.black,
                           ),
@@ -605,7 +605,7 @@ class HotelCard extends ConsumerWidget {
                   Text(
                     '+US\$${_calculateTaxes(hotel.priceRange)} taxes and fees',
                     style: TextStyle(
-                      fontSize: 16,
+                      fontSize: 16.sp,
                       color: Colors.grey[600],
                     ),
                     overflow: TextOverflow.ellipsis,
@@ -613,13 +613,13 @@ class HotelCard extends ConsumerWidget {
                 ],
               ),
 
-              SizedBox(height: 12),
+              SizedBox(height: 12.h),
 
               // Availability Warning (Expanded)
               Text(
                 'Only ${_getRandomAvailability()} left at this price on',
                 style: TextStyle(
-                  fontSize: 16,
+                  fontSize: 16.sp,
                   color: Colors.black,
                 ),
                 overflow: TextOverflow.ellipsis,
@@ -629,7 +629,7 @@ class HotelCard extends ConsumerWidget {
                 child: Text(
                   'RealInn',
                   style: TextStyle(
-                    fontSize: 16,
+                    fontSize: 16.sp,
                     color: primaryColor,
                     decoration: TextDecoration.underline,
                   ),
@@ -685,11 +685,11 @@ class HotelCard extends ConsumerWidget {
 
   String _getHotelCategoryImage(String hotelName) {
     final name = hotelName.toLowerCase();
-    
+
     // Create a hash-based selection to ensure different hotels get different images
     final hash = hotelName.hashCode;
     final imageIndex = (hash % 20).abs(); // Use 20 different images
-    
+
     // Luxury hotels
     if (name.contains('luxury') ||
         name.contains('premium') ||
@@ -810,7 +810,7 @@ class HotelCard extends ConsumerWidget {
       'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=400&h=300&fit=crop',
       'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=300&fit=crop',
     ];
-    
+
     return defaultImages[imageIndex];
   }
 
@@ -831,10 +831,10 @@ class HotelCard extends ConsumerWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              padding: EdgeInsets.all(16),
+              padding: EdgeInsets.all(16.w),
               decoration: BoxDecoration(
                 color: Colors.white.withOpacity(0.9),
-                borderRadius: BorderRadius.circular(50),
+                borderRadius: BorderRadius.circular(50.r),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(0.1),
@@ -854,7 +854,7 @@ class HotelCard extends ConsumerWidget {
               padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               decoration: BoxDecoration(
                 color: Colors.white.withOpacity(0.9),
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(16.r),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(0.1),
@@ -867,7 +867,7 @@ class HotelCard extends ConsumerWidget {
                 hotel.name?.split(' ').take(2).join(' ') ?? 'Hotel',
                 style: TextStyle(
                   color: Colors.black,
-                  fontSize: 14,
+                  fontSize: 14.sp,
                   fontWeight: FontWeight.bold,
                 ),
                 textAlign: TextAlign.center,
@@ -975,7 +975,7 @@ class HotelCardModern extends ConsumerWidget {
                         horizontal: 0, vertical: isTablet ? 12 : 8),
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(12.r),
                       boxShadow: [
                         BoxShadow(
                           color:
@@ -987,7 +987,7 @@ class HotelCardModern extends ConsumerWidget {
                       ],
                     ),
                     child: ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(12.r),
                       child: isTablet
                           ? _buildTabletLayout(primaryColor, isTablet, context)
                           : _buildMobileLayout(primaryColor, isTablet, context),
@@ -1020,7 +1020,7 @@ class HotelCardModern extends ConsumerWidget {
         Expanded(
           flex: 6,
           child: Padding(
-            padding: EdgeInsets.all(12),
+            padding: EdgeInsets.all(12.w),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -1032,7 +1032,7 @@ class HotelCardModern extends ConsumerWidget {
                       child: Text(
                         hotel.name ?? 'Hotel Name',
                         style: TextStyle(
-                          fontSize: 16,
+                          fontSize: 16.sp,
                           fontWeight: FontWeight.bold,
                           color: Colors.black87,
                         ),
@@ -1044,13 +1044,13 @@ class HotelCardModern extends ConsumerWidget {
                       padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
                         color: bookingType == 0 ? Colors.blue : Colors.green,
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(12.r),
                       ),
                       child: Text(
                         bookingType == 0 ? 'Daily' : 'Monthly',
                         style: TextStyle(
                           color: Colors.white,
-                          fontSize: 10,
+                          fontSize: 10.sp,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -1058,7 +1058,7 @@ class HotelCardModern extends ConsumerWidget {
                   ],
                 ),
 
-                SizedBox(height: 8),
+                SizedBox(height: 8.h),
 
                 // Location
                 if (hotel.city != null || hotel.country != null)
@@ -1066,12 +1066,12 @@ class HotelCardModern extends ConsumerWidget {
                     children: [
                       Icon(Icons.location_on,
                           size: 14, color: Colors.grey[600]),
-                      SizedBox(width: 4),
+                      SizedBox(width: 4.w),
                       Expanded(
                         child: Text(
                           '${hotel.city ?? ''}${hotel.city != null && hotel.country != null ? ', ' : ''}${hotel.country ?? ''}',
                           style: TextStyle(
-                            fontSize: 12,
+                            fontSize: 12.sp,
                             color: Colors.grey[600],
                           ),
                           maxLines: 1,
@@ -1081,34 +1081,34 @@ class HotelCardModern extends ConsumerWidget {
                     ],
                   ),
 
-                SizedBox(height: 8),
+                SizedBox(height: 8.h),
 
                 // Rating
                 if (hotel.rate != null)
                   Row(
                     children: [
                       Icon(Icons.star, size: 14, color: Colors.amber),
-                      SizedBox(width: 4),
+                      SizedBox(width: 4.w),
                       Text(
                         hotel.rate.toString(),
                         style: TextStyle(
-                          fontSize: 12,
+                          fontSize: 12.sp,
                           fontWeight: FontWeight.w600,
                           color: Colors.black87,
                         ),
                       ),
-                      SizedBox(width: 4),
+                      SizedBox(width: 4.w),
                       Text(
                         _getRatingText(hotel.rate),
                         style: TextStyle(
-                          fontSize: 12,
+                          fontSize: 12.sp,
                           color: Colors.grey[600],
                         ),
                       ),
                     ],
                   ),
 
-                SizedBox(height: 8),
+                SizedBox(height: 8.h),
 
                 // Price
                 if (hotel.priceRange != null)
@@ -1117,16 +1117,16 @@ class HotelCardModern extends ConsumerWidget {
                       Text(
                         '\$${hotel.priceRange}',
                         style: TextStyle(
-                          fontSize: 16,
+                          fontSize: 16.sp,
                           fontWeight: FontWeight.bold,
                           color: primaryColor,
                         ),
                       ),
-                      SizedBox(width: 4),
+                      SizedBox(width: 4.w),
                       Text(
                         bookingType == 0 ? '/night' : '/month',
                         style: TextStyle(
-                          fontSize: 12,
+                          fontSize: 12.sp,
                           color: Colors.grey[600],
                         ),
                       ),
@@ -1158,7 +1158,7 @@ class HotelCardModern extends ConsumerWidget {
         Expanded(
           flex: 65,
           child: Padding(
-            padding: EdgeInsets.all(16),
+            padding: EdgeInsets.all(16.w),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -1170,7 +1170,7 @@ class HotelCardModern extends ConsumerWidget {
                       child: Text(
                         hotel.name ?? 'Hotel Name',
                         style: TextStyle(
-                          fontSize: 20,
+                          fontSize: 20.sp,
                           fontWeight: FontWeight.bold,
                           color: Colors.black87,
                         ),
@@ -1183,13 +1183,13 @@ class HotelCardModern extends ConsumerWidget {
                           EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                       decoration: BoxDecoration(
                         color: bookingType == 0 ? Colors.blue : Colors.green,
-                        borderRadius: BorderRadius.circular(16),
+                        borderRadius: BorderRadius.circular(16.r),
                       ),
                       child: Text(
                         bookingType == 0 ? 'Daily' : 'Monthly',
                         style: TextStyle(
                           color: Colors.white,
-                          fontSize: 12,
+                          fontSize: 12.sp,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -1197,7 +1197,7 @@ class HotelCardModern extends ConsumerWidget {
                   ],
                 ),
 
-                SizedBox(height: 12),
+                SizedBox(height: 12.h),
 
                 // Location
                 if (hotel.city != null || hotel.country != null)
@@ -1205,38 +1205,38 @@ class HotelCardModern extends ConsumerWidget {
                     children: [
                       Icon(Icons.location_on,
                           size: 16, color: Colors.grey[600]),
-                      SizedBox(width: 6),
+                      SizedBox(width: 6.w),
                       Text(
                         '${hotel.city ?? ''}${hotel.city != null && hotel.country != null ? ', ' : ''}${hotel.country ?? ''}',
                         style: TextStyle(
-                          fontSize: 14,
+                          fontSize: 14.sp,
                           color: Colors.grey[600],
                         ),
                       ),
                     ],
                   ),
 
-                SizedBox(height: 12),
+                SizedBox(height: 12.h),
 
                 // Rating and additional info
                 Row(
                   children: [
                     if (hotel.rate != null) ...[
                       Icon(Icons.star, size: 16, color: Colors.amber),
-                      SizedBox(width: 6),
+                      SizedBox(width: 6.w),
                       Text(
                         hotel.rate.toString(),
                         style: TextStyle(
-                          fontSize: 14,
+                          fontSize: 14.sp,
                           fontWeight: FontWeight.w600,
                           color: Colors.black87,
                         ),
                       ),
-                      SizedBox(width: 6),
+                      SizedBox(width: 6.w),
                       Text(
                         _getRatingText(hotel.rate),
                         style: TextStyle(
-                          fontSize: 14,
+                          fontSize: 14.sp,
                           color: Colors.grey[600],
                         ),
                       ),
@@ -1244,7 +1244,7 @@ class HotelCardModern extends ConsumerWidget {
                   ],
                 ),
 
-                SizedBox(height: 12),
+                SizedBox(height: 12.h),
 
                 // Price
                 if (hotel.priceRange != null)
@@ -1253,16 +1253,16 @@ class HotelCardModern extends ConsumerWidget {
                       Text(
                         '\$${hotel.priceRange}',
                         style: TextStyle(
-                          fontSize: 20,
+                          fontSize: 20.sp,
                           fontWeight: FontWeight.bold,
                           color: primaryColor,
                         ),
                       ),
-                      SizedBox(width: 6),
+                      SizedBox(width: 6.w),
                       Text(
                         bookingType == 0 ? '/night' : '/month',
                         style: TextStyle(
-                          fontSize: 14,
+                          fontSize: 14.sp,
                           color: Colors.grey[600],
                         ),
                       ),

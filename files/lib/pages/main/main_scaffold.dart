@@ -45,7 +45,13 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
 
   Widget _buildBottomNavigationBar() {
     final primaryColor = WPConfig.navbarColor;
-    final isTablet = MediaQuery.of(context).size.width >= 768;
+    final screenSize = MediaQuery.of(context).size;
+    final isTablet = screenSize.width >= 768;
+    final isLandscape = screenSize.width > screenSize.height;
+
+    // Adjust heights based on orientation
+    final navBarHeight =
+        isLandscape ? (isTablet ? 60.h : 50.h) : (isTablet ? 80.h : 70.h);
 
     return Container(
       decoration: BoxDecoration(
@@ -60,19 +66,21 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
       ),
       child: SafeArea(
         child: Container(
-          height: isTablet ? 80.h : 70.h,
-          padding:
-              EdgeInsets.symmetric(horizontal: isTablet ? 24.w : 16.w, vertical: 8.h),
+          height: navBarHeight,
+          padding: EdgeInsets.symmetric(
+              horizontal: isTablet ? 24.w : 16.w,
+              vertical: isLandscape ? 4.h : 8.h),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _buildNavItem(0, Icons.home, 'home'.tr(), isTablet, primaryColor),
-              _buildNavItem(
-                  1, Icons.favorite, 'favorites'.tr(), isTablet, primaryColor),
-              _buildNavItem(
-                  2, Icons.shopping_cart_outlined, 'waiting_list'.tr(), isTablet, primaryColor),
-              _buildNavItem(
-                  3, Icons.history, 'history'.tr(), isTablet, primaryColor),
+              _buildNavItem(0, Icons.home, 'home'.tr(), isTablet, isLandscape,
+                  primaryColor),
+              _buildNavItem(1, Icons.favorite, 'favorites'.tr(), isTablet,
+                  isLandscape, primaryColor),
+              _buildNavItem(2, Icons.shopping_cart_outlined,
+                  'waiting_list'.tr(), isTablet, isLandscape, primaryColor),
+              _buildNavItem(3, Icons.history, 'history'.tr(), isTablet,
+                  isLandscape, primaryColor),
             ],
           ),
         ),
@@ -81,8 +89,16 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
   }
 
   Widget _buildNavItem(int index, IconData icon, String label, bool isTablet,
-      Color primaryColor) {
+      bool isLandscape, Color primaryColor) {
     final isSelected = _currentIndex == index;
+
+    // Adjust sizes based on orientation
+    final iconSize =
+        isLandscape ? (isTablet ? 20.sp : 18.sp) : (isTablet ? 28.sp : 24.sp);
+    final textSize =
+        isLandscape ? (isTablet ? 10.sp : 8.sp) : (isTablet ? 12.sp : 10.sp);
+    final spacing =
+        isLandscape ? (isTablet ? 2.h : 1.h) : (isTablet ? 6.h : 4.h);
 
     return GestureDetector(
       onTap: () {
@@ -92,27 +108,33 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
       },
       child: Column(
         mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           // Use PNG image for waiting list (index 2), icon for others
           index == 2
               ? SvgPicture.asset(
                   AssetsManager.waiting,
-                  width: isTablet ? 28.w : 24.w,
-                  height: isTablet ? 28.h : 24.h,
+                  width: iconSize,
+                  height: iconSize,
                   color: isSelected ? primaryColor : Colors.black,
                 )
               : Icon(
                   icon,
                   color: isSelected ? primaryColor : Colors.black,
-                  size: isTablet ? 28.sp : 24.sp,
+                  size: iconSize,
                 ),
-          SizedBox(height: isTablet ? 6.h : 4.h),
-          Text(
-            label,
-            style: TextStyle(
-              color: isSelected ? primaryColor : Colors.black,
-              fontSize: isTablet ? 12.sp : 10.sp,
-              fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+          SizedBox(height: spacing),
+          Flexible(
+            child: Text(
+              label,
+              style: TextStyle(
+                color: isSelected ? primaryColor : Colors.black,
+                fontSize: textSize,
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+              ),
+              textAlign: TextAlign.center,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
           ),
         ],
