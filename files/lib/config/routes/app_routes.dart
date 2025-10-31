@@ -1,0 +1,50 @@
+class AppRoutes {
+  static const String initial = '/';
+  static const String loadingApp = '/loading_app';
+  static const String entryPoint = '/entrypoint';
+  static const String onboarding = '/onboarding';
+  static const String selectThemeAndLang = '/selectLangAndTheme';
+  static const String selectLocation = '/selectLocation ';
+  static const String loginIntro = '/login_intro';
+  static const String login = '/login';
+  static const String loginAnimation = '/login_animation';
+  static const String signup = '/sign_up';
+  static const String verifyCode = '/verify_code';
+  static const String forgotPass = '/forgot_pass';
+  static const String resetPass = '/reset_pass';
+  static const String search = '/search';
+  static const String notification = '/notification';
+  static const String explore = '/explore';
+  static const String profile = '/profile';
+
+  static const String service = '/service';
+  static const String allProperties = '/allProperties';
+  static const String allServices = '/allServices';
+  static const String postWebsite = '/post_website';
+  static const String comment = '/comments';
+  static const String category = '/category';
+  static const String categoryProducts = '/categoryProducts';
+  static const String paymentPage = '/paymentPage';
+  static const String informationPage = '/informationPage';
+  static const String completeOrderPage = '/completeOrderPage';
+  static const String orderState = '/orderState';
+  static const String tag = '/tag';
+  static const String author = '/author';
+  static const String contact = '/contact';
+  static const String viewImageFullScreen = '/viewImageFullScreen';
+  static const String allAuthors = '/all_authors';
+  static const String delivery = '/delivery';
+  static const String splash = '/splash';
+
+  static const String settings = '/settings';
+  static const String notifications = '/notifications';
+  static const String privacy = '/privacy';
+  static const String terms = '/terms';
+  static const String about = '/about';
+  static const String help = '/help';
+  static const String rate = '/rate';
+  static const String faq = '/faq';
+  static const String homePage = '/homePage';
+  static const String serviceProviderCategories =
+      '/service-provider-categories';
+}

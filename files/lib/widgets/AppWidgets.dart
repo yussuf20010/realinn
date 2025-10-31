@@ -1,7 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import '../../core/components/headline_with_row.dart';
-import '../core/constants/app_defaults.dart';
+import '../../config/components/headline_with_row.dart';
+import '../config/constants/app_defaults.dart';
 
 class CustomAppWidgets {
   static Widget searchBar(BuildContext context,

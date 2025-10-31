@@ -5,8 +5,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../config/wp_config.dart';
 import '../../models/hotel.dart';
 import '../../models/selected_room.dart';
-import '../../providers/favorites_provider.dart';
-import '../../providers/waiting_list_provider.dart';
+import '../../services/favorites_provider.dart';
+import '../../services/waiting_list_provider.dart';
 
 class HotelDetailsPage extends ConsumerStatefulWidget {
   final Hotel hotel;
@@ -1973,25 +1973,21 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
         hotel: widget.hotel,
         room: room,
         checkInDate: widget.checkInDate ?? DateTime.now(),
-        checkOutDate: widget.checkOutDate ?? DateTime.now().add(Duration(days: 1)),
+        checkOutDate:
+            widget.checkOutDate ?? DateTime.now().add(Duration(days: 1)),
         quantity: _roomQuantities[room.name] ?? 1,
       );
     }
 
-    // Show success message
+    // Show success message and navigate to waiting list
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('${selectedRoomObjects.length} room(s) added to waiting list'),
+        content:
+            Text('${selectedRoomObjects.length} room(s) added to waiting list'),
         backgroundColor: Colors.green,
-        action: SnackBarAction(
-          label: 'View',
-          textColor: Colors.white,
-          onPressed: () {
-            Navigator.pushNamed(context, '/waiting-list');
-          },
-        ),
       ),
     );
+    Navigator.pushNamed(context, '/waiting-list');
 
     // Clear selected rooms
     setState(() {

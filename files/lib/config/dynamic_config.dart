@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../controllers/site_settings_controller.dart';
+import '../services/site_settings_controller.dart';
 import '../models/site_settings.dart';
 import 'wp_config.dart';
 
@@ -38,4 +38,4 @@ class DynamicConfig {
       logoUrl: null,
     );
   }
-} 
+}

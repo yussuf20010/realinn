@@ -1,18 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../../../../services/hotel_service.dart';
+import '../../../../models/hotel.dart';
 import '../../../../config/wp_config.dart';
-import '../../../controllers/location_controller.dart';
-import '../../../models/location.dart' as location_model;
 
-class LocationsSection extends ConsumerWidget {
+class LocationsSection extends StatelessWidget {
   const LocationsSection({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final isTablet = MediaQuery.of(context).size.width >= 768;
-    final primaryColor = WPConfig.navbarColor;
+    // Using WPConfig.navbarColor directly where needed; no local assignment
 
     return Padding(
       padding:
@@ -37,96 +35,109 @@ class LocationsSection extends ConsumerWidget {
             ),
           ),
           SizedBox(height: 20),
-          Consumer(
-            builder: (context, ref, child) {
-              final locationsAsync = ref.watch(locationProvider);
+          FutureBuilder(
+            future: HotelService.fetchMeta(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return _buildLoadingLocations(isTablet);
+              }
+              if (snapshot.hasError) {
+                return _buildErrorLocations(
+                    isTablet, snapshot.error.toString());
+              }
+              final locationData = snapshot.data as LocationResponseModel?;
+              if (locationData == null) {
+                return _buildErrorLocations(isTablet, 'No data');
+              }
 
-              return locationsAsync.when(
-                data: (locationData) {
-                  final cities = locationData.cities ?? [];
-                  final countries = locationData.countries ?? [];
+              final cities = locationData.cities ?? [];
+              final countries = locationData.countries ?? [];
 
-                  if (cities.isEmpty && countries.isEmpty) {
-                    return _buildPlaceholderLocations(isTablet);
-                  }
+              if (cities.isEmpty && countries.isEmpty) {
+                return _buildPlaceholderLocations(isTablet);
+              }
 
-                  // Show top cities and countries
-                  final topCities = cities.take(6).toList();
-                  final topCountries = countries.take(2).toList();
+              final topCities = cities.take(6).toList();
+              final topCountries = countries.take(2).toList();
 
-                  return Column(
-                    children: [
-                      // Cities Grid
-                      if (topCities.isNotEmpty) ...[
-                        Text(
-                          'Cities',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: isTablet ? 18 : 16,
-                            color: Colors.black,
+              return Column(
+                children: [
+                  if (topCities.isNotEmpty) ...[
+                    Text(
+                      'Cities',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: isTablet ? 18 : 16,
+                        color: Colors.black,
+                      ),
+                    ),
+                    SizedBox(height: 12),
+                    GridView.builder(
+                      shrinkWrap: true,
+                      physics: NeverScrollableScrollPhysics(),
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: isTablet ? 3 : 2,
+                        crossAxisSpacing: 12,
+                        mainAxisSpacing: 12,
+                        childAspectRatio: 1.2,
+                      ),
+                      itemCount: topCities.length,
+                      itemBuilder: (context, index) {
+                        final city = topCities[index];
+                        // Build image URL from city feature_image if available
+                        String? cityImageUrl;
+                        if (city.featureImage != null &&
+                            city.featureImage!.isNotEmpty) {
+                          // Construct full URL from feature_image
+                          if (city.featureImage!.startsWith('http')) {
+                            cityImageUrl = city.featureImage;
+                          } else {
+                            cityImageUrl =
+                                '${WPConfig.imageBaseUrl}${city.featureImage}';
+                          }
+                        }
+                        return _buildLocationCard(
+                          name: city.name ?? 'City',
+                          subtitle: 'Explore hotels',
+                          icon: Icons.location_city,
+                          color: _getLocationColor(index),
+                          isTablet: isTablet,
+                          imageUrl: cityImageUrl,
+                          onTap: () =>
+                              _navigateToLocation(context, city.name ?? 'City'),
+                        );
+                      },
+                    ),
+                    SizedBox(height: 24),
+                  ],
+                  if (topCountries.isNotEmpty) ...[
+                    Text(
+                      'Countries',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: isTablet ? 18 : 16,
+                        color: Colors.black,
+                      ),
+                    ),
+                    SizedBox(height: 12),
+                    Row(
+                      children: topCountries.map((country) {
+                        final index = topCountries.indexOf(country);
+                        return Expanded(
+                          child: _buildLocationCard(
+                            name: country.name ?? 'Country',
+                            subtitle: 'Discover destinations',
+                            icon: Icons.flag,
+                            color: _getLocationColor(index + 6),
+                            isTablet: isTablet,
+                            onTap: () => _navigateToLocation(
+                                context, country.name ?? 'Country'),
                           ),
-                        ),
-                        SizedBox(height: 12),
-                        GridView.builder(
-                          shrinkWrap: true,
-                          physics: NeverScrollableScrollPhysics(),
-                          gridDelegate:
-                              SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: isTablet ? 3 : 2,
-                            crossAxisSpacing: 12,
-                            mainAxisSpacing: 12,
-                            childAspectRatio: 1.2,
-                          ),
-                          itemCount: topCities.length,
-                          itemBuilder: (context, index) {
-                            final city = topCities[index];
-                            return _buildLocationCard(
-                              name: city.name ?? 'City',
-                              subtitle: 'Explore hotels',
-                              icon: Icons.location_city,
-                              color: _getLocationColor(index),
-                              isTablet: isTablet,
-                              onTap: () => _navigateToLocation(
-                                  context, city.name ?? 'City'),
-                            );
-                          },
-                        ),
-                        SizedBox(height: 24),
-                      ],
-
-                      // Countries Row
-                      if (topCountries.isNotEmpty) ...[
-                        Text(
-                          'Countries',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: isTablet ? 18 : 16,
-                            color: Colors.black,
-                          ),
-                        ),
-                        SizedBox(height: 12),
-                        Row(
-                          children: topCountries.map((country) {
-                            final index = topCountries.indexOf(country);
-                            return Expanded(
-                              child: _buildLocationCard(
-                                name: country.name ?? 'Country',
-                                subtitle: 'Discover destinations',
-                                icon: Icons.flag,
-                                color: _getLocationColor(index + 6),
-                                isTablet: isTablet,
-                                onTap: () => _navigateToLocation(
-                                    context, country.name ?? 'Country'),
-                              ),
-                            );
-                          }).toList(),
-                        ),
-                      ],
-                    ],
-                  );
-                },
-                loading: () => _buildLoadingLocations(isTablet),
-                error: (e, _) => _buildErrorLocations(isTablet, e.toString()),
+                        );
+                      }).toList(),
+                    ),
+                  ],
+                ],
               );
             },
           ),
@@ -142,9 +153,21 @@ class LocationsSection extends ConsumerWidget {
     required Color color,
     required bool isTablet,
     required VoidCallback onTap,
+    String? imageUrl,
   }) {
-    // Get category image based on location name or index
-    final imageUrl = _getCategoryImage(name);
+    // Use provided imageUrl if available and not empty, otherwise get category image based on location name
+    String finalImageUrl;
+    if (imageUrl != null && imageUrl.isNotEmpty) {
+      finalImageUrl = imageUrl;
+    } else {
+      finalImageUrl = _getCategoryImage(name);
+    }
+
+    // Final safety check - ensure we never pass empty string to NetworkImage
+    if (finalImageUrl.isEmpty) {
+      finalImageUrl =
+          'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=300&fit=crop';
+    }
 
     return GestureDetector(
       onTap: onTap,
@@ -164,15 +187,47 @@ class LocationsSection extends ConsumerWidget {
           child: Stack(
             children: [
               // Background image
-              Container(
+              Image.network(
+                finalImageUrl,
                 width: double.infinity,
                 height: double.infinity,
-                decoration: BoxDecoration(
-                  image: DecorationImage(
-                    image: NetworkImage(imageUrl),
-                    fit: BoxFit.cover,
-                  ),
-                ),
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) {
+                  // Show placeholder with gradient if image fails
+                  return Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          color.withOpacity(0.6),
+                          color.withOpacity(0.8),
+                        ],
+                      ),
+                    ),
+                    child: Center(
+                      child: Icon(
+                        icon,
+                        size: 48,
+                        color: Colors.white.withOpacity(0.7),
+                      ),
+                    ),
+                  );
+                },
+                loadingBuilder: (context, child, loadingProgress) {
+                  if (loadingProgress == null) return child;
+                  return Container(
+                    color: Colors.grey[300],
+                    child: Center(
+                      child: CircularProgressIndicator(
+                        value: loadingProgress.expectedTotalBytes != null
+                            ? loadingProgress.cumulativeBytesLoaded /
+                                loadingProgress.expectedTotalBytes!
+                            : null,
+                      ),
+                    ),
+                  );
+                },
               ),
               // Gradient overlay for better text readability
               Container(
@@ -303,130 +358,36 @@ class LocationsSection extends ConsumerWidget {
   }
 
   Widget _buildPlaceholderLocations(bool isTablet) {
-    // Beautiful placeholder images for different categories
-    final placeholderImages = [
-      'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=400&h=300&fit=crop', // Beach
-      'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=300&fit=crop', // Desert
-      'https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=400&h=300&fit=crop', // City
-      'https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=400&h=300&fit=crop', // Historical
-      'https://images.unsplash.com/photo-1439066615861-d1af74d74000?w=400&h=300&fit=crop', // Nature
-      'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=300&fit=crop', // Landscape
-    ];
-
-    final placeholderNames = [
-      'Beautiful Beaches',
-      'Desert Adventures',
-      'City Life',
-      'Historical Sites',
-      'Natural Wonders',
-      'Amazing Views',
-    ];
-
-    return Column(
-      children: [
-        GridView.builder(
-          shrinkWrap: true,
-          physics: NeverScrollableScrollPhysics(),
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: isTablet ? 3 : 2,
-            crossAxisSpacing: 12,
-            mainAxisSpacing: 12,
-            childAspectRatio: 1.2,
+    // No static placeholder data - show empty message
+    return Container(
+      padding: EdgeInsets.all(20),
+      child: Column(
+        children: [
+          Icon(
+            Icons.location_off,
+            size: isTablet ? 64 : 48,
+            color: Colors.grey[400],
           ),
-          itemCount: 6,
-          itemBuilder: (context, index) {
-            return Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(12),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
-                    blurRadius: 12,
-                    offset: Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: Stack(
-                  children: [
-                    // Background image
-                    Container(
-                      width: double.infinity,
-                      height: double.infinity,
-                      decoration: BoxDecoration(
-                        image: DecorationImage(
-                          image: NetworkImage(placeholderImages[index]),
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                    ),
-                    // Gradient overlay
-                    Container(
-                      width: double.infinity,
-                      height: double.infinity,
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [
-                            Colors.transparent,
-                            Colors.black.withOpacity(0.7),
-                          ],
-                        ),
-                      ),
-                    ),
-                    // Content
-                    Padding(
-                      padding: EdgeInsets.all(isTablet ? 16 : 12),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            placeholderNames[index],
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: isTablet ? 16 : 14,
-                              color: Colors.white,
-                              shadows: [
-                                Shadow(
-                                  offset: Offset(0, 1),
-                                  blurRadius: 2,
-                                  color: Colors.black.withOpacity(0.5),
-                                ),
-                              ],
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          SizedBox(height: 4),
-                          Text(
-                            'Explore hotels',
-                            style: TextStyle(
-                              fontSize: isTablet ? 12 : 10,
-                              color: Colors.white.withOpacity(0.9),
-                              shadows: [
-                                Shadow(
-                                  offset: Offset(0, 1),
-                                  blurRadius: 2,
-                                  color: Colors.black.withOpacity(0.5),
-                                ),
-                              ],
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          },
-        ),
-      ],
+          SizedBox(height: 16),
+          Text(
+            'No locations available',
+            style: TextStyle(
+              fontSize: isTablet ? 18 : 16,
+              color: Colors.grey[600],
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          SizedBox(height: 8),
+          Text(
+            'Please check your connection',
+            style: TextStyle(
+              fontSize: isTablet ? 14 : 12,
+              color: Colors.grey[500],
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
     );
   }
 
@@ -530,7 +491,6 @@ class LocationsSection extends ConsumerWidget {
   }
 
   void _navigateToLocation(BuildContext context, String locationName) {
-    // TODO: Navigate to location-specific page or search results
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('Navigating to $locationName...'),

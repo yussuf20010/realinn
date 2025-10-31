@@ -3,15 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../config/dynamic_config.dart';
-import '../../../../providers/favorites_provider.dart';
-
+import '../../../../services/favorites_provider.dart';
 import '../../../models/hotel.dart';
-import '../../../models/location.dart' as location_model;
 
 class HotelCard extends ConsumerWidget {
   final Hotel hotel;
-  final location_model.City? city;
-  final location_model.Country? country;
+  final CityModel? city;
+  final CountryModel? country;
   final VoidCallback? onFavoriteTap;
   final bool isFavorite;
 
@@ -224,7 +222,9 @@ class HotelCard extends ConsumerWidget {
                       ),
                     ),
                     Text(
-                      ' · ${_getReviewCount()} reviews',
+                      hotel.reviews != null && hotel.reviews!.isNotEmpty
+                          ? ' · ${hotel.reviews!.length} reviews'
+                          : '',
                       style: TextStyle(
                         fontSize: 10.sp,
                         fontWeight: FontWeight.bold,
@@ -340,16 +340,7 @@ class HotelCard extends ConsumerWidget {
 
                 SizedBox(height: 6.h),
 
-                // Availability Warning (Compact)
-                Text(
-                  'Only ${_getRandomAvailability()} left at this price on',
-                  style: TextStyle(
-                    fontSize: 10.sp,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.red,
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                ),
+                // Availability removed - use API data only
                 GestureDetector(
                   onTap: () => _navigateToHotelDetails(context),
                   child: Text(
@@ -501,15 +492,17 @@ class HotelCard extends ConsumerWidget {
                       color: Colors.black,
                     ),
                   ),
-                  Text(
-                    ' · ${_getReviewCount()} reviews',
-                    style: TextStyle(
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
+                  hotel.reviews != null && hotel.reviews!.isNotEmpty
+                      ? Text(
+                          ' · ${hotel.reviews!.length} reviews',
+                          style: TextStyle(
+                            fontSize: 16.sp,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        )
+                      : SizedBox.shrink(),
                 ],
               ),
 
@@ -615,15 +608,7 @@ class HotelCard extends ConsumerWidget {
 
               SizedBox(height: 12.h),
 
-              // Availability Warning (Expanded)
-              Text(
-                'Only ${_getRandomAvailability()} left at this price on',
-                style: TextStyle(
-                  fontSize: 16.sp,
-                  color: Colors.black,
-                ),
-                overflow: TextOverflow.ellipsis,
-              ),
+              // Availability removed - use API data only
               GestureDetector(
                 onTap: () => _navigateToHotelDetails(context),
                 child: Text(
@@ -643,10 +628,22 @@ class HotelCard extends ConsumerWidget {
   }
 
   Widget _buildHotelImage() {
-    // Use beautiful hotel images from Unsplash if no hotel images available
-    final imageUrl = hotel.images?.isNotEmpty == true
-        ? hotel.images!.first
-        : _getHotelCategoryImage(hotel.name ?? 'Hotel');
+    // Use API images only - no fallbacks
+    String? imageUrl;
+
+    // Try hotel.images first (list)
+    if (hotel.images != null && hotel.images!.isNotEmpty) {
+      imageUrl = hotel.images!.first;
+    }
+    // Then try hotel.imageUrl (single image)
+    else if (hotel.imageUrl != null && hotel.imageUrl!.isNotEmpty) {
+      imageUrl = hotel.imageUrl;
+    }
+
+    // If no API image available, show placeholder
+    if (imageUrl == null || imageUrl.isEmpty) {
+      return _buildPlaceholderImage();
+    }
 
     return Container(
       decoration: BoxDecoration(
@@ -683,136 +680,7 @@ class HotelCard extends ConsumerWidget {
     );
   }
 
-  String _getHotelCategoryImage(String hotelName) {
-    final name = hotelName.toLowerCase();
-
-    // Create a hash-based selection to ensure different hotels get different images
-    final hash = hotelName.hashCode;
-    final imageIndex = (hash % 20).abs(); // Use 20 different images
-
-    // Luxury hotels
-    if (name.contains('luxury') ||
-        name.contains('premium') ||
-        name.contains('elite') ||
-        name.contains('royal') ||
-        name.contains('grand') ||
-        name.contains('palace')) {
-      final luxuryImages = [
-        'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400&h=300&fit=crop',
-        'https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=400&h=300&fit=crop',
-        'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=400&h=300&fit=crop',
-        'https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=400&h=300&fit=crop',
-        'https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=400&h=300&fit=crop',
-      ];
-      return luxuryImages[imageIndex % luxuryImages.length];
-    }
-
-    // Beach resorts
-    if (name.contains('beach') ||
-        name.contains('resort') ||
-        name.contains('coastal') ||
-        name.contains('ocean') ||
-        name.contains('seaside')) {
-      final beachImages = [
-        'https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=400&h=300&fit=crop',
-        'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=400&h=300&fit=crop',
-        'https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=400&h=300&fit=crop',
-        'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=400&h=300&fit=crop',
-        'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400&h=300&fit=crop',
-      ];
-      return beachImages[imageIndex % beachImages.length];
-    }
-
-    // Mountain hotels
-    if (name.contains('mountain') ||
-        name.contains('alpine') ||
-        name.contains('ski') ||
-        name.contains('lodge') ||
-        name.contains('cabin')) {
-      final mountainImages = [
-        'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=400&h=300&fit=crop',
-        'https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=400&h=300&fit=crop',
-        'https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=400&h=300&fit=crop',
-        'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=400&h=300&fit=crop',
-        'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400&h=300&fit=crop',
-      ];
-      return mountainImages[imageIndex % mountainImages.length];
-    }
-
-    // City hotels
-    if (name.contains('city') ||
-        name.contains('urban') ||
-        name.contains('downtown') ||
-        name.contains('center') ||
-        name.contains('plaza')) {
-      final cityImages = [
-        'https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=400&h=300&fit=crop',
-        'https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=400&h=300&fit=crop',
-        'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=400&h=300&fit=crop',
-        'https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=400&h=300&fit=crop',
-        'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=400&h=300&fit=crop',
-      ];
-      return cityImages[imageIndex % cityImages.length];
-    }
-
-    // Boutique hotels
-    if (name.contains('boutique') ||
-        name.contains('charm') ||
-        name.contains('vintage') ||
-        name.contains('heritage') ||
-        name.contains('classic')) {
-      final boutiqueImages = [
-        'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=300&fit=crop',
-        'https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=400&h=300&fit=crop',
-        'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=400&h=300&fit=crop',
-        'https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=400&h=300&fit=crop',
-        'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=400&h=300&fit=crop',
-      ];
-      return boutiqueImages[imageIndex % boutiqueImages.length];
-    }
-
-    // Business hotels
-    if (name.contains('business') ||
-        name.contains('corporate') ||
-        name.contains('executive') ||
-        name.contains('suite') ||
-        name.contains('conference')) {
-      final businessImages = [
-        'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400&h=300&fit=crop',
-        'https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=400&h=300&fit=crop',
-        'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=400&h=300&fit=crop',
-        'https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=400&h=300&fit=crop',
-        'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=400&h=300&fit=crop',
-      ];
-      return businessImages[imageIndex % businessImages.length];
-    }
-
-    // Default diverse hotel images based on hash
-    final defaultImages = [
-      'https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=400&h=300&fit=crop',
-      'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400&h=300&fit=crop',
-      'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=400&h=300&fit=crop',
-      'https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=400&h=300&fit=crop',
-      'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=400&h=300&fit=crop',
-      'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=300&fit=crop',
-      'https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=400&h=300&fit=crop',
-      'https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=400&h=300&fit=crop',
-      'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400&h=300&fit=crop',
-      'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=400&h=300&fit=crop',
-      'https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=400&h=300&fit=crop',
-      'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=400&h=300&fit=crop',
-      'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=300&fit=crop',
-      'https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=400&h=300&fit=crop',
-      'https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=400&h=300&fit=crop',
-      'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400&h=300&fit=crop',
-      'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=400&h=300&fit=crop',
-      'https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=400&h=300&fit=crop',
-      'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=400&h=300&fit=crop',
-      'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=300&fit=crop',
-    ];
-
-    return defaultImages[imageIndex];
-  }
+  // Removed _getHotelCategoryImage - no fallback to Unsplash images
 
   Widget _buildPlaceholderImage() {
     return Container(
@@ -914,17 +782,9 @@ class HotelCard extends ConsumerWidget {
     return (basePrice * 0.15).roundToDouble(); // 15% taxes
   }
 
-  int _getRandomAvailability() {
-    // This should come from your dynamic data
-    final hotelId = int.tryParse(hotel.id ?? '0') ?? 0;
-    return 2 + (hotelId % 4); // Random number between 2-5
-  }
+  // Removed _getRandomAvailability - static/mock data
 
-  int _getReviewCount() {
-    // This should come from your dynamic data
-    final hotelId = int.tryParse(hotel.id ?? '0') ?? 0;
-    return 100 + (hotelId % 500); // Random number between 100-600
-  }
+  // Removed _getReviewCount - use hotel.reviews?.length ?? 0 instead
 
   void _navigateToHotelDetails(BuildContext context) {
     Navigator.pushNamed(
@@ -1277,25 +1137,34 @@ class HotelCardModern extends ConsumerWidget {
   }
 
   Widget _buildHotelImage() {
-    if (hotel.images != null && hotel.imageUrl!.isNotEmpty) {
-      return Image.network(
-        hotel.imageUrl!,
-        fit: BoxFit.cover,
-        errorBuilder: (context, error, stackTrace) => _buildPlaceholderImage(),
-        loadingBuilder: (context, child, loadingProgress) {
-          if (loadingProgress == null) return child;
-          return Center(
-            child: CircularProgressIndicator(
-              value: loadingProgress.expectedTotalBytes != null
-                  ? loadingProgress.cumulativeBytesLoaded /
-                      loadingProgress.expectedTotalBytes!
-                  : null,
-            ),
-          );
-        },
-      );
+    // Use API images only - no fallbacks
+    String? imageUrl;
+
+    // Try hotel.images first (list)
+    if (hotel.images != null && hotel.images!.isNotEmpty) {
+      imageUrl = hotel.images!.first;
     }
-    return _buildPlaceholderImage();
+    // Then try hotel.imageUrl (single image)
+    else if (hotel.imageUrl != null && hotel.imageUrl!.isNotEmpty) {
+      imageUrl = hotel.imageUrl;
+    }
+
+    // If no API image available, show placeholder
+    if (imageUrl == null || imageUrl.isEmpty) {
+      return _buildPlaceholderImage();
+    }
+
+    return Image.network(
+      imageUrl,
+      fit: BoxFit.cover,
+      errorBuilder: (context, error, stackTrace) {
+        return _buildPlaceholderImage();
+      },
+      loadingBuilder: (context, child, loadingProgress) {
+        if (loadingProgress == null) return child;
+        return _buildPlaceholderImage();
+      },
+    );
   }
 
   Widget _buildPlaceholderImage() {

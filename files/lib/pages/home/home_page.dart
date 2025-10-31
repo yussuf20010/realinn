@@ -4,11 +4,13 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../config/wp_config.dart';
 import '../../config/dynamic_config.dart';
+import '../../config/routes/app_routes.dart';
 import '../../models/hotel.dart';
-import '../../models/location.dart';
-import '../../controllers/location_controller.dart';
-import '../../controllers/hotel_controller.dart';
-import '../../core/constants/assets.dart';
+import '../../models/service_provider.dart';
+import '../../services/hotel_service.dart';
+import '../../services/service_provider_service.dart';
+import '../../services/auth_service.dart';
+import '../../config/constants/assets.dart';
 import 'components/search_box_widget.dart';
 
 class HomePage extends ConsumerStatefulWidget {
@@ -23,14 +25,21 @@ class _HomePageState extends ConsumerState<HomePage> {
   DateTime? _checkInDate;
   DateTime? _checkOutDate;
   int _rooms = 1;
-  List<City> _cities = [];
-  List<Country> _countries = [];
+  List<CityModel> _cities = [];
+  List<CountryModel> _countries = [];
   List<Hotel> _allHotels = [];
   bool _isSearching = false;
   bool _isLoadingLocations = true;
   bool _isLoadingHotels = true;
   String? _selectedDestination;
   int _selectedServiceType = 0;
+
+  // Service providers flow state
+  bool _isSearchingProviders = false;
+  bool _showProvidersList = false;
+  bool _showApprovalPrompt = false;
+  String? _selectedProvider;
+  List<ServiceProvider> _availableProviders = [];
 
   final List<String> _serviceTypes = ['stays', 'services'];
 
@@ -47,13 +56,98 @@ class _HomePageState extends ConsumerState<HomePage> {
     super.dispose();
   }
 
+  // Service providers flow methods
+  void _handleServiceTypeChange(int index) {
+    setState(() {
+      _selectedServiceType = index;
+      if (index == 1) {
+        // Services tab selected - navigate to categories page
+        Navigator.pushNamed(context, AppRoutes.serviceProviderCategories);
+      } else {
+        // Reset service providers flow
+        _resetServiceProvidersFlow();
+      }
+    });
+  }
+
+  void _startServiceProvidersFlow() {
+    setState(() {
+      _isSearchingProviders = true;
+      _showProvidersList = false;
+      _showApprovalPrompt = false;
+      _selectedProvider = null;
+    });
+
+    _fetchProviders().then((providers) {
+      if (!mounted) return;
+      setState(() {
+        _isSearchingProviders = false;
+        _showProvidersList = true;
+        _availableProviders = providers;
+      });
+    }).catchError((e) {
+      if (!mounted) return;
+      setState(() {
+        _isSearchingProviders = false;
+        _showProvidersList = true;
+        _availableProviders = [];
+      });
+    });
+  }
+
+  void _resetServiceProvidersFlow() {
+    setState(() {
+      _isSearchingProviders = false;
+      _showProvidersList = false;
+      _showApprovalPrompt = false;
+      _selectedProvider = null;
+      _availableProviders = [];
+    });
+  }
+
+  void _selectProvider(String providerId) {
+    setState(() {
+      _selectedProvider = providerId;
+      _showProvidersList = false;
+      _showApprovalPrompt = true;
+    });
+  }
+
+  void _approveProvider() {
+    // Handle provider approval
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('provider_approved'.tr()),
+        backgroundColor: Colors.green,
+        duration: Duration(seconds: 2),
+      ),
+    );
+
+    // Reset the flow
+    _resetServiceProvidersFlow();
+  }
+
+  void _rejectProvider() {
+    // Go back to providers list
+    setState(() {
+      _showApprovalPrompt = false;
+      _showProvidersList = true;
+      _selectedProvider = null;
+    });
+  }
+
+  Future<List<ServiceProvider>> _fetchProviders() async {
+    return await ServiceProviderService.fetchProviders();
+  }
+
   Future<void> _loadLocationData() async {
     try {
       setState(() {
         _isLoadingLocations = true;
       });
 
-      final locationResponse = await ref.read(locationProvider.future);
+      final locationResponse = await HotelService.fetchMeta();
+
       setState(() {
         _cities = locationResponse.cities ?? [];
         _countries = locationResponse.countries ?? [];
@@ -66,17 +160,8 @@ class _HomePageState extends ConsumerState<HomePage> {
       print('Error loading locations: $e');
       setState(() {
         _isLoadingLocations = false;
-        // Load fallback data
-        _cities = [
-          City(id: 1, name: 'Cairo', countryId: 1),
-          City(id: 2, name: 'Alexandria', countryId: 1),
-          City(id: 3, name: 'Giza', countryId: 1),
-        ];
-        _countries = [
-          Country(id: 1, name: 'Egypt'),
-          Country(id: 2, name: 'Saudi Arabia'),
-          Country(id: 3, name: 'UAE'),
-        ];
+        _cities = [];
+        _countries = [];
       });
     }
   }
@@ -87,7 +172,7 @@ class _HomePageState extends ConsumerState<HomePage> {
         _isLoadingHotels = true;
       });
 
-      final hotels = await ref.read(hotelProvider.future);
+      final hotels = await HotelService.fetchHotels();
       setState(() {
         _allHotels = hotels;
         _isLoadingHotels = false;
@@ -98,30 +183,7 @@ class _HomePageState extends ConsumerState<HomePage> {
       print('Error loading hotels: $e');
       setState(() {
         _isLoadingHotels = false;
-        _allHotels = [
-          Hotel(
-            id: '1',
-            name: 'Cairo Marriott Hotel',
-            cityId: 1,
-            city: 'Cairo',
-            country: 'Egypt',
-            description: 'Luxury hotel in Cairo',
-            rate: 4.5,
-            priceRange: '150.0',
-            imageUrl: 'https://example.com/cairo.jpg',
-          ),
-          Hotel(
-            id: '2',
-            name: 'Alexandria Beach Resort',
-            cityId: 2,
-            city: 'Alexandria',
-            country: 'Egypt',
-            description: 'Beach resort in Alexandria',
-            rate: 4.3,
-            priceRange: '120.0',
-            imageUrl: 'https://example.com/alexandria.jpg',
-          ),
-        ];
+        _allHotels = [];
       });
     }
   }
@@ -152,14 +214,14 @@ class _HomePageState extends ConsumerState<HomePage> {
           'Sample hotel IDs: ${_allHotels.take(3).map((h) => '${h.name} (Country ID: ${h.countryId}, City ID: ${h.cityId})').join(', ')}');
 
       // First, try to find the destination in countries and cities
-      Country? selectedCountry;
-      City? selectedCity;
+      CountryModel? selectedCountry;
+      CityModel? selectedCity;
 
       // Check if it's a country
       selectedCountry = _countries.firstWhere(
         (country) =>
             country.name?.toLowerCase() == _selectedDestination!.toLowerCase(),
-        orElse: () => Country(id: 0, name: ''),
+        orElse: () => CountryModel(id: 0, name: ''),
       );
 
       // Check if it's a city
@@ -167,7 +229,7 @@ class _HomePageState extends ConsumerState<HomePage> {
         selectedCity = _cities.firstWhere(
           (city) =>
               city.name?.toLowerCase() == _selectedDestination!.toLowerCase(),
-          orElse: () => City(id: 0, name: '', countryId: 0),
+          orElse: () => CityModel(id: 0, name: '', countryId: 0),
         );
       }
 
@@ -278,9 +340,9 @@ class _HomePageState extends ConsumerState<HomePage> {
               SizedBox(height: 16),
             ],
 
-            // Add space when Services is selected
+            // Service providers flow when Services is selected
             if (_selectedServiceType == 1) ...[
-              SizedBox(height: 40),
+              _buildServiceProvidersFlow(),
             ],
 
             _buildMainContent(isTablet, primaryColor),
@@ -344,7 +406,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                         )),
                       ),
 
-                      // Right side - Language and Profile
+                      // Right side - Language and Profile/Login
                       Row(
                         children: [
                           // Language Toggle
@@ -383,16 +445,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                               ),
                             ),
                           ),
-                          IconButton(
-                            icon: Icon(Icons.person,
-                                color: Colors.white,
-                                size: isLandscape
-                                    ? (isTablet ? 20.sp : 18.sp)
-                                    : (isTablet ? 24.sp : 20.sp)),
-                            onPressed: () {
-                              Navigator.pushNamed(context, '/profile');
-                            },
-                          ),
+                          _buildAuthAction(isTablet, isLandscape),
                         ],
                       ),
                     ],
@@ -414,9 +467,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                         margin: EdgeInsets.symmetric(horizontal: 6.w),
                         child: GestureDetector(
                           onTap: () {
-                            setState(() {
-                              _selectedServiceType = index;
-                            });
+                            _handleServiceTypeChange(index);
                           },
                           child: Container(
                             height: isLandscape ? 20.h : 25.h,
@@ -484,6 +535,32 @@ class _HomePageState extends ConsumerState<HomePage> {
       default:
         return Icons.bed;
     }
+  }
+
+  Widget _buildAuthAction(bool isTablet, bool isLandscape) {
+    final size =
+        isLandscape ? (isTablet ? 20.sp : 18.sp) : (isTablet ? 24.sp : 20.sp);
+
+    return FutureBuilder<bool>(
+      future: AuthService.isLoggedIn(),
+      builder: (context, snapshot) {
+        final isLoggedIn = snapshot.data ?? false;
+        return IconButton(
+          icon: Icon(
+            isLoggedIn ? Icons.person : Icons.login,
+            color: Colors.white,
+            size: size,
+          ),
+          onPressed: () {
+            if (isLoggedIn) {
+              Navigator.pushNamed(context, AppRoutes.profile);
+            } else {
+              Navigator.pushNamed(context, AppRoutes.login);
+            }
+          },
+        );
+      },
+    );
   }
 
   void _toggleLanguage(BuildContext context) async {
@@ -606,6 +683,8 @@ class _HomePageState extends ConsumerState<HomePage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                SizedBox(height: isTablet ? 16.h : 12.h),
+
                 // Travel more, spend less section
                 _buildTravelMoreSection(isTablet, primaryColor),
 
@@ -1279,11 +1358,311 @@ class _HomePageState extends ConsumerState<HomePage> {
       ),
     );
   }
+
+  // Service Providers Flow UI
+  Widget _buildServiceProvidersFlow() {
+    if (_isSearchingProviders) {
+      return _buildSearchingProvidersScreen();
+    } else if (_showProvidersList) {
+      return _buildProvidersListScreen();
+    } else if (_showApprovalPrompt) {
+      return _buildApprovalPromptScreen();
+    }
+
+    return SizedBox.shrink();
+  }
+
+  Widget _buildSearchingProvidersScreen() {
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 20.h),
+      padding: EdgeInsets.all(24.w),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16.r),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 8,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          SizedBox(height: 20.h),
+          CircularProgressIndicator(
+            color: WPConfig.navbarColor,
+            strokeWidth: 3,
+          ),
+          SizedBox(height: 24.h),
+          Text(
+            'searching_providers'.tr(),
+            style: TextStyle(
+              fontSize: 18.sp,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+            ),
+          ),
+          SizedBox(height: 12.h),
+          Text(
+            'finding_best_providers'.tr(),
+            style: TextStyle(
+              fontSize: 14.sp,
+              color: Colors.grey[600],
+            ),
+            textAlign: TextAlign.center,
+          ),
+          SizedBox(height: 20.h),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildProvidersListScreen() {
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 20.h),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'available_providers'.tr(),
+            style: TextStyle(
+              fontSize: 20.sp,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+            ),
+          ),
+          SizedBox(height: 16.h),
+          Text(
+            'select_provider_message'.tr(),
+            style: TextStyle(
+              fontSize: 14.sp,
+              color: Colors.grey[600],
+            ),
+          ),
+          SizedBox(height: 20.h),
+          ..._availableProviders
+              .map((provider) => _buildProviderCard(provider))
+              .toList(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildProviderCard(ServiceProvider provider) {
+    return Container(
+      margin: EdgeInsets.only(bottom: 16.h),
+      padding: EdgeInsets.all(16.w),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12.r),
+        border: Border.all(color: Colors.grey[300]!),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 4,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          // Provider Image
+          Container(
+            width: 60.w,
+            height: 60.h,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(30.r),
+              image: provider.imageUrl.isNotEmpty
+                  ? DecorationImage(
+                      image: NetworkImage(provider.imageUrl),
+                      fit: BoxFit.cover,
+                      onError: (exception, stackTrace) {},
+                    )
+                  : null,
+            ),
+          ),
+          SizedBox(width: 16.w),
+          // Provider Info
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  provider.name,
+                  style: TextStyle(
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  ),
+                ),
+                SizedBox(height: 4.h),
+                Text(
+                  provider.description ?? '',
+                  style: TextStyle(
+                    fontSize: 12.sp,
+                    color: Colors.grey[600],
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                SizedBox(height: 8.h),
+                Row(
+                  children: [
+                    Icon(Icons.star, color: Colors.amber, size: 16.sp),
+                    SizedBox(width: 4.w),
+                    Text(
+                      '${provider.rating}',
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                    ),
+                    SizedBox(width: 16.w),
+                    Icon(Icons.work, color: Colors.blue, size: 16.sp),
+                    SizedBox(width: 4.w),
+                    Text(
+                      '${provider.completedJobs} jobs',
+                      style: TextStyle(
+                        fontSize: 12.sp,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 8.h),
+                Text(
+                  '\$${provider.pricePerHour.toStringAsFixed(0)}/hour',
+                  style: TextStyle(
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.bold,
+                    color: WPConfig.navbarColor,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          // Select Button
+          ElevatedButton(
+            onPressed: () => _selectProvider(provider.id),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: WPConfig.navbarColor,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8.r),
+              ),
+            ),
+            child: Text(
+              'select'.tr(),
+              style: TextStyle(fontSize: 12.sp),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildApprovalPromptScreen() {
+    final selectedProvider = _availableProviders.firstWhere(
+      (p) => p.id == _selectedProvider,
+      orElse: () => _availableProviders.first,
+    );
+
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 20.h),
+      padding: EdgeInsets.all(24.w),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16.r),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 8,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Icon(
+            Icons.check_circle_outline,
+            color: Colors.green,
+            size: 64.sp,
+          ),
+          SizedBox(height: 20.h),
+          Text(
+            'provider_selected'.tr(),
+            style: TextStyle(
+              fontSize: 20.sp,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+            ),
+          ),
+          SizedBox(height: 12.h),
+          Text(
+            selectedProvider.name,
+            style: TextStyle(
+              fontSize: 18.sp,
+              fontWeight: FontWeight.bold,
+              color: WPConfig.navbarColor,
+            ),
+          ),
+          SizedBox(height: 8.h),
+          Text(
+            selectedProvider.description ?? '',
+            style: TextStyle(
+              fontSize: 14.sp,
+              color: Colors.grey[600],
+            ),
+            textAlign: TextAlign.center,
+          ),
+          SizedBox(height: 20.h),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: _rejectProvider,
+                  style: OutlinedButton.styleFrom(
+                    side: BorderSide(color: Colors.grey),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8.r),
+                    ),
+                  ),
+                  child: Text(
+                    'back'.tr(),
+                    style: TextStyle(fontSize: 14.sp),
+                  ),
+                ),
+              ),
+              SizedBox(width: 16.w),
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: _approveProvider,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8.r),
+                    ),
+                  ),
+                  child: Text(
+                    'approve'.tr(),
+                    style: TextStyle(fontSize: 14.sp),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class DestinationPickerDialog extends StatelessWidget {
-  final List<Country> countries;
-  final List<City> cities;
+  final List<CountryModel> countries;
+  final List<CityModel> cities;
   final Function(String) onDestinationSelected;
 
   const DestinationPickerDialog({

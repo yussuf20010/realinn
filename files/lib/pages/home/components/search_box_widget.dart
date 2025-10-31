@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
-import '../../../controllers/location_controller.dart';
-import '../../../models/location.dart';
+import '../../../services/hotel_service.dart';
+import '../../../models/hotel.dart';
 
-class SearchBoxWidget extends ConsumerStatefulWidget {
+class SearchBoxWidget extends StatefulWidget {
   final Function(String destination, DateTime? checkIn, DateTime? checkOut,
       int rooms, int adults, int children) onSearch;
   final bool isLoading;
@@ -17,10 +16,10 @@ class SearchBoxWidget extends ConsumerStatefulWidget {
   }) : super(key: key);
 
   @override
-  ConsumerState<SearchBoxWidget> createState() => _SearchBoxWidgetState();
+  State<SearchBoxWidget> createState() => _SearchBoxWidgetState();
 }
 
-class _SearchBoxWidgetState extends ConsumerState<SearchBoxWidget> {
+class _SearchBoxWidgetState extends State<SearchBoxWidget> {
   int _selectedTab = 0;
   String _destination = '';
   DateTime? _checkInDate;
@@ -477,7 +476,7 @@ class _SearchBoxWidgetState extends ConsumerState<SearchBoxWidget> {
   }
 }
 
-class DestinationSelectionModal extends ConsumerStatefulWidget {
+class DestinationSelectionModal extends StatefulWidget {
   final String selectedDestination;
   final Function(String) onDestinationSelected;
 
@@ -488,12 +487,11 @@ class DestinationSelectionModal extends ConsumerStatefulWidget {
   }) : super(key: key);
 
   @override
-  ConsumerState<DestinationSelectionModal> createState() =>
+  State<DestinationSelectionModal> createState() =>
       _DestinationSelectionModalState();
 }
 
-class _DestinationSelectionModalState
-    extends ConsumerState<DestinationSelectionModal> {
+class _DestinationSelectionModalState extends State<DestinationSelectionModal> {
   final TextEditingController _searchController = TextEditingController();
   String _selectedDestination = '';
   List<String> _destinations = [];
@@ -511,38 +509,31 @@ class _DestinationSelectionModalState
     // This will be called in the build method using ref.watch
   }
 
-  List<String> _extractDestinations(LocationResponse locationResponse) {
+  List<String> _extractDestinations(LocationResponseModel locationResponse) {
     List<String> destinations = [];
 
     // Add cities
-    if (locationResponse.cities != null) {
-      for (var city in locationResponse.cities!) {
-        if (city.name != null) {
-          // Find the country name for this city
-          String countryName = '';
-          if (city.countryId != null && locationResponse.countries != null) {
-            var country = locationResponse.countries!.firstWhere(
-              (c) => c.id == city.countryId,
-              orElse: () => Country(),
-            );
-            countryName = country.name ?? '';
-          }
-
-          if (countryName.isNotEmpty) {
-            destinations.add('${city.name}, $countryName');
-          } else {
-            destinations.add(city.name!);
-          }
+    final cities = locationResponse.cities ?? [];
+    for (final city in cities) {
+      if (city.name != null) {
+        // Find the country name for this city
+        String countryName = '';
+        final countries = locationResponse.countries ?? [];
+        if (city.countryId != null) {
+          final match = countries.firstWhere((cc) => cc.id == city.countryId,
+              orElse: () => CountryModel());
+          countryName = match.name ?? '';
         }
+        destinations.add(
+            countryName.isNotEmpty ? '${city.name}, $countryName' : city.name!);
       }
     }
 
     // Add countries
-    if (locationResponse.countries != null) {
-      for (var country in locationResponse.countries!) {
-        if (country.name != null) {
-          destinations.add(country.name!);
-        }
+    final countries = locationResponse.countries ?? [];
+    for (final country in countries) {
+      if (country.name != null) {
+        destinations.add(country.name!);
       }
     }
 
@@ -569,43 +560,24 @@ class _DestinationSelectionModalState
   Widget build(BuildContext context) {
     final primaryColor = const Color(0xFFa93ae1);
     final isTablet = MediaQuery.of(context).size.width >= 768;
-
-    // Watch location data
-    final locationResponse = ref.watch(locationProvider);
-
-    // Update destinations when data is available
-    locationResponse.when(
-      data: (data) {
-        if (_destinations.isEmpty) {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            setState(() {
-              _destinations = _extractDestinations(data);
-              _filteredDestinations = List.from(_destinations);
-            });
-          });
-        }
-      },
-      loading: () {
-        // Keep current destinations while loading
-      },
-      error: (error, stackTrace) {
-        // Fallback to default destinations if API fails
-        if (_destinations.isEmpty) {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            setState(() {
-              _destinations = [
-                'Cairo, Egypt',
-                'Dubai, UAE',
-                'London, UK',
-                'Paris, France',
-                'New York, USA',
-              ];
-              _filteredDestinations = List.from(_destinations);
-            });
-          });
-        }
-      },
-    );
+    Future.microtask(() async {
+      if (_destinations.isNotEmpty) return;
+      try {
+        final data = await HotelService.fetchMeta();
+        if (!mounted) return;
+        setState(() {
+          _destinations = _extractDestinations(data);
+          _filteredDestinations = List.from(_destinations);
+        });
+      } catch (e) {
+        if (!mounted) return;
+        // Don't set fallback static data - just show empty list
+        setState(() {
+          _destinations = [];
+          _filteredDestinations = [];
+        });
+      }
+    });
 
     return Container(
       height: MediaQuery.of(context).size.height * 0.8,
@@ -671,68 +643,54 @@ class _DestinationSelectionModalState
 
           // Destinations list
           Expanded(
-            child: locationResponse.when(
-              data: (data) => ListView.builder(
-                padding: EdgeInsets.symmetric(horizontal: 20.w),
-                itemCount: _filteredDestinations.length,
-                itemBuilder: (context, index) {
-                  final destination = _filteredDestinations[index];
-                  final isSelected = _selectedDestination == destination;
+            child: _destinations.isEmpty
+                ? Center(child: CircularProgressIndicator(color: primaryColor))
+                : ListView.builder(
+                    padding: EdgeInsets.symmetric(horizontal: 20.w),
+                    itemCount: _filteredDestinations.length,
+                    itemBuilder: (context, index) {
+                      final destination = _filteredDestinations[index];
+                      final isSelected = _selectedDestination == destination;
 
-                  return Container(
-                    margin: EdgeInsets.only(bottom: 8.h),
-                    decoration: BoxDecoration(
-                      color: isSelected
-                          ? primaryColor.withOpacity(0.1)
-                          : Colors.transparent,
-                      border: Border.all(
-                        color: isSelected ? primaryColor : Colors.grey[300]!,
-                        width: isSelected ? 3 : 2,
-                      ),
-                    ),
-                    child: ListTile(
-                      title: Text(
-                        destination,
-                        style: TextStyle(
-                          color: isSelected ? primaryColor : Colors.black,
-                          fontWeight:
-                              isSelected ? FontWeight.bold : FontWeight.normal,
-                          fontSize: isTablet ? 16.sp : 14.sp,
+                      return Container(
+                        margin: EdgeInsets.only(bottom: 8.h),
+                        decoration: BoxDecoration(
+                          color: isSelected
+                              ? primaryColor.withOpacity(0.1)
+                              : Colors.transparent,
+                          border: Border.all(
+                            color:
+                                isSelected ? primaryColor : Colors.grey[300]!,
+                            width: isSelected ? 3 : 2,
+                          ),
                         ),
-                      ),
-                      trailing: isSelected
-                          ? Icon(Icons.check_circle,
-                              color: primaryColor,
-                              size: isTablet ? 24.sp : 20.sp)
-                          : Icon(Icons.radio_button_unchecked,
-                              color: Colors.grey[400],
-                              size: isTablet ? 24.sp : 20.sp),
-                      onTap: () {
-                        setState(() {
-                          _selectedDestination = destination;
-                        });
-                      },
-                    ),
-                  );
-                },
-              ),
-              loading: () => Center(
-                child: CircularProgressIndicator(color: primaryColor),
-              ),
-              error: (error, stackTrace) => Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.error, color: Colors.red, size: 48.sp),
-                    SizedBox(height: 16.h),
-                    Text(
-                      'failed_to_load_destinations'.tr(),
-                      style: TextStyle(fontSize: 16.sp, color: Colors.red),
-                    ),
-                  ],
-                ),
-              ),
-            ),
+                        child: ListTile(
+                          title: Text(
+                            destination,
+                            style: TextStyle(
+                              color: isSelected ? primaryColor : Colors.black,
+                              fontWeight: isSelected
+                                  ? FontWeight.bold
+                                  : FontWeight.normal,
+                              fontSize: isTablet ? 16.sp : 14.sp,
+                            ),
+                          ),
+                          trailing: isSelected
+                              ? Icon(Icons.check_circle,
+                                  color: primaryColor,
+                                  size: isTablet ? 24.sp : 20.sp)
+                              : Icon(Icons.radio_button_unchecked,
+                                  color: Colors.grey[400],
+                                  size: isTablet ? 24.sp : 20.sp),
+                          onTap: () {
+                            setState(() {
+                              _selectedDestination = destination;
+                            });
+                          },
+                        ),
+                      );
+                    },
+                  ),
           ),
 
           // Apply button

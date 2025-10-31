@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import '../../config/wp_config.dart';
-import '../../providers/favorites_provider.dart';
+import '../../services/favorites_provider.dart';
 import '../../models/hotel.dart';
 import '../hotels/hotel_details_page.dart';
 

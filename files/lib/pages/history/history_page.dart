@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../config/wp_config.dart';
-import '../../providers/waiting_list_provider.dart';
+import '../../services/waiting_list_provider.dart';
 
 class HistoryPage extends ConsumerWidget {
   const HistoryPage({Key? key}) : super(key: key);
@@ -26,9 +26,10 @@ class HistoryPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildCustomAppBar(BuildContext context, Color primaryColor, bool isTablet, WidgetRef ref) {
+  Widget _buildCustomAppBar(
+      BuildContext context, Color primaryColor, bool isTablet, WidgetRef ref) {
     final waitingList = ref.watch(waitingListProvider);
-    
+
     return Container(
       color: primaryColor,
       child: SafeArea(
@@ -106,11 +107,13 @@ class HistoryPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildHistoryList(List waitingList, Color primaryColor, bool isTablet, WidgetRef ref) {
+  Widget _buildHistoryList(
+      List waitingList, Color primaryColor, bool isTablet, WidgetRef ref) {
     // Filter for completed and cancelled items (history)
-    final historyItems = waitingList.where((item) => 
-      item.status == 'confirmed' || item.status == 'cancelled'
-    ).toList();
+    final historyItems = waitingList
+        .where(
+            (item) => item.status == 'confirmed' || item.status == 'cancelled')
+        .toList();
 
     if (historyItems.isEmpty) {
       return _buildEmptyState(primaryColor, isTablet);
@@ -126,7 +129,8 @@ class HistoryPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildHistoryItem(dynamic item, Color primaryColor, bool isTablet, WidgetRef ref) {
+  Widget _buildHistoryItem(
+      dynamic item, Color primaryColor, bool isTablet, WidgetRef ref) {
     return Container(
       margin: EdgeInsets.only(bottom: 16.h),
       decoration: BoxDecoration(
@@ -152,7 +156,8 @@ class HistoryPage extends ConsumerWidget {
                 topRight: Radius.circular(12.r),
               ),
               image: DecorationImage(
-                image: NetworkImage(item.hotel.imageUrl ?? 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400&h=300&fit=crop'),
+                image: NetworkImage(item.hotel.imageUrl ??
+                    'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400&h=300&fit=crop'),
                 fit: BoxFit.cover,
               ),
             ),
@@ -163,7 +168,8 @@ class HistoryPage extends ConsumerWidget {
                   top: 12.h,
                   right: 12.w,
                   child: Container(
-                    padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+                    padding:
+                        EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
                     decoration: BoxDecoration(
                       color: _getStatusColor(item.status),
                       borderRadius: BorderRadius.circular(20.r),
@@ -183,7 +189,8 @@ class HistoryPage extends ConsumerWidget {
                   top: 12.h,
                   left: 12.w,
                   child: Container(
-                    padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+                    padding:
+                        EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
                     decoration: BoxDecoration(
                       color: Colors.black.withOpacity(0.7),
                       borderRadius: BorderRadius.circular(20.r),
@@ -230,7 +237,8 @@ class HistoryPage extends ConsumerWidget {
                 // Dates and quantity
                 Row(
                   children: [
-                    Icon(Icons.calendar_today, size: 16.sp, color: Colors.grey[600]),
+                    Icon(Icons.calendar_today,
+                        size: 16.sp, color: Colors.grey[600]),
                     SizedBox(width: 8.w),
                     Text(
                       '${_formatDate(item.checkInDate)} - ${_formatDate(item.checkOutDate)}',
@@ -306,12 +314,12 @@ class HistoryPage extends ConsumerWidget {
   void _rebookItem(dynamic item, WidgetRef ref) {
     // Add item back to waiting list for rebooking
     ref.read(waitingListProvider.notifier).addToWaitingList(
-      hotel: item.hotel,
-      room: item.room,
-      checkInDate: item.checkInDate,
-      checkOutDate: item.checkOutDate,
-      quantity: item.quantity,
-    );
+          hotel: item.hotel,
+          room: item.room,
+          checkInDate: item.checkInDate,
+          checkOutDate: item.checkOutDate,
+          quantity: item.quantity,
+        );
   }
 
   void _showClearAllDialog(BuildContext context, WidgetRef ref) {
@@ -331,7 +339,8 @@ class HistoryPage extends ConsumerWidget {
               Navigator.pop(context);
             },
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: Text('clear_all'.tr(), style: TextStyle(color: Colors.white)),
+            child:
+                Text('clear_all'.tr(), style: TextStyle(color: Colors.white)),
           ),
         ],
       ),

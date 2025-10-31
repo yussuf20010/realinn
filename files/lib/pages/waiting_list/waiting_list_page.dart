@@ -4,9 +4,8 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../../config/wp_config.dart';
-import '../../providers/waiting_list_provider.dart';
-import '../../models/selected_room.dart';
-import '../../core/constants/assets.dart';
+import '../../services/waiting_list_provider.dart';
+import '../../config/constants/assets.dart';
 
 class WaitingListPage extends ConsumerWidget {
   const WaitingListPage({Key? key}) : super(key: key);
@@ -21,7 +20,8 @@ class WaitingListPage extends ConsumerWidget {
       backgroundColor: Colors.grey[50],
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(100.h),
-        child: _buildCustomAppBar(context, primaryColor, isTablet, waitingList, ref),
+        child: _buildCustomAppBar(
+            context, primaryColor, isTablet, waitingList, ref),
       ),
       body: waitingList.isEmpty
           ? _buildEmptyState(primaryColor, isTablet)
@@ -29,30 +29,31 @@ class WaitingListPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildCustomAppBar(BuildContext context, Color primaryColor, bool isTablet, List waitingList, WidgetRef ref) {
+  Widget _buildCustomAppBar(BuildContext context, Color primaryColor,
+      bool isTablet, List waitingList, WidgetRef ref) {
     return Container(
       color: primaryColor,
       child: SafeArea(
         child: Container(
           height: 80.h,
           padding: EdgeInsets.symmetric(horizontal: 16.w),
-            child: Row(
-              children: [
-                // Title - Centered
-                Expanded(
-                  child: Center(
-                    child: Text(
-                      'waiting_list'.tr(),
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: isTablet ? 24.sp : 20.sp,
-                        fontWeight: FontWeight.bold,
-                      ),
+          child: Row(
+            children: [
+              // Title - Centered
+              Expanded(
+                child: Center(
+                  child: Text(
+                    'waiting_list'.tr(),
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: isTablet ? 24.sp : 20.sp,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -95,11 +96,11 @@ class WaitingListPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildWaitingList(List waitingList, Color primaryColor, bool isTablet, WidgetRef ref) {
+  Widget _buildWaitingList(
+      List waitingList, Color primaryColor, bool isTablet, WidgetRef ref) {
     // Filter for pending items only (waiting list)
-    final pendingItems = waitingList.where((item) => 
-      item.status == 'pending'
-    ).toList();
+    final pendingItems =
+        waitingList.where((item) => item.status == 'pending').toList();
 
     if (pendingItems.isEmpty) {
       return _buildEmptyState(primaryColor, isTablet);
@@ -110,12 +111,14 @@ class WaitingListPage extends ConsumerWidget {
       itemCount: pendingItems.length,
       itemBuilder: (context, index) {
         final item = pendingItems[index];
-        return _buildWaitingListItem(item, primaryColor, isTablet, ref);
+        return _buildWaitingListItem(
+            context, item, primaryColor, isTablet, ref);
       },
     );
   }
 
-  Widget _buildWaitingListItem(dynamic item, Color primaryColor, bool isTablet, WidgetRef ref) {
+  Widget _buildWaitingListItem(BuildContext context, dynamic item,
+      Color primaryColor, bool isTablet, WidgetRef ref) {
     return Container(
       margin: EdgeInsets.only(bottom: 16.h),
       decoration: BoxDecoration(
@@ -134,7 +137,8 @@ class WaitingListPage extends ConsumerWidget {
                 topRight: Radius.circular(12.r),
               ),
               image: DecorationImage(
-                image: NetworkImage(item.hotel.imageUrl ?? 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400&h=300&fit=crop'),
+                image: NetworkImage(item.hotel.imageUrl ??
+                    'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400&h=300&fit=crop'),
                 fit: BoxFit.cover,
               ),
             ),
@@ -145,7 +149,8 @@ class WaitingListPage extends ConsumerWidget {
                   top: 12.h,
                   right: 12.w,
                   child: Container(
-                    padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+                    padding:
+                        EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
                     decoration: BoxDecoration(
                       color: _getStatusColor(item.status),
                       borderRadius: BorderRadius.circular(20.r),
@@ -212,7 +217,8 @@ class WaitingListPage extends ConsumerWidget {
                 // Dates and quantity
                 Row(
                   children: [
-                    Icon(Icons.calendar_today, size: 16.sp, color: Colors.grey[600]),
+                    Icon(Icons.calendar_today,
+                        size: 16.sp, color: Colors.grey[600]),
                     SizedBox(width: 8.w),
                     Text(
                       '${_formatDate(item.checkInDate)} - ${_formatDate(item.checkOutDate)}',
@@ -252,7 +258,8 @@ class WaitingListPage extends ConsumerWidget {
                   children: [
                     Expanded(
                       child: OutlinedButton(
-                        onPressed: () => _updateStatus(ref, item.id, 'confirmed'),
+                        onPressed: () =>
+                            _updateStatus(context, ref, item.id, 'confirmed'),
                         style: OutlinedButton.styleFrom(
                           side: BorderSide(color: Colors.green),
                           shape: RoundedRectangleBorder(
@@ -271,7 +278,8 @@ class WaitingListPage extends ConsumerWidget {
                     SizedBox(width: 12.w),
                     Expanded(
                       child: OutlinedButton(
-                        onPressed: () => _updateStatus(ref, item.id, 'cancelled'),
+                        onPressed: () =>
+                            _updateStatus(context, ref, item.id, 'cancelled'),
                         style: OutlinedButton.styleFrom(
                           side: BorderSide(color: Colors.red),
                           shape: RoundedRectangleBorder(
@@ -316,11 +324,14 @@ class WaitingListPage extends ConsumerWidget {
     ref.read(waitingListProvider.notifier).removeFromWaitingList(id);
   }
 
-  void _updateStatus(WidgetRef ref, String id, String status) {
+  void _updateStatus(
+      BuildContext context, WidgetRef ref, String id, String status) {
     ref.read(waitingListProvider.notifier).updateStatus(id, status);
+    if (status == 'confirmed') {
+      // Navigate to history after confirming
+      Navigator.pushNamed(context, '/history');
+    }
   }
-
-
 
   String _getStatusText(String status) {
     switch (status.toLowerCase()) {
@@ -334,5 +345,4 @@ class WaitingListPage extends ConsumerWidget {
         return status.toUpperCase();
     }
   }
-
 }

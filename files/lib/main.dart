@@ -5,13 +5,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'dart:ui' as ui;
-
+import 'config/localization/app_locales.dart';
+import 'config/routes/on_generate_route.dart';
+import 'config/themes/theme_constants.dart';
+import 'config/utils/app_utils.dart';
 import 'config/wp_config.dart';
 import 'config/dynamic_config.dart';
-import 'core/localization/app_locales.dart';
-import 'core/routes/on_generate_route.dart';
-import 'core/themes/theme_constants.dart';
-import 'core/utils/app_utils.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -62,14 +61,9 @@ class RealInnApp extends StatelessWidget {
                     final isTablet = width >= 768;
                     final textScale = isTablet ? 1.15 : 1.0;
 
+
                     // Handle RTL for Arabic
                     final isRTL = context.locale.languageCode == 'ar';
-                    print(
-                        'Main App Builder - Locale: ${context.locale.languageCode}, isRTL: $isRTL');
-                    print('Main App Builder - Full Locale: ${context.locale}');
-                    print(
-                        'Main App Builder - Supported Locales: ${context.supportedLocales}');
-
                     return MediaQuery(
                       data: mediaQuery.copyWith(
                         textScaler: TextScaler.linear(textScale),

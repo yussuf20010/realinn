@@ -1,55 +1,115 @@
 class User {
   final int id;
-  final String firstName;
-  final String lastName;
-  final String email;
-  final String phone;
-  final String role;
-  final String image;
-  final DateTime? emailVerifiedAt;
-  final String fcmToken;
+  final String? username;
+  final String? email;
+  final String? name;
+  final String? image;
+  final String? phone;
+  final String? country;
+  final String? city;
+  final String? state;
+  final String? zipCode;
+  final String? address;
+  final String? emailVerifiedAt;
+  final int? status;
+  final String? createdAt;
+  final String? updatedAt;
 
   User({
     required this.id,
-    required this.firstName,
-    required this.lastName,
-    required this.email,
-    required this.phone,
-    required this.role,
-    required this.image,
-    this.emailVerifiedAt, // ✅ No `required`, as it can be null
-    required this.fcmToken,
+    this.username,
+    this.email,
+    this.name,
+    this.image,
+    this.phone,
+    this.country,
+    this.city,
+    this.state,
+    this.zipCode,
+    this.address,
+    this.emailVerifiedAt,
+    this.status,
+    this.createdAt,
+    this.updatedAt,
   });
 
-  // ✅ Convert from JSON
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
-      id: json['id'] ?? 0,
-      firstName: json['first_name'] ?? '',
-      lastName: json['last_name'] ?? '',
-      email: json['email'] ?? '',
-      phone: json['phone'] ?? '',
-      role: json['role'] ?? '',
-      image: json['image'] ?? '',
-      emailVerifiedAt: json['email_verified_at'] != null
-          ? DateTime.tryParse(json['email_verified_at'])
-          : null, // ✅ Handle null safely
-      fcmToken: json['fcm_token'] ?? '',
+      id: json['id'] is int
+          ? json['id']
+          : (json['id'] is String ? int.tryParse(json['id']) ?? 0 : 0),
+      username: json['username']?.toString(),
+      email: json['email']?.toString(),
+      name: json['name']?.toString(),
+      image: json['image']?.toString(),
+      phone: json['phone']?.toString(),
+      country: json['country']?.toString(),
+      city: json['city']?.toString(),
+      state: json['state']?.toString(),
+      zipCode: json['zip_code']?.toString(),
+      address: json['address']?.toString(),
+      emailVerifiedAt: json['email_verified_at']?.toString(),
+      status: json['status'] is int
+          ? json['status']
+          : (json['status'] is String ? int.tryParse(json['status']) : null),
+      createdAt: json['created_at']?.toString(),
+      updatedAt: json['updated_at']?.toString(),
     );
   }
 
-  // ✅ Convert to JSON
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'first_name': firstName,
-      'last_name': lastName,
+      'username': username,
       'email': email,
-      'phone': phone,
-      'role': role,
+      'name': name,
       'image': image,
-      'email_verified_at': emailVerifiedAt?.toIso8601String(), // ✅ Convert safely
-      'fcm_token': fcmToken,
+      'phone': phone,
+      'country': country,
+      'city': city,
+      'state': state,
+      'zip_code': zipCode,
+      'address': address,
+      'email_verified_at': emailVerifiedAt,
+      'status': status,
+      'created_at': createdAt,
+      'updated_at': updatedAt,
     };
+  }
+}
+
+class AuthResponse {
+  final String message;
+  final User? user;
+  final String? redirect;
+  final int? userId;
+  final int? otpExpiresIn;
+
+  AuthResponse({
+    required this.message,
+    this.user,
+    this.redirect,
+    this.userId,
+    this.otpExpiresIn,
+  });
+
+  factory AuthResponse.fromJson(Map<String, dynamic> json) {
+    return AuthResponse(
+      message: json['message']?.toString() ?? '',
+      user: json['user'] != null
+          ? User.fromJson(json['user'] as Map<String, dynamic>)
+          : null,
+      redirect: json['redirect']?.toString(),
+      userId: json['user_id'] is int
+          ? json['user_id'] as int
+          : (json['user_id'] is String
+              ? int.tryParse(json['user_id'] as String)
+              : null),
+      otpExpiresIn: json['otp_expires_in'] is int
+          ? json['otp_expires_in'] as int
+          : (json['otp_expires_in'] is String
+              ? int.tryParse(json['otp_expires_in'] as String)
+              : null),
+    );
   }
 }

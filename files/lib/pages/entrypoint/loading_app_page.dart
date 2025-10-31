@@ -3,10 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../config/core_provider.dart';
 import '../../config/wp_config.dart';
 import '../main/main_scaffold.dart';
-import '../login/login_intro_page.dart';
+import '../auth/login.dart';
 import 'components/loading_dependency.dart';
 import 'package:easy_localization/easy_localization.dart';
-
 
 class LoadingAppPage extends ConsumerWidget {
   const LoadingAppPage({Key? key}) : super(key: key);
@@ -21,10 +20,10 @@ class LoadingAppPage extends ConsumerWidget {
               return MainScaffold();
             case AppState.loggedOut:
               return WPConfig.forceUserToLoginEverytime
-                  ? const LoginIntroPage()
-                  :  MainScaffold();
+                  ? const LoginPage()
+                  : MainScaffold();
             default:
-              return  MainScaffold();
+              return MainScaffold();
           }
         },
         error: (t) => Text('unknown_error'.tr()),

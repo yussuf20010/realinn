@@ -3,8 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:lottie/lottie.dart';
-import '../../../../core/constants/constants.dart';
-import '../../../controllers/internet/reconnecting_provider.dart';
+import '../../../config/constants/app_defaults.dart';
+import '../../../config/constants/sizedbox_const.dart';
+import '../../../services/internet/reconnecting_provider.dart';
 
 class InternetNotAvailablePage extends StatelessWidget {
   const InternetNotAvailablePage({Key? key}) : super(key: key);

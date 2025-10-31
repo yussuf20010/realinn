@@ -28,7 +28,7 @@ dependencies:
   validators: ^3.0.0
   shared_preferences: ^2.3.2
   intl: ^0.19.0
-  firebase_core: ^3.4.0
+  firebase_core: ^3.15.2
   firebase_messaging: ^15.1.0
   url_launcher: ^6.0.20
   flutter_displaymode: ^0.6.0

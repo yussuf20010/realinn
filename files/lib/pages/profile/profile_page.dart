@@ -3,6 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../config/wp_config.dart';
+import '../../services/auth_service.dart';
+import '../../models/user.dart';
+import '../../config/routes/app_routes.dart';
 
 class ProfilePage extends ConsumerStatefulWidget {
   const ProfilePage({Key? key}) : super(key: key);
@@ -12,9 +15,36 @@ class ProfilePage extends ConsumerStatefulWidget {
 }
 
 class _ProfilePageState extends ConsumerState<ProfilePage> {
+  User? _user;
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+  }
+
+  Future<void> _loadUserData() async {
+    try {
+      final user = await AuthService.getCurrentUser();
+      if (mounted) {
+        setState(() {
+          _user = user;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final primaryColor = WPConfig.navbarColor;
+    final primaryColor = WPConfig.primaryColor;
     final isTablet = MediaQuery.of(context).size.width >= 768;
 
     return Scaffold(
@@ -85,11 +115,25 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                           ),
                         ],
                       ),
-                      child: Icon(
-                        Icons.person,
-                        color: primaryColor,
-                        size: isTablet ? 20 : 18,
-                      ),
+                      child: _user?.image != null
+                          ? ClipOval(
+                              child: Image.network(
+                                _user!.image!.startsWith('http')
+                                    ? _user!.image!
+                                    : '${WPConfig.imageBaseUrl}${_user!.image}',
+                                fit: BoxFit.cover,
+                                errorBuilder: (_, __, ___) => Icon(
+                                  Icons.person,
+                                  color: primaryColor,
+                                  size: isTablet ? 20 : 18,
+                                ),
+                              ),
+                            )
+                          : Icon(
+                              Icons.person,
+                              color: primaryColor,
+                              size: isTablet ? 20 : 18,
+                            ),
                     ),
                     SizedBox(width: 8),
                     // Profile name
@@ -98,7 +142,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Mahmoud Ahmed',
+                          _user?.name ?? _user?.username ?? 'User',
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: isTablet ? 18 : 16,
@@ -106,7 +150,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                           ),
                         ),
                         Text(
-                          'mahmoud.ahmed@email.com',
+                          _user?.email ?? 'No email',
                           style: TextStyle(
                             color: Colors.white.withOpacity(0.8),
                             fontSize: isTablet ? 14 : 12,
@@ -125,56 +169,34 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   }
 
   Widget _buildMainContent(bool isTablet, Color primaryColor) {
+    if (_isLoading) {
+      return Center(child: CircularProgressIndicator());
+    }
+
+    if (_user == null) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text('Please log in to view your profile'),
+            SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pushNamed(context, AppRoutes.login);
+              },
+              child: Text('Login'),
+            ),
+          ],
+        ),
+      );
+    }
+
     return SingleChildScrollView(
-      padding: EdgeInsets.fromLTRB(
-          isTablet ? 20.w : 16.w, 20.h, isTablet ? 20.w : 16.w, isTablet ? 40.h : 30.h),
+      padding: EdgeInsets.fromLTRB(isTablet ? 20.w : 16.w, 20.h,
+          isTablet ? 20.w : 16.w, isTablet ? 40.h : 30.h),
       child: Column(
         children: [
-          // Menu items
-          _buildMenuSection(
-            title: 'account'.tr(),
-            items: [
-              _buildMenuItem(
-                icon: Icons.person_outline,
-                title: 'personal_information'.tr(),
-                subtitle: 'update_profile_details'.tr(),
-                onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('personal_information'.tr())),
-                  );
-                },
-                isTablet: isTablet,
-                primaryColor: primaryColor,
-              ),
-              _buildMenuItem(
-                icon: Icons.lock_outline,
-                title: 'security'.tr(),
-                subtitle: 'password_privacy_settings'.tr(),
-                onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('security_settings'.tr())),
-                  );
-                },
-                isTablet: isTablet,
-                primaryColor: primaryColor,
-              ),
-              _buildMenuItem(
-                icon: Icons.notifications_outlined,
-                title: 'notifications'.tr(),
-                subtitle: 'notification_preferences'.tr(),
-                onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('notification_preferences'.tr())),
-                  );
-                },
-                isTablet: isTablet,
-                primaryColor: primaryColor,
-              ),
-            ],
-            isTablet: isTablet,
-            primaryColor: primaryColor,
-          ),
-          SizedBox(height: 24.h),
+          // Account section removed
 
           _buildMenuSection(
             title: 'travel'.tr(),
@@ -229,18 +251,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             title: 'support'.tr(),
             items: [
               _buildMenuItem(
-                icon: Icons.help_outline,
-                title: 'help_center'.tr(),
-                subtitle: 'find_answers_common_questions'.tr(),
-                onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('help_center'.tr())),
-                  );
-                },
-                isTablet: isTablet,
-                primaryColor: primaryColor,
-              ),
-              _buildMenuItem(
                 icon: Icons.support_agent,
                 title: 'contact_support'.tr(),
                 subtitle: 'get_help_from_team'.tr(),
@@ -255,6 +265,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             primaryColor: primaryColor,
           ),
           SizedBox(height: 24.h),
+
+          // User info section removed
 
           // Logout button
           SizedBox(
@@ -386,6 +398,41 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     );
   }
 
+  Widget _buildInfoItem({
+    required String label,
+    required String value,
+    required bool isTablet,
+  }) {
+    return Container(
+      padding: EdgeInsets.all(isTablet ? 20 : 16),
+      decoration: BoxDecoration(
+        border: Border(
+          bottom: BorderSide(color: Colors.grey[200]!, width: 1),
+        ),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: isTablet ? 16 : 14,
+              color: Colors.grey[600],
+            ),
+          ),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: isTablet ? 16 : 14,
+              fontWeight: FontWeight.bold,
+              color: Colors.black87,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _showLogoutDialog(BuildContext context) {
     showDialog(
       context: context,
@@ -417,14 +464,17 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               ),
             ),
             ElevatedButton(
-              onPressed: () {
+              onPressed: () async {
                 Navigator.of(context).pop();
                 // Handle logout
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('logged_out_successfully'.tr())),
-                );
-                Navigator.pushNamedAndRemoveUntil(
-                    context, '/', (route) => false);
+                await AuthService.logout();
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('logged_out_successfully'.tr())),
+                  );
+                  Navigator.pushNamedAndRemoveUntil(
+                      context, AppRoutes.login, (route) => false);
+                }
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.red[600],

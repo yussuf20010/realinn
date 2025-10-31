@@ -4,7 +4,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../config/wp_config.dart';
 import '../config/dynamic_config.dart';
-import '../core/constants/assets.dart';
+import '../config/constants/assets.dart';
 import '../pages/profile/profile_page.dart';
 import '../pages/customer_service/customer_service_page.dart';
 

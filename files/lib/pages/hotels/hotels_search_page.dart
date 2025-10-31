@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:realinn/config/wp_config.dart';
-import 'package:realinn/controllers/hotel_controller.dart';
+import 'package:realinn/services/hotel_service.dart';
 import 'package:realinn/models/hotel.dart';
 import 'package:realinn/pages/home/components/hotel_card.dart';
 
@@ -41,7 +41,8 @@ class _HotelsSearchPageState extends ConsumerState<HotelsSearchPage> {
   @override
   void initState() {
     super.initState();
-    print('HotelsSearchPage initState - initialHotels: ${widget.initialHotels?.length ?? 0}');
+    print(
+        'HotelsSearchPage initState - initialHotels: ${widget.initialHotels?.length ?? 0}');
     print('Search query: ${widget.searchQuery}');
     if (widget.initialHotels != null && widget.initialHotels!.isNotEmpty) {
       _hotels = widget.initialHotels!;
@@ -61,31 +62,11 @@ class _HotelsSearchPageState extends ConsumerState<HotelsSearchPage> {
     });
 
     try {
-      final hotelsAsync = ref.read(hotelProvider);
-
-      await hotelsAsync.when(
-        data: (hotels) {
-          setState(() {
-            _hotels = hotels;
-            _isLoading = false;
-          });
-        },
-        loading: () {
-          setState(() {
-            _isLoading = true;
-          });
-        },
-        error: (error, stack) {
-          setState(() {
-            _isLoading = false;
-          });
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Error loading hotels: $error')),
-            );
-          }
-        },
-      );
+      final hotels = await HotelService.fetchHotels();
+      setState(() {
+        _hotels = hotels;
+        _isLoading = false;
+      });
     } catch (e) {
       setState(() {
         _isLoading = false;
@@ -808,8 +789,6 @@ class _HotelsSearchPageState extends ConsumerState<HotelsSearchPage> {
     });
   }
 
-
-
   Widget _buildResultsSummary(bool isTablet) {
     return Container(
       padding: EdgeInsets.all(16),
@@ -995,14 +974,6 @@ class _HotelsSearchPageState extends ConsumerState<HotelsSearchPage> {
       },
     );
   }
-
-
-
-
-
-
-
-
 
   Widget _buildAmenityOption(String amenity, IconData icon, String description,
       bool isTablet, Color primaryColor) {

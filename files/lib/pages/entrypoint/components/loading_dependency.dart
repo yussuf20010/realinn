@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
-import '../../../core/constants/constants.dart';
+import '../../../config/constants/app_colors.dart';
+import '../../../config/constants/assets.dart';
 
 class LoadingDependencies extends StatelessWidget {
   const LoadingDependencies({

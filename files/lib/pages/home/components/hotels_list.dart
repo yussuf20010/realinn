@@ -1,21 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:easy_localization/easy_localization.dart';
-import '../../../../config/dynamic_config.dart';
-import '../../../../controllers/hotel_controller.dart';
-import '../../../../controllers/location_controller.dart';
+import '../../../../services/hotel_service.dart';
 import '../../../models/hotel.dart';
-import '../../../models/location.dart' as location_model;
-
 import 'hotel_card.dart';
 
-class HotelsList extends ConsumerWidget {
+class HotelsList extends StatelessWidget {
   const HotelsList({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final dynamicConfig = ref.watch(dynamicConfigProvider);
-    final primaryColor = dynamicConfig.primaryColor;
+  Widget build(BuildContext context) {
     final isTablet = MediaQuery.of(context).size.width >= 768;
 
     return Padding(
@@ -35,39 +27,39 @@ class HotelsList extends ConsumerWidget {
               ),
             ),
           ),
-          
+
           SizedBox(height: isTablet ? 24 : 16),
-          
+
           // Hotels list with different layouts for mobile and tablet
-          Consumer(
-            builder: (context, ref, child) {
-              final hotelsResponse = ref.watch(hotelProvider);
-              final locationResponse = ref.watch(locationProvider);
-              
-              return locationResponse.when(
-                data: (locationData) {
-                  return hotelsResponse.when(
-          data: (hotels) {
-                      if (hotels.isEmpty) {
-                        return _buildEmptyState(isTablet);
-                      }
-                      
-                      // Show all hotels on home page
-                      final displayHotels = hotels;
-                      
-                      if (isTablet) {
-                        return _buildTabletLayout(displayHotels, locationData, primaryColor);
-                      } else {
-                        return _buildMobileLayout(displayHotels, locationData, primaryColor);
-                      }
-                    },
-                    loading: () => _buildLoadingState(isTablet),
-                    error: (e, _) => _buildErrorState(isTablet, e.toString()),
-                  );
-                },
-                loading: () => _buildLoadingState(isTablet),
-                error: (e, _) => _buildErrorState(isTablet, e.toString()),
-              );
+          FutureBuilder(
+            future: Future.wait([
+              HotelService.fetchHotels(),
+              HotelService.fetchMeta(),
+            ]),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return _buildLoadingState(isTablet);
+              }
+              if (snapshot.hasError) {
+                return _buildErrorState(isTablet, snapshot.error.toString());
+              }
+              final results = snapshot.data as List<dynamic>?;
+              if (results == null || results.length < 2) {
+                return _buildEmptyState(isTablet);
+              }
+              final hotels = results[0] as List<Hotel>;
+              final locationData = results[1] as LocationResponseModel;
+              if (hotels.isEmpty) {
+                return _buildEmptyState(isTablet);
+              }
+              final displayHotels = hotels;
+              if (isTablet) {
+                return _buildTabletLayout(
+                    displayHotels, locationData, Colors.purple);
+              } else {
+                return _buildMobileLayout(
+                    displayHotels, locationData, Colors.purple);
+              }
             },
           ),
         ],
@@ -75,31 +67,15 @@ class HotelsList extends ConsumerWidget {
     );
   }
 
-  Widget _buildMobileLayout(List<Hotel> hotels, dynamic locationData, Color primaryColor) {
+  Widget _buildMobileLayout(List<Hotel> hotels,
+      LocationResponseModel locationData, Color primaryColor) {
     return Column(
       children: hotels.map((hotel) {
         // Find location data for this hotel
-        location_model.City? hotelCity;
-        location_model.Country? hotelCountry;
-        
-        if (hotel.cityId != null) {
-          hotelCity = locationData.cities?.firstWhere(
-            (c) => c.id == hotel.cityId,
-            orElse: () => location_model.City(),
-          );
-        }
-
-                if (hotel.countryId != null) {
-          hotelCountry = locationData.countries?.firstWhere(
-                    (c) => c.id == hotel.countryId,
-                    orElse: () => location_model.Country(),
-                  );
-        }
-        
         return HotelCard(
           hotel: hotel,
-          city: hotelCity,
-          country: hotelCountry,
+          city: null,
+          country: null,
           onFavoriteTap: () {
             // Handle favorite toggle
           },
@@ -109,7 +85,8 @@ class HotelsList extends ConsumerWidget {
     );
   }
 
-  Widget _buildTabletLayout(List<Hotel> hotels, dynamic locationData, Color primaryColor) {
+  Widget _buildTabletLayout(List<Hotel> hotels,
+      LocationResponseModel locationData, Color primaryColor) {
     // For tablet, show hotels in a grid layout
     return GridView.builder(
       shrinkWrap: true,
@@ -123,31 +100,12 @@ class HotelsList extends ConsumerWidget {
       itemCount: hotels.length,
       itemBuilder: (context, index) {
         final hotel = hotels[index];
-        location_model.City? hotelCity;
-        location_model.Country? hotelCountry;
-
-                if (hotel.cityId != null) {
-          hotelCity = locationData.cities?.firstWhere(
-                    (c) => c.id == hotel.cityId,
-                    orElse: () => location_model.City(),
-                  );
-        }
-        
-        if (hotel.countryId != null) {
-          hotelCountry = locationData.countries?.firstWhere(
-            (c) => c.id == hotel.countryId,
-            orElse: () => location_model.Country(),
-          );
-        }
-        
         return HotelCard(
           hotel: hotel,
-          city: hotelCity,
-          country: hotelCountry,
-          onFavoriteTap: () {
-            // Handle favorite toggle
-          },
-          isFavorite: false, // This should come from your favorites provider
+          city: null,
+          country: null,
+          onFavoriteTap: () {},
+          isFavorite: false,
         );
       },
     );
@@ -156,15 +114,15 @@ class HotelsList extends ConsumerWidget {
   Widget _buildEmptyState(bool isTablet) {
     return Container(
       padding: EdgeInsets.all(isTablet ? 48 : 32),
-                   child: Column(
-                     children: [
+      child: Column(
+        children: [
           Icon(
             Icons.hotel_outlined,
             size: isTablet ? 80 : 48,
             color: Colors.grey[400],
           ),
           SizedBox(height: isTablet ? 24 : 16),
-                        Text(
+          Text(
             'No hotels available',
             style: TextStyle(
               fontSize: isTablet ? 22 : 18,
@@ -173,18 +131,18 @@ class HotelsList extends ConsumerWidget {
             ),
           ),
           SizedBox(height: isTablet ? 12 : 8),
-                        Text(
+          Text(
             'Check back later for new listings',
             style: TextStyle(
               fontSize: isTablet ? 16 : 14,
               color: Colors.grey[500],
             ),
             textAlign: TextAlign.center,
-                       ),
-                     ],
-                   ),
-                 );
-               }
+          ),
+        ],
+      ),
+    );
+  }
 
   Widget _buildLoadingState(bool isTablet) {
     if (isTablet) {
@@ -224,8 +182,8 @@ class HotelsList extends ConsumerWidget {
           ),
         ],
       ),
-                   child: Row(
-                     children: [
+      child: Row(
+        children: [
           // Image placeholder
           Container(
             width: 60,
@@ -270,10 +228,10 @@ class HotelsList extends ConsumerWidget {
               ],
             ),
           ),
-                     ],
-                   ),
-                 );
-               }
+        ],
+      ),
+    );
+  }
 
   Widget _buildTabletLoadingCard() {
     return Container(
@@ -335,15 +293,15 @@ class HotelsList extends ConsumerWidget {
             ),
           ),
         ],
-                 ),
-               );
-             }
+      ),
+    );
+  }
 
   Widget _buildErrorState(bool isTablet, String error) {
     return Container(
       padding: EdgeInsets.all(isTablet ? 48 : 32),
       child: Column(
-                  children: [
+        children: [
           Icon(
             Icons.error_outline,
             size: isTablet ? 80 : 48,
@@ -352,7 +310,7 @@ class HotelsList extends ConsumerWidget {
           SizedBox(height: isTablet ? 24 : 16),
           Text(
             'Error loading hotels',
-                        style: TextStyle(
+            style: TextStyle(
               fontSize: isTablet ? 22 : 18,
               color: Colors.red[600],
               fontWeight: FontWeight.w500,
@@ -366,10 +324,9 @@ class HotelsList extends ConsumerWidget {
               color: Colors.grey[500],
             ),
             textAlign: TextAlign.center,
-                                       ),
-                                   ],
-                                 ),
+          ),
+        ],
+      ),
     );
   }
 }
-
