@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_iconly/flutter_iconly.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -9,13 +10,11 @@ import '../../config/routes/app_routes.dart';
 import '../../services/auth_service.dart';
 
 class ResetPasswordPage extends StatefulWidget {
-  final String email;
-  final String verificationCode;
+  final String? resetToken;
 
   const ResetPasswordPage({
     Key? key,
-    required this.email,
-    required this.verificationCode,
+    this.resetToken,
   }) : super(key: key);
 
   @override
@@ -36,7 +35,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
   @override
   void initState() {
     super.initState();
-    _codeController = TextEditingController(text: widget.verificationCode);
+    _codeController = TextEditingController();
     _newPasswordController = TextEditingController();
     _confirmPasswordController = TextEditingController();
 
@@ -65,7 +64,9 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
   }
 
   bool _areAllFieldsValid() {
-    return _codeController.text.isNotEmpty &&
+    final hasToken = (widget.resetToken != null && widget.resetToken!.isNotEmpty) ||
+        _codeController.text.isNotEmpty;
+    return hasToken &&
         _newPasswordController.text.isNotEmpty &&
         _confirmPasswordController.text.isNotEmpty &&
         _newPasswordController.text.length >= 8 &&
@@ -85,15 +86,14 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
 
     try {
       await AuthService.resetPassword(
-        email: widget.email,
-        verificationCode: _codeController.text.trim(),
+        resetToken: widget.resetToken ?? _codeController.text.trim(),
         newPassword: _newPasswordController.text,
         newPasswordConfirmation: _confirmPasswordController.text,
       );
 
       if (mounted) {
         setState(() {
-          _successMessage = 'Password reset successfully';
+          _successMessage = 'auth.password_reset_success'.tr();
         });
 
         // Navigate to login after success
@@ -175,7 +175,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
-                            'Reset Password',
+                            'auth.reset_password'.tr(),
                             style: TextStyle(
                               fontSize: 28.sp,
                               fontWeight: FontWeight.bold,
@@ -239,23 +239,25 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                             ),
                             SizedBox(height: 16.h),
                           ],
-                          TextFormField(
-                            controller: _codeController,
-                            decoration: AppStyles.inputDecoration(
-                              label: 'Verification Code',
-                              icon: IconlyLight.lock,
+                          if (widget.resetToken == null || widget.resetToken!.isEmpty)
+                            TextFormField(
+                              controller: _codeController,
+                              decoration: AppStyles.inputDecoration(
+                                label: 'auth.reset_token'.tr(),
+                                icon: IconlyLight.lock,
+                              ),
+                              validator: (v) => (widget.resetToken == null || widget.resetToken!.isEmpty) && (v == null || v.isEmpty)
+                                  ? 'auth.reset_token_required'.tr()
+                                  : null,
+                              textInputAction: TextInputAction.next,
                             ),
-                            validator: (v) => v == null || v.isEmpty
-                                ? 'Verification code is required'
-                                : null,
-                            textInputAction: TextInputAction.next,
-                          ),
-                          SizedBox(height: 12.h),
+                          if (widget.resetToken == null || widget.resetToken!.isEmpty)
+                            SizedBox(height: 12.h),
                           TextFormField(
                             controller: _newPasswordController,
                             obscureText: !_showNewPassword,
                             decoration: AppStyles.inputDecoration(
-                              label: 'New Password',
+                              label: 'auth.new_password'.tr(),
                               icon: IconlyLight.password,
                               suffixIcon: IconButton(
                                 icon: Icon(
@@ -269,10 +271,10 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                             ),
                             validator: (v) {
                               if (v == null || v.isEmpty) {
-                                return 'New password is required';
+                                return 'auth.new_password_required'.tr();
                               }
                               if (v.length < 8) {
-                                return 'Password must be at least 8 characters';
+                                return 'auth.password_min_length'.tr();
                               }
                               return null;
                             },
@@ -283,7 +285,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                             controller: _confirmPasswordController,
                             obscureText: !_showConfirmPassword,
                             decoration: AppStyles.inputDecoration(
-                              label: 'Confirm New Password',
+                              label: 'auth.confirm_new_password'.tr(),
                               icon: IconlyLight.password,
                               suffixIcon: IconButton(
                                 icon: Icon(
@@ -297,10 +299,10 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                             ),
                             validator: (v) {
                               if (v == null || v.isEmpty) {
-                                return 'Please confirm your password';
+                                return 'auth.please_confirm_password'.tr();
                               }
                               if (v != _newPasswordController.text) {
-                                return 'Passwords do not match';
+                                return 'auth.passwords_do_not_match'.tr();
                               }
                               return null;
                             },
@@ -324,7 +326,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                                   ),
                                   SizedBox(width: 6.w),
                                   Text(
-                                    'Passwords do not match',
+                                    'auth.passwords_do_not_match'.tr(),
                                     style: TextStyle(
                                       color: Colors.red,
                                       fontSize: 12.sp,
@@ -375,7 +377,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                                               color: Colors.white,
                                             )
                                           : Text(
-                                              'Reset Password',
+                                              'auth.reset_password'.tr(),
                                               style: TextStyle(
                                                 color: Colors.white,
                                                 fontWeight: FontWeight.bold,
@@ -398,7 +400,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                                 );
                               },
                               child: Text(
-                                "Back to Sign In",
+                                'auth.back_to_sign_in'.tr(),
                                 style: TextStyle(
                                   color: AppStyles.mainBlue,
                                   fontWeight: FontWeight.bold,

@@ -446,7 +446,7 @@ class _FavouritesPageState extends ConsumerState<FavouritesPage> {
               // Remove from favorites button
               IconButton(
                 onPressed: () {
-                  ref.read(favoritesProvider.notifier).removeHotel(hotel);
+                  ref.read(favoritesProvider.notifier).removeHotel(hotel, context);
                 },
                 icon: Icon(
                   Icons.favorite,

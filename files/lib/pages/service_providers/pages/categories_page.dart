@@ -4,7 +4,6 @@ import '../../../models/service_provider_category.dart';
 import '../../../services/service_provider_service.dart';
 import '../../../config/wp_config.dart';
 import 'providers_list_page.dart';
-import '../utils/category_icons.dart';
 
 class CategoriesPage extends StatefulWidget {
   const CategoriesPage({Key? key}) : super(key: key);
@@ -34,8 +33,8 @@ class _CategoriesPageState extends State<CategoriesPage> {
 
     try {
       final categories = await ServiceProviderService.fetchCategories();
-      categories.sort((a, b) =>
-          a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+      categories
+          .sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
       setState(() {
         _categories = categories;
         _isLoading = false;
@@ -127,16 +126,18 @@ class _CategoriesPageState extends State<CategoriesPage> {
                           GridView.builder(
                             shrinkWrap: true,
                             physics: NeverScrollableScrollPhysics(),
-                            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: isTablet ? 4 : 2,
-                              crossAxisSpacing: 16.w,
-                              mainAxisSpacing: 16.h,
-                              childAspectRatio: 0.85,
+                            gridDelegate:
+                                SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 3,
+                              crossAxisSpacing: isTablet ? 24.w : 16.w,
+                              mainAxisSpacing: isTablet ? 28.h : 20.h,
+                              childAspectRatio: 0.70,
                             ),
                             itemCount: _filteredCategories().length,
                             itemBuilder: (context, index) {
                               final category = _filteredCategories()[index];
-                              return _buildCategoryCard(category, isTablet);
+                              return _buildCategoryAvatar(
+                                  category, index, isTablet);
                             },
                           ),
                         ],
@@ -149,14 +150,12 @@ class _CategoriesPageState extends State<CategoriesPage> {
     var list = _categories;
     if (_search.trim().isNotEmpty) {
       final q = _search.toLowerCase();
-      list = list
-          .where((c) => c.name.toLowerCase().contains(q))
-          .toList();
+      list = list.where((c) => c.name.toLowerCase().contains(q)).toList();
     }
     if (_selectedNames.isNotEmpty) {
-      list = list
-          .where((c) => _selectedNames.contains(c.name))
-          .toList();
+      // Create a copy of the Set to avoid concurrent modification issues
+      final selectedNamesCopy = Set<String>.from(_selectedNames);
+      list = list.where((c) => selectedNamesCopy.contains(c.name)).toList();
     }
     return list;
   }
@@ -213,28 +212,36 @@ class _CategoriesPageState extends State<CategoriesPage> {
               selectedColor: Colors.green.shade50,
               checkmarkColor: Colors.green,
             ),
-            ...topNames.map((n) => FilterChip(
-                  label: Text(n),
-                  selected: _selectedNames.contains(n),
-                  onSelected: (v) => setState(() {
+            ...topNames.map((n) {
+              // Capture the name in a local variable to avoid closure issues
+              final name = n;
+              return FilterChip(
+                label: Text(name),
+                selected: _selectedNames.contains(name),
+                onSelected: (v) {
+                  setState(() {
                     if (v) {
-                      _selectedNames.add(n);
+                      _selectedNames.add(name);
                     } else {
-                      _selectedNames.remove(n);
+                      _selectedNames.remove(name);
                     }
-                  }),
-                )),
+                  });
+                },
+              );
+            }),
           ],
         ),
       ],
     );
   }
 
-  Widget _buildCategoryCard(ServiceProviderCategory category, bool isTablet) {
-    final icon = CategoryIcons.getIcon(category.name);
-    final color = CategoryIcons.getColor(category.name);
+  Widget _buildCategoryAvatar(
+      ServiceProviderCategory category, int index, bool isTablet) {
+    // Calculate percentage based on index (for demo, you can use actual data)
+    final percentage = ((index + 1) * 15) % 100;
+    final avatarColor = _getAvatarColor(index);
 
-    return InkWell(
+    return GestureDetector(
       onTap: () {
         Navigator.push(
           context,
@@ -246,66 +253,68 @@ class _CategoriesPageState extends State<CategoriesPage> {
           ),
         );
       },
-      borderRadius: BorderRadius.circular(16.r),
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16.r),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.08),
-              blurRadius: 12,
-              offset: Offset(0, 4),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          // Static colored avatar circle - no box
+          Container(
+            width: isTablet ? 100.w : 80.w,
+            height: isTablet ? 100.w : 80.w,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: avatarColor,
             ),
-          ],
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              padding: EdgeInsets.all(isTablet ? 24.w : 20.w),
-              decoration: BoxDecoration(
-                color: color.withOpacity(0.1),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                icon,
-                size: isTablet ? 48.sp : 40.sp,
-                color: color,
-              ),
+            child: Icon(
+              Icons.person,
+              size: isTablet ? 50 : 40,
+              color: Colors.white,
             ),
-            SizedBox(height: 16.h),
-            Text(
+          ),
+          SizedBox(height: 6.h),
+          // Category name
+          Flexible(
+            child: Text(
               category.name,
               style: TextStyle(
-                fontSize: isTablet ? 16.sp : 14.sp,
-                fontWeight: FontWeight.bold,
+                fontSize: isTablet ? 11.sp : 10.sp,
+                fontWeight: FontWeight.w500,
                 color: Colors.black87,
               ),
               textAlign: TextAlign.center,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),
-            if (category.description != null &&
-                category.description!.isNotEmpty) ...[
-              SizedBox(height: 8.h),
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 8.w),
-                child: Text(
-                  category.description!,
-                  style: TextStyle(
-                    fontSize: isTablet ? 12.sp : 10.sp,
-                    color: Colors.grey[600],
-                  ),
-                  textAlign: TextAlign.center,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ],
-          ],
-        ),
+          ),
+          SizedBox(height: 2.h),
+          // Percentage
+          Text(
+            '$percentage%',
+            style: TextStyle(
+              fontSize: isTablet ? 10.sp : 9.sp,
+              fontWeight: FontWeight.w600,
+              color: Colors.grey[700],
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
       ),
     );
+  }
+
+  Color _getAvatarColor(int index) {
+    final colors = [
+      Color(0xFFFFD700), // Yellow
+      Color(0xFF20B2AA), // Teal
+      Color(0xFF9370DB), // Purple
+      Color(0xFF32CD32), // Green
+      Color(0xFFFF6347), // Orange
+      Color(0xFF4169E1), // Blue
+      Color(0xFFFF69B4), // Pink
+      Color(0xFF00CED1), // Dark Turquoise
+      Color(0xFFFFA500), // Orange
+      Color(0xFF8B008B), // Dark Magenta
+    ];
+    return colors[index % colors.length];
   }
 }

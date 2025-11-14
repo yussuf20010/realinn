@@ -7,6 +7,9 @@ class TokenStorageService {
   static const String _keyCookies = 'auth_cookies';
   static const String _keyUser = 'auth_user';
   static const String _keyIsLoggedIn = 'is_logged_in';
+  static const String _keyUserType = 'user_type';
+  static const String _keySelectedUserType =
+      'selected_user_type'; // Temporary selection before login
 
   // Save authentication token
   static Future<void> saveToken(String token) async {
@@ -60,12 +63,48 @@ class TokenStorageService {
     return prefs.getBool(_keyIsLoggedIn) ?? false;
   }
 
+  // Save user type
+  static Future<void> saveUserType(String userType) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_keyUserType, userType);
+  }
+
+  // Get user type
+  static Future<String?> getUserType() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_keyUserType);
+  }
+
+  // Save selected user type (temporary, before login/signup)
+  static Future<void> saveSelectedUserType(String userType) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_keySelectedUserType, userType);
+  }
+
+  // Get selected user type (temporary, before login/signup)
+  static Future<String?> getSelectedUserType() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_keySelectedUserType);
+  }
+
+  // Clear selected user type (called after successful login/signup)
+  static Future<void> clearSelectedUserType() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_keySelectedUserType);
+  }
+
   // Clear all auth data (logout)
   static Future<void> clearAuth() async {
     final prefs = await SharedPreferences.getInstance();
+    // Remove all auth-related keys only
     await prefs.remove(_keyToken);
     await prefs.remove(_keyCookies);
     await prefs.remove(_keyUser);
+    await prefs.remove(_keyUserType);
+    await prefs.remove(_keySelectedUserType);
+    // Explicitly set is_logged_in to false
     await prefs.setBool(_keyIsLoggedIn, false);
+    // Ensure all changes are committed
+    await prefs.reload();
   }
 }

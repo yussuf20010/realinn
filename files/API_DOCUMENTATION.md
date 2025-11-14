@@ -1,4 +1,4 @@
-## RealInn API Documentation
+## RealN API Documentation
 
 ### Base URL
 - All routes in `routes/api.php` are prefixed with `/api`.

@@ -4,8 +4,294 @@ import '../config/wp_config.dart';
 import '../models/user.dart' show AuthResponse, User;
 import 'token_storage_service.dart';
 
+enum UserType { user, hotel, serviceProvider }
+
 class AuthService {
-  // Sign up (Register)
+  // Register as Regular User
+  static Future<Map<String, dynamic>> registerUser({
+    required String username,
+    required String email,
+    required String password,
+    required String passwordConfirmation,
+    String? name,
+  }) async {
+    try {
+      final body = <String, dynamic>{
+        'username': username,
+        'email': email,
+        'password': password,
+        'password_confirmation': passwordConfirmation,
+      };
+      if (name != null && name.isNotEmpty) {
+        body['name'] = name;
+      }
+
+      print('🔵 REGISTER USER REQUEST:');
+      print('URL: ${WPConfig.registerUserApiUrl}');
+      print('Headers: ${WPConfig.defaultHeaders}');
+      print('Request Body: ${json.encode(body)}');
+
+      final response = await http.post(
+        Uri.parse(WPConfig.registerUserApiUrl),
+        headers: WPConfig.defaultHeaders,
+        body: json.encode(body),
+      );
+
+      final Map<String, dynamic> data = json.decode(response.body);
+      print('🔵 REGISTER USER RESPONSE:');
+      print('Status Code: ${response.statusCode}');
+      print('Body: ${response.body}');
+
+      if (response.statusCode == 201) {
+        return data;
+      } else {
+        final errorMsg = data['error']?.toString() ??
+            data['message']?.toString() ??
+            data['errors']?.toString() ??
+            'Registration failed';
+        throw Exception(errorMsg);
+      }
+    } catch (e) {
+      throw Exception('Register user error: ${e.toString()}');
+    }
+  }
+
+  // Register as Hotel
+  static Future<Map<String, dynamic>> registerHotel({
+    required String username,
+    required String email,
+    required String password,
+    required String passwordConfirmation,
+    String? phone,
+    required String hotelName,
+    String? country,
+    String? city,
+    String? state,
+    String? address,
+    String? zipCode,
+  }) async {
+    try {
+      final body = <String, dynamic>{
+        'username': username,
+        'email': email,
+        'password': password,
+        'password_confirmation': passwordConfirmation,
+        'hotel_name': hotelName,
+      };
+      if (phone != null && phone.isNotEmpty) body['phone'] = phone;
+      if (country != null && country.isNotEmpty) body['country'] = country;
+      if (city != null && city.isNotEmpty) body['city'] = city;
+      if (state != null && state.isNotEmpty) body['state'] = state;
+      if (address != null && address.isNotEmpty) body['address'] = address;
+      if (zipCode != null && zipCode.isNotEmpty) body['zip_code'] = zipCode;
+
+      print('🔵 REGISTER HOTEL REQUEST:');
+      print('URL: ${WPConfig.registerHotelApiUrl}');
+      print('Headers: ${WPConfig.defaultHeaders}');
+      print('Request Body: ${json.encode(body)}');
+
+      final response = await http.post(
+        Uri.parse(WPConfig.registerHotelApiUrl),
+        headers: WPConfig.defaultHeaders,
+        body: json.encode(body),
+      );
+
+      final Map<String, dynamic> data = json.decode(response.body);
+      print('🔵 REGISTER HOTEL RESPONSE:');
+      print('Status Code: ${response.statusCode}');
+      print('Body: ${response.body}');
+
+      if (response.statusCode == 201) {
+        return data;
+      } else {
+        final errorMsg = data['error']?.toString() ??
+            data['message']?.toString() ??
+            data['errors']?.toString() ??
+            'Hotel registration failed';
+        throw Exception(errorMsg);
+      }
+    } catch (e) {
+      throw Exception('Register hotel error: ${e.toString()}');
+    }
+  }
+
+  // Register as Service Provider
+  static Future<Map<String, dynamic>> registerServiceProvider({
+    required String username,
+    required String email,
+    required String password,
+    required String passwordConfirmation,
+    String? name,
+    String? displayName,
+    String? tagline,
+    String? description,
+    String? country,
+    String? city,
+    int? mainCategoryId,
+    List<String>? skills,
+    double? minPrice,
+    double? maxPrice,
+    String? currency,
+  }) async {
+    try {
+      final body = <String, dynamic>{
+        'username': username,
+        'email': email,
+        'password': password,
+        'password_confirmation': passwordConfirmation,
+      };
+      if (name != null && name.isNotEmpty) body['name'] = name;
+      if (displayName != null && displayName.isNotEmpty) body['display_name'] = displayName;
+      if (tagline != null && tagline.isNotEmpty) body['tagline'] = tagline;
+      if (description != null && description.isNotEmpty) body['description'] = description;
+      if (country != null && country.isNotEmpty) body['country'] = country;
+      if (city != null && city.isNotEmpty) body['city'] = city;
+      if (mainCategoryId != null) body['main_category_id'] = mainCategoryId;
+      if (skills != null && skills.isNotEmpty) body['skills'] = skills;
+      if (minPrice != null) body['min_price'] = minPrice;
+      if (maxPrice != null) body['max_price'] = maxPrice;
+      if (currency != null && currency.isNotEmpty) body['currency'] = currency;
+
+      print('🔵 REGISTER SERVICE PROVIDER REQUEST:');
+      print('URL: ${WPConfig.registerServiceProviderApiUrl}');
+      print('Headers: ${WPConfig.defaultHeaders}');
+      print('Request Body: ${json.encode(body)}');
+
+      final response = await http.post(
+        Uri.parse(WPConfig.registerServiceProviderApiUrl),
+        headers: WPConfig.defaultHeaders,
+        body: json.encode(body),
+      );
+
+      final Map<String, dynamic> data = json.decode(response.body);
+      print('🔵 REGISTER SERVICE PROVIDER RESPONSE:');
+      print('Status Code: ${response.statusCode}');
+      print('Body: ${response.body}');
+
+      if (response.statusCode == 201) {
+        return data;
+      } else {
+        final errorMsg = data['error']?.toString() ??
+            data['message']?.toString() ??
+            data['errors']?.toString() ??
+            'Service provider registration failed';
+        throw Exception(errorMsg);
+      }
+    } catch (e) {
+      throw Exception('Register service provider error: ${e.toString()}');
+    }
+  }
+
+  // Verify OTP (new endpoint)
+  static Future<AuthResponse> verifyOtp({
+    int? userId,
+    int? vendorId,
+    required String otpCode,
+    required String userType, // 'user', 'hotel', 'service_provider'
+  }) async {
+    try {
+      final body = <String, dynamic>{
+        'otp_code': otpCode,
+        'user_type': userType,
+      };
+      if (userId != null) {
+        body['user_id'] = userId;
+      }
+      if (vendorId != null) {
+        body['vendor_id'] = vendorId;
+      }
+
+      print('🔵 VERIFY OTP REQUEST:');
+      print('URL: ${WPConfig.registerVerifyOtpApiUrl}');
+      print('Headers: ${WPConfig.defaultHeaders}');
+      print('Request Body: ${json.encode(body)}');
+
+      final response = await http.post(
+        Uri.parse(WPConfig.registerVerifyOtpApiUrl),
+        headers: WPConfig.defaultHeaders,
+        body: json.encode(body),
+      );
+
+      final Map<String, dynamic> data = json.decode(response.body);
+      print('🔵 VERIFY OTP RESPONSE:');
+      print('Status Code: ${response.statusCode}');
+      print('Body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final authResponse = AuthResponse.fromJson(data);
+        
+        // Save token if provided
+        if (data['token'] != null) {
+          await TokenStorageService.saveToken(data['token'].toString());
+        }
+        
+        // Save user type
+        if (userType.isNotEmpty) {
+          await TokenStorageService.saveUserType(userType);
+        }
+        
+        // Save user if provided
+        if (authResponse.user != null) {
+          await TokenStorageService.saveUser(authResponse.user!);
+        }
+        
+        return authResponse;
+      } else {
+        final errorMsg = data['error']?.toString() ??
+            data['message']?.toString() ??
+            data['errors']?.toString() ??
+            'OTP verification failed';
+        throw Exception(errorMsg);
+      }
+    } catch (e) {
+      throw Exception('Verify OTP error: ${e.toString()}');
+    }
+  }
+
+  // Resend OTP (new endpoint)
+  static Future<Map<String, dynamic>> resendOtp({
+    int? userId,
+    required String userType,
+  }) async {
+    try {
+      final body = <String, dynamic>{
+        'user_type': userType,
+      };
+      if (userId != null) {
+        body['user_id'] = userId;
+      }
+
+      print('🔵 RESEND OTP REQUEST:');
+      print('URL: ${WPConfig.registerResendOtpApiUrl}');
+      print('Headers: ${WPConfig.defaultHeaders}');
+      print('Request Body: ${json.encode(body)}');
+
+      final response = await http.post(
+        Uri.parse(WPConfig.registerResendOtpApiUrl),
+        headers: WPConfig.defaultHeaders,
+        body: json.encode(body),
+      );
+
+      final Map<String, dynamic> data = json.decode(response.body);
+      print('🔵 RESEND OTP RESPONSE:');
+      print('Status Code: ${response.statusCode}');
+      print('Body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        return data;
+      } else {
+        final errorMsg = data['error']?.toString() ??
+            data['message']?.toString() ??
+            data['errors']?.toString() ??
+            'Resend OTP failed';
+        throw Exception(errorMsg);
+      }
+    } catch (e) {
+      throw Exception('Resend OTP error: ${e.toString()}');
+    }
+  }
+
+  // Legacy Sign up (Register) - kept for backward compatibility
   static Future<AuthResponse> signup({
     required String username,
     required String email,
@@ -113,6 +399,11 @@ class AuthService {
       if (response.statusCode == 200) {
         final authResponse = AuthResponse.fromJson(data);
 
+        // Save token if provided
+        if (data['token'] != null) {
+          await TokenStorageService.saveToken(data['token'].toString());
+        }
+
         // Save session cookies
         final cookies = response.headers['set-cookie'] ?? '';
         if (cookies.isNotEmpty) {
@@ -122,8 +413,10 @@ class AuthService {
         // Save user data if available
         if (authResponse.user != null) {
           await TokenStorageService.saveUser(authResponse.user!);
-          await TokenStorageService.saveToken(
-              'session_cookie'); // Mark as logged in
+          // Mark as logged in if token wasn't provided
+          if (data['token'] == null) {
+            await TokenStorageService.saveToken('session_cookie');
+          }
         }
 
         return authResponse;
@@ -169,6 +462,7 @@ class AuthService {
       print('---');
 
       if (response.statusCode == 200 || response.statusCode == 201) {
+        // New API returns reset_token, old API might return verification_code
         return data;
       } else {
         // Extract error message from response
@@ -308,18 +602,18 @@ class AuthService {
 
   // Reset Password
   static Future<Map<String, dynamic>> resetPassword({
-    required String email,
-    required String verificationCode,
+    String? resetToken,
     required String newPassword,
     required String newPasswordConfirmation,
   }) async {
     try {
       final requestBody = {
-        'email': email,
-        'verification_code': verificationCode,
         'new_password': newPassword,
         'new_password_confirmation': newPasswordConfirmation,
       };
+      if (resetToken != null && resetToken.isNotEmpty) {
+        requestBody['reset_token'] = resetToken;
+      }
 
       print('🔵 RESET PASSWORD REQUEST:');
       print('URL: ${WPConfig.userResetPasswordApiUrl}');

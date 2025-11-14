@@ -5,6 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../../config/wp_config.dart';
 import '../../services/waiting_list_provider.dart';
+import '../../services/bookings_service.dart';
 import '../../config/constants/assets.dart';
 
 class WaitingListPage extends ConsumerWidget {
@@ -253,13 +254,15 @@ class WaitingListPage extends ConsumerWidget {
                   ],
                 ),
                 SizedBox(height: 16.h),
+                // Coupon section
+                _buildCouponSection(context, item, isTablet),
+                SizedBox(height: 16.h),
                 // Action buttons
                 Row(
                   children: [
                     Expanded(
                       child: OutlinedButton(
-                        onPressed: () =>
-                            _updateStatus(context, ref, item.id, 'confirmed'),
+                        onPressed: () => _confirmBooking(context, ref, item),
                         style: OutlinedButton.styleFrom(
                           side: BorderSide(color: Colors.green),
                           shape: RoundedRectangleBorder(
@@ -322,6 +325,228 @@ class WaitingListPage extends ConsumerWidget {
 
   void _removeItem(WidgetRef ref, String id) {
     ref.read(waitingListProvider.notifier).removeFromWaitingList(id);
+  }
+
+  Widget _buildCouponSection(
+      BuildContext context, dynamic item, bool isTablet) {
+    return _CouponSectionWidget(item: item, isTablet: isTablet);
+  }
+}
+
+class _CouponSectionWidget extends StatefulWidget {
+  final dynamic item;
+  final bool isTablet;
+
+  const _CouponSectionWidget({
+    required this.item,
+    required this.isTablet,
+  });
+
+  @override
+  State<_CouponSectionWidget> createState() => _CouponSectionWidgetState();
+}
+
+class _CouponSectionWidgetState extends State<_CouponSectionWidget> {
+  final TextEditingController _couponController = TextEditingController();
+  Map<String, dynamic>? _couponData;
+  bool _isApplyingCoupon = false;
+
+  @override
+  void dispose() {
+    _couponController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _applyCoupon() async {
+    final couponCode = _couponController.text.trim();
+    if (couponCode.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Please enter a coupon code')),
+      );
+      return;
+    }
+
+    setState(() {
+      _isApplyingCoupon = true;
+    });
+
+    try {
+      // Get room ID from item (you may need to adjust this based on your model)
+      final roomId = 1; // TODO: Get actual room ID from item
+      final checkIn = widget.item.checkInDate.toString().split(' ')[0];
+      final checkOut = widget.item.checkOutDate.toString().split(' ')[0];
+
+      final result = await BookingsService.applyCoupon(
+        roomId: roomId,
+        couponCode: couponCode,
+        checkIn: checkIn,
+        checkOut: checkOut,
+      );
+
+      setState(() {
+        _couponData = result;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content:
+              Text('Coupon applied! Discount: \$${result['discount'] ?? 0}'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(e.toString().replaceAll('Exception: ', '')),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      setState(() {
+        _isApplyingCoupon = false;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Coupon Code',
+          style: TextStyle(
+            fontSize: widget.isTablet ? 14.sp : 12.sp,
+            fontWeight: FontWeight.w600,
+            color: Colors.grey[700],
+          ),
+        ),
+        SizedBox(height: 8.h),
+        Row(
+          children: [
+            Expanded(
+              child: TextField(
+                controller: _couponController,
+                decoration: InputDecoration(
+                  hintText: 'Enter coupon code',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8.r),
+                  ),
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: 12.w,
+                    vertical: 12.h,
+                  ),
+                ),
+              ),
+            ),
+            SizedBox(width: 8.w),
+            ElevatedButton(
+              onPressed: _isApplyingCoupon ? null : _applyCoupon,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: WPConfig.navbarColor,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8.r),
+                ),
+              ),
+              child: _isApplyingCoupon
+                  ? SizedBox(
+                      width: 16.w,
+                      height: 16.h,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    )
+                  : Text('Apply'),
+            ),
+          ],
+        ),
+        if (_couponData != null) ...[
+          SizedBox(height: 8.h),
+          Container(
+            padding: EdgeInsets.all(12.w),
+            decoration: BoxDecoration(
+              color: Colors.green.shade50,
+              borderRadius: BorderRadius.circular(8.r),
+              border: Border.all(color: Colors.green.shade200),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Coupon Applied!',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.green.shade900,
+                  ),
+                ),
+                SizedBox(height: 4.h),
+                Text(
+                  'Original: \$${_couponData!['original_price'] ?? 0}',
+                  style: TextStyle(fontSize: 12.sp),
+                ),
+                Text(
+                  'Discount: \$${_couponData!['discount'] ?? 0}',
+                  style:
+                      TextStyle(fontSize: 12.sp, color: Colors.green.shade700),
+                ),
+                Text(
+                  'Final: \$${_couponData!['final_price'] ?? 0}',
+                  style: TextStyle(
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.green.shade900,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+extension WaitingListPageExtension on WaitingListPage {
+  Future<void> _confirmBooking(
+      BuildContext context, WidgetRef ref, dynamic item) async {
+    try {
+      // Get room ID from item (you may need to adjust this based on your model)
+      final roomId = 1; // TODO: Get actual room ID from item
+      final checkIn = item.checkInDate.toString().split(' ')[0];
+      final checkOut = item.checkOutDate.toString().split(' ')[0];
+      final guests = 2; // TODO: Get actual guests count
+      final paymentMethod = 'paypal'; // TODO: Get from user selection
+
+      final result = await BookingsService.createBooking(
+        roomId: roomId,
+        checkIn: checkIn,
+        checkOut: checkOut,
+        guests: guests,
+        paymentMethod: paymentMethod,
+        couponCode: null, // TODO: Get from coupon section if applied
+      );
+
+      // Update status and navigate
+      ref.read(waitingListProvider.notifier).updateStatus(item.id, 'confirmed');
+
+      if (result['payment_required'] == true) {
+        // Navigate to payment page if needed
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Payment required. Redirecting...')),
+        );
+      } else {
+        Navigator.pushNamed(context, '/history');
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(e.toString().replaceAll('Exception: ', '')),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   void _updateStatus(

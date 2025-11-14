@@ -7,6 +7,7 @@ import '../../models/hotel.dart';
 import '../../models/selected_room.dart';
 import '../../services/favorites_provider.dart';
 import '../../services/waiting_list_provider.dart';
+import '../service_providers/pages/categories_page.dart';
 
 class HotelDetailsPage extends ConsumerStatefulWidget {
   final Hotel hotel;
@@ -569,335 +570,6 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
     );
   }
 
-  Widget _buildRoomCard(
-    String title,
-    String bedType,
-    String amenities,
-    String price,
-    String originalPrice,
-    bool isTablet,
-  ) {
-    final isSelected = _selectedRooms.contains(title);
-
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          if (isSelected) {
-            _selectedRooms.remove(title);
-            _roomQuantities.remove(title);
-          } else {
-            _selectedRooms.add(title);
-            _roomQuantities[title] = 1;
-          }
-        });
-      },
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: isSelected ? Colors.orange : Colors.blue,
-            width: isSelected ? 3 : 1,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: isSelected
-                  ? Colors.orange.withOpacity(0.3)
-                  : Colors.black.withOpacity(0.1),
-              blurRadius: isSelected ? 8 : 4,
-              offset: Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Room Image
-            Container(
-              height: 200,
-              width: double.infinity,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
-                image: DecorationImage(
-                  image: NetworkImage(
-                      'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=400&h=300&fit=crop'),
-                  fit: BoxFit.cover,
-                ),
-              ),
-              child: Stack(
-                children: [
-                  // Overlay for better text visibility
-                  Container(
-                    decoration: BoxDecoration(
-                      borderRadius:
-                          BorderRadius.vertical(top: Radius.circular(12)),
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          Colors.transparent,
-                          Colors.black.withOpacity(0.3),
-                        ],
-                      ),
-                    ),
-                  ),
-                  if (isSelected)
-                    Positioned(
-                      top: 12,
-                      right: 12,
-                      child: Container(
-                        padding: EdgeInsets.all(6),
-                        decoration: BoxDecoration(
-                          color: Colors.orange,
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          Icons.check,
-                          color: Colors.white,
-                          size: 16,
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-            ),
-            Padding(
-              padding: EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Room Title
-                  Text(
-                    title,
-                    style: TextStyle(
-                      fontSize: isTablet ? 18 : 16,
-                      fontWeight: FontWeight.bold,
-                      color: isSelected ? Colors.orange : Colors.blue,
-                    ),
-                  ),
-                  SizedBox(height: 8),
-                  // Bed Configuration
-                  Row(
-                    children: [
-                      Icon(Icons.bed, size: 16, color: Colors.grey[600]),
-                      SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          bedType,
-                          style: TextStyle(
-                            fontSize: isTablet ? 14 : 12,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 4),
-                  // Room Size
-                  Row(
-                    children: [
-                      Icon(Icons.aspect_ratio,
-                          size: 16, color: Colors.grey[600]),
-                      SizedBox(width: 8),
-                      Text(
-                        'Room size: 25 m²',
-                        style: TextStyle(
-                          fontSize: isTablet ? 14 : 12,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 12),
-                  // Amenities
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 4,
-                    children: amenities.split(', ').take(4).map((amenity) {
-                      return Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Icons.check, size: 12, color: Colors.green),
-                          SizedBox(width: 4),
-                          Text(
-                            amenity,
-                            style: TextStyle(
-                              fontSize: isTablet ? 12 : 10,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black,
-                            ),
-                          ),
-                        ],
-                      );
-                    }).toList(),
-                  ),
-                  SizedBox(height: 12),
-                  // Benefits
-                  Column(
-                    children: [
-                      _buildBenefitRow('Free cancellation anytime', Icons.check,
-                          Colors.green),
-                      _buildBenefitRow(
-                          'No prepayment needed – pay at the property',
-                          Icons.check,
-                          Colors.green),
-                      _buildBenefitRow('No credit card needed',
-                          Icons.credit_card_off, Colors.green),
-                      _buildBenefitRow(
-                          'Breakfast included', Icons.coffee, Colors.green),
-                    ],
-                  ),
-                  SizedBox(height: 12),
-                  // Deal Tags
-                  Row(
-                    children: [
-                      Container(
-                        padding:
-                            EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: Colors.green,
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: Text(
-                          '52% off',
-                          style: TextStyle(
-                            fontSize: isTablet ? 12 : 10,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                      SizedBox(width: 8),
-                      Container(
-                        padding:
-                            EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: Colors.green,
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: Text(
-                          'Limited-time Deal',
-                          style: TextStyle(
-                            fontSize: isTablet ? 12 : 10,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 12),
-                  // Pricing
-                  Text(
-                    'Price for 1 night (4 Sep - 5 Sep)',
-                    style: TextStyle(
-                      fontSize: isTablet ? 14 : 12,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
-                    ),
-                  ),
-                  SizedBox(height: 8),
-                  Row(
-                    children: [
-                      Text(
-                        originalPrice,
-                        style: TextStyle(
-                          fontSize: isTablet ? 16 : 14,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.red,
-                          decoration: TextDecoration.lineThrough,
-                        ),
-                      ),
-                      SizedBox(width: 8),
-                      Text(
-                        price,
-                        style: TextStyle(
-                          fontSize: isTablet ? 20 : 18,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
-                        ),
-                      ),
-                    ],
-                  ),
-                  Text(
-                    '+US\$3.10 taxes and fees',
-                    style: TextStyle(
-                      fontSize: isTablet ? 12 : 10,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black54,
-                    ),
-                  ),
-                  SizedBox(height: 16),
-                  // Select Button
-                  SizedBox(
-                    width: double.infinity,
-                    child: OutlinedButton(
-                      onPressed: () {
-                        setState(() {
-                          if (isSelected) {
-                            _selectedRooms.remove(title);
-                            _roomQuantities.remove(title);
-                          } else {
-                            _selectedRooms.add(title);
-                            _roomQuantities[title] = 1;
-                          }
-                        });
-                      },
-                      style: OutlinedButton.styleFrom(
-                        side: BorderSide(
-                          color: isSelected ? Colors.orange : Colors.blue,
-                          width: 2,
-                        ),
-                        backgroundColor:
-                            isSelected ? Colors.orange.withOpacity(0.1) : null,
-                        padding: EdgeInsets.symmetric(vertical: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                      child: Text(
-                        isSelected ? 'Selected' : 'Select',
-                        style: TextStyle(
-                          color: isSelected ? Colors.orange : Colors.blue,
-                          fontSize: isTablet ? 16 : 14,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildBenefitRow(String text, IconData icon, Color color) {
-    return Padding(
-      padding: EdgeInsets.only(bottom: 4),
-      child: Row(
-        children: [
-          Icon(icon, size: 12, color: color),
-          SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              text,
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildRatingBar(
       String label, double score, bool hasArrow, bool isTablet) {
     return Row(
@@ -1128,6 +800,27 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
                   ),
                 ),
               ],
+            ),
+          ),
+          // Service Providers button
+          Container(
+            margin: EdgeInsets.only(right: 8.w),
+            decoration: BoxDecoration(
+              color: Colors.grey[100],
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Colors.grey[300]!),
+            ),
+            child: IconButton(
+              icon: Icon(Icons.handyman, color: primaryColor),
+              tooltip: 'hotel.service_providers'.tr(),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => CategoriesPage(),
+                  ),
+                );
+              },
             ),
           ),
           SizedBox(
@@ -1945,54 +1638,36 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
             'minibar'.tr()
           ],
         ));
-      } else if (roomId == 'comfort_triple_room') {
-        selectedRoomObjects.add(SelectedRoom(
-          name: 'comfort_triple_room'.tr(),
-          pricePerNight: 25.0,
-          maxAdults: 3,
-          maxChildren: 0,
-          imageUrl:
-              'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=400&h=300&fit=crop',
-          amenities: [
-            'Free WiFi',
-            'Attached bathroom',
-            'Air conditioning',
-            'Balcony',
-            'City view',
-            'Flat-screen TV',
-            'Soundproof'
-          ],
-        ));
       }
-    }
 
-    // Add each selected room to waiting list
-    final waitingListNotifier = ref.read(waitingListProvider.notifier);
-    for (SelectedRoom room in selectedRoomObjects) {
-      waitingListNotifier.addToWaitingList(
-        hotel: widget.hotel,
-        room: room,
-        checkInDate: widget.checkInDate ?? DateTime.now(),
-        checkOutDate:
-            widget.checkOutDate ?? DateTime.now().add(Duration(days: 1)),
-        quantity: _roomQuantities[room.name] ?? 1,
+      // Add each selected room to waiting list
+      final waitingListNotifier = ref.read(waitingListProvider.notifier);
+      for (SelectedRoom room in selectedRoomObjects) {
+        waitingListNotifier.addToWaitingList(
+          hotel: widget.hotel,
+          room: room,
+          checkInDate: widget.checkInDate ?? DateTime.now(),
+          checkOutDate:
+              widget.checkOutDate ?? DateTime.now().add(Duration(days: 1)),
+          quantity: _roomQuantities[room.name] ?? 1,
+        );
+      }
+
+      // Show success message and navigate to waiting list
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+              '${selectedRoomObjects.length} room(s) added to waiting list'),
+          backgroundColor: Colors.green,
+        ),
       );
+      Navigator.pushNamed(context, '/waiting-list');
+
+      // Clear selected rooms
+      setState(() {
+        _selectedRooms.clear();
+        _roomQuantities.clear();
+      });
     }
-
-    // Show success message and navigate to waiting list
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content:
-            Text('${selectedRoomObjects.length} room(s) added to waiting list'),
-        backgroundColor: Colors.green,
-      ),
-    );
-    Navigator.pushNamed(context, '/waiting-list');
-
-    // Clear selected rooms
-    setState(() {
-      _selectedRooms.clear();
-      _roomQuantities.clear();
-    });
   }
 }

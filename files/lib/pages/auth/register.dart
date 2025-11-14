@@ -19,7 +19,9 @@ enum PasswordStrength {
 }
 
 class RegisterPage extends StatefulWidget {
-  const RegisterPage({Key? key}) : super(key: key);
+  final String? initialUserType; // User type selected from outside (login page)
+  
+  const RegisterPage({Key? key, this.initialUserType}) : super(key: key);
 
   @override
   State<RegisterPage> createState() => _RegisterPageState();
@@ -32,7 +34,22 @@ class _RegisterPageState extends State<RegisterPage> {
   late TextEditingController _countryCodeController;
   late TextEditingController _passwordController;
   late TextEditingController _confirmPasswordController;
+  // User type specific controllers
+  late TextEditingController _nameController;
+  late TextEditingController _hotelNameController;
+  late TextEditingController _addressController;
+  late TextEditingController _zipCodeController;
+  late TextEditingController _displayNameController;
+  late TextEditingController _taglineController;
+  late TextEditingController _descriptionController;
+  late TextEditingController _minPriceController;
+  late TextEditingController _maxPriceController;
+  late TextEditingController _currencyController;
   Country? _selectedCountry;
+  String? _selectedUserType; // 'user', 'hotel', 'service_provider'
+  String? _selectedState;
+  String? _selectedCity;
+  int? _selectedCategoryId;
   bool _isCreating = false;
   bool _showPassword = false;
   bool _showConfirmPassword = false;
@@ -49,6 +66,18 @@ class _RegisterPageState extends State<RegisterPage> {
     _countryCodeController = TextEditingController();
     _passwordController = TextEditingController();
     _confirmPasswordController = TextEditingController();
+    _nameController = TextEditingController();
+    _hotelNameController = TextEditingController();
+    _addressController = TextEditingController();
+    _zipCodeController = TextEditingController();
+    _displayNameController = TextEditingController();
+    _taglineController = TextEditingController();
+    _descriptionController = TextEditingController();
+    _minPriceController = TextEditingController();
+    _maxPriceController = TextEditingController();
+    _currencyController = TextEditingController(text: 'USD');
+    // Use initialUserType from widget if provided, otherwise default to 'user'
+    _selectedUserType = widget.initialUserType ?? 'user';
 
     _passwordController.addListener(() => setState(() {}));
     _confirmPasswordController.addListener(() => setState(() {}));
@@ -65,6 +94,16 @@ class _RegisterPageState extends State<RegisterPage> {
     _countryCodeController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
+    _nameController.dispose();
+    _hotelNameController.dispose();
+    _addressController.dispose();
+    _zipCodeController.dispose();
+    _displayNameController.dispose();
+    _taglineController.dispose();
+    _descriptionController.dispose();
+    _minPriceController.dispose();
+    _maxPriceController.dispose();
+    _currencyController.dispose();
     super.dispose();
   }
 
@@ -97,12 +136,18 @@ class _RegisterPageState extends State<RegisterPage> {
   }
 
   bool _areAllFieldsValid() {
-    return _usernameController.text.isNotEmpty &&
+    bool baseValid = _usernameController.text.isNotEmpty &&
         _emailController.text.isNotEmpty &&
         _passwordController.text.isNotEmpty &&
         _confirmPasswordController.text.isNotEmpty &&
         _passwordController.text.length >= 8 &&
         _passwordController.text == _confirmPasswordController.text;
+    
+    if (_selectedUserType == 'hotel') {
+      return baseValid && _hotelNameController.text.isNotEmpty;
+    }
+    
+    return baseValid;
   }
 
   Future<void> _register() async {
@@ -121,21 +166,102 @@ class _RegisterPageState extends State<RegisterPage> {
           ? '${_selectedCountry!.dialCode}${_phoneController.text.trim()}'
           : null;
 
-      final res = await AuthService.signup(
-        username: _usernameController.text.trim(),
-        email: _emailController.text.trim(),
-        phone: phone,
-        password: _passwordController.text,
-        passwordConfirmation: _confirmPasswordController.text,
-      );
+      Map<String, dynamic> response;
+      int? userId;
+      int? vendorId;
+      String userType;
+
+      if (_selectedUserType == 'hotel') {
+        response = await AuthService.registerHotel(
+          username: _usernameController.text.trim(),
+          email: _emailController.text.trim(),
+          password: _passwordController.text,
+          passwordConfirmation: _confirmPasswordController.text,
+          phone: phone,
+          hotelName: _hotelNameController.text.trim(),
+          country: _selectedCountry?.name,
+          city: _selectedCity,
+          state: _selectedState,
+          address: _addressController.text.trim(),
+          zipCode: _zipCodeController.text.trim(),
+        );
+        vendorId = response['vendor_id'] is int
+            ? response['vendor_id']
+            : (response['vendor_id'] is String
+                ? int.tryParse(response['vendor_id'])
+                : null);
+        userType = 'hotel';
+      } else if (_selectedUserType == 'service_provider') {
+        final skills = _descriptionController.text
+            .split(',')
+            .map((s) => s.trim())
+            .where((s) => s.isNotEmpty)
+            .toList();
+        response = await AuthService.registerServiceProvider(
+          username: _usernameController.text.trim(),
+          email: _emailController.text.trim(),
+          password: _passwordController.text,
+          passwordConfirmation: _confirmPasswordController.text,
+          name: _nameController.text.trim().isNotEmpty
+              ? _nameController.text.trim()
+              : null,
+          displayName: _displayNameController.text.trim().isNotEmpty
+              ? _displayNameController.text.trim()
+              : null,
+          tagline: _taglineController.text.trim().isNotEmpty
+              ? _taglineController.text.trim()
+              : null,
+          description: _descriptionController.text.trim().isNotEmpty
+              ? _descriptionController.text.trim()
+              : null,
+          country: _selectedCountry?.name,
+          city: _selectedCity,
+          mainCategoryId: _selectedCategoryId,
+          skills: skills.isNotEmpty ? skills : null,
+          minPrice: _minPriceController.text.trim().isNotEmpty
+              ? double.tryParse(_minPriceController.text.trim())
+              : null,
+          maxPrice: _maxPriceController.text.trim().isNotEmpty
+              ? double.tryParse(_maxPriceController.text.trim())
+              : null,
+          currency: _currencyController.text.trim().isNotEmpty
+              ? _currencyController.text.trim()
+              : 'USD',
+        );
+        userId = response['user_id'] is int
+            ? response['user_id']
+            : (response['user_id'] is String
+                ? int.tryParse(response['user_id'])
+                : null);
+        userType = 'service_provider';
+      } else {
+        // Default to user
+        response = await AuthService.registerUser(
+          username: _usernameController.text.trim(),
+          email: _emailController.text.trim(),
+          password: _passwordController.text,
+          passwordConfirmation: _confirmPasswordController.text,
+          name: _nameController.text.trim().isNotEmpty
+              ? _nameController.text.trim()
+              : null,
+        );
+        userId = response['user_id'] is int
+            ? response['user_id']
+            : (response['user_id'] is String
+                ? int.tryParse(response['user_id'])
+                : null);
+        userType = 'user';
+      }
 
       if (mounted) {
-        // Navigate to verify page with email
+        // Navigate to verify page
         Navigator.of(context).pushReplacementNamed(
           AppRoutes.verifyCode,
           arguments: {
             'email': _emailController.text.trim(),
-            'userId': res.userId ?? res.user?.id ?? 0,
+            'userId': userId,
+            'vendorId': vendorId,
+            'userType': userType,
           },
         );
       }
@@ -186,17 +312,17 @@ class _RegisterPageState extends State<RegisterPage> {
       case PasswordStrength.empty:
         return SizedBox.shrink();
       case PasswordStrength.weak:
-        label = 'Weak';
+        label = 'auth.password_strength_weak'.tr();
         color = Colors.red;
         percentage = 0.33;
         break;
       case PasswordStrength.medium:
-        label = 'Medium';
+        label = 'auth.password_strength_medium'.tr();
         color = Colors.orange;
         percentage = 0.66;
         break;
       case PasswordStrength.strong:
-        label = 'Strong';
+        label = 'auth.password_strength_strong'.tr();
         color = Colors.green;
         percentage = 1.0;
         break;
@@ -253,26 +379,26 @@ class _RegisterPageState extends State<RegisterPage> {
     List<String> missing = [];
 
     if (password.length < 8) {
-      missing.add('8+ characters');
+      missing.add('auth.password_8_chars'.tr());
     }
     if (!password.contains(RegExp(r'[a-z]'))) {
-      missing.add('lowercase');
+      missing.add('auth.password_lowercase'.tr());
     }
     if (!password.contains(RegExp(r'[A-Z]'))) {
-      missing.add('uppercase');
+      missing.add('auth.password_uppercase'.tr());
     }
     if (!password.contains(RegExp(r'[0-9]'))) {
-      missing.add('number');
+      missing.add('auth.password_number'.tr());
     }
     if (!password.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]'))) {
-      missing.add('special character');
+      missing.add('auth.password_special'.tr());
     }
 
     if (missing.isEmpty) {
-      return '✓ Password meets all requirements';
+      return 'auth.password_meets_requirements'.tr();
     }
 
-    return 'Need: ${missing.join(", ")}';
+    return 'auth.password_requirements'.tr(args: [missing.join(", ")]);
   }
 
   @override
@@ -311,7 +437,7 @@ class _RegisterPageState extends State<RegisterPage> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
-                            'Create Account',
+                            'auth.create_account'.tr(),
                             style: TextStyle(
                               fontSize: 28.sp,
                               fontWeight: FontWeight.bold,
@@ -320,6 +446,83 @@ class _RegisterPageState extends State<RegisterPage> {
                             textAlign: TextAlign.center,
                           ),
                           SizedBox(height: 24.h),
+                          // User Type Selection - only show if not provided from outside
+                          if (widget.initialUserType == null) ...[
+                            Text(
+                              'auth.register_as'.tr(),
+                              style: TextStyle(
+                                fontSize: 14.sp,
+                                color: Colors.grey[700],
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            SizedBox(height: 8.h),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: _buildUserTypeButton(
+                                    label: 'auth.user'.tr(),
+                                    type: 'user',
+                                    icon: Icons.person,
+                                  ),
+                                ),
+                                SizedBox(width: 8.w),
+                                Expanded(
+                                  child: _buildUserTypeButton(
+                                    label: 'auth.hotel'.tr(),
+                                    type: 'hotel',
+                                    icon: Icons.hotel,
+                                  ),
+                                ),
+                                SizedBox(width: 8.w),
+                                Expanded(
+                                  child: _buildUserTypeButton(
+                                    label: 'auth.service_provider'.tr(),
+                                    type: 'service_provider',
+                                    icon: Icons.business,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            SizedBox(height: 24.h),
+                          ] else ...[
+                            // Show selected user type badge if provided from outside
+                            Container(
+                              padding: EdgeInsets.symmetric(vertical: 8.h, horizontal: 12.w),
+                              decoration: BoxDecoration(
+                                color: WPConfig.primaryColor.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(8.r),
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    _selectedUserType == 'user'
+                                        ? Icons.person
+                                        : _selectedUserType == 'hotel'
+                                            ? Icons.hotel
+                                            : Icons.business,
+                                    color: WPConfig.primaryColor,
+                                    size: 16.sp,
+                                  ),
+                                  SizedBox(width: 8.w),
+                                  Text(
+                                    _selectedUserType == 'user'
+                                        ? 'auth.user'.tr()
+                                        : _selectedUserType == 'hotel'
+                                            ? 'auth.hotel'.tr()
+                                            : 'auth.service_provider'.tr(),
+                                    style: TextStyle(
+                                      color: WPConfig.primaryColor,
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 14.sp,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            SizedBox(height: 24.h),
+                          ],
                           if (_errorMessage != null) ...[
                             Container(
                               padding: EdgeInsets.all(12.w),
@@ -375,6 +578,35 @@ class _RegisterPageState extends State<RegisterPage> {
                             ),
                             SizedBox(height: 16.h),
                           ],
+                          // Name field (for user and service provider)
+                          if (_selectedUserType == 'user' || _selectedUserType == 'service_provider')
+                            TextFormField(
+                              controller: _nameController,
+                              decoration: AppStyles.inputDecoration(
+                                label: 'auth.full_name'.tr(),
+                                icon: IconlyLight.profile,
+                              ),
+                              textInputAction: TextInputAction.next,
+                              onChanged: (value) => setState(() {}),
+                            ),
+                          if (_selectedUserType == 'user' || _selectedUserType == 'service_provider')
+                            SizedBox(height: 12.h),
+                          // Hotel Name (for hotel)
+                          if (_selectedUserType == 'hotel')
+                            TextFormField(
+                              controller: _hotelNameController,
+                              decoration: AppStyles.inputDecoration(
+                                label: 'auth.hotel_name_label'.tr(),
+                                icon: Icons.hotel,
+                              ),
+                              validator: (v) => _selectedUserType == 'hotel' && (v == null || v.isEmpty)
+                                  ? 'auth.hotel_name_required'.tr()
+                                  : null,
+                              textInputAction: TextInputAction.next,
+                              onChanged: (value) => setState(() {}),
+                            ),
+                          if (_selectedUserType == 'hotel')
+                            SizedBox(height: 12.h),
                           TextFormField(
                             controller: _usernameController,
                             decoration: AppStyles.inputDecoration(
@@ -400,7 +632,7 @@ class _RegisterPageState extends State<RegisterPage> {
                               }
                               if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
                                   .hasMatch(v)) {
-                                return 'Please enter a valid email';
+                                return 'auth.valid_email_required'.tr();
                               }
                               return null;
                             },
@@ -411,87 +643,53 @@ class _RegisterPageState extends State<RegisterPage> {
                           SizedBox(height: 12.h),
                           Row(
                             children: [
-                              Expanded(
-                                flex: 2,
-                                child: GestureDetector(
-                                  onTap: () {
-                                    CountrySelectorModal.show(
-                                      context,
-                                      selectedDialCode:
-                                          _selectedCountry?.dialCode,
-                                      onCountrySelected: (country) {
-                                        setState(() {
-                                          _selectedCountry = country;
-                                          _countryCodeController.text =
-                                              country.dialCode;
-                                        });
-                                      },
-                                    );
-                                  },
-                                  child: AbsorbPointer(
-                                    child: TextFormField(
-                                      readOnly: true,
-                                      controller: _countryCodeController,
-                                      decoration: InputDecoration(
-                                        labelText: 'country_code'.tr(),
-                                        hintText: 'country_code'.tr(),
-                                        filled: true,
-                                        fillColor: AppStyles.fieldFill,
-                                        prefixIcon: _selectedCountry != null
-                                            ? Padding(
-                                                padding:
-                                                    EdgeInsets.only(left: 16.w),
-                                                child: Padding(
-                                                  padding: EdgeInsets.symmetric(
-                                                      vertical: 12.h),
-                                                  child: Text(
-                                                    _selectedCountry!.flag,
-                                                    style: TextStyle(
-                                                        fontSize: 18.sp),
-                                                  ),
-                                                ),
-                                              )
-                                            : Icon(
-                                                IconlyLight.call,
-                                                color: AppStyles.mainBlue,
-                                              ),
-                                        suffixIcon: Icon(
-                                          Icons.arrow_drop_down,
-                                          color: AppStyles.mainBlue,
-                                          size: 24.sp,
-                                        ),
-                                        border: OutlineInputBorder(
-                                          borderRadius: BorderRadius.circular(
-                                              AppStyles.borderRadius),
-                                          borderSide: BorderSide.none,
-                                        ),
-                                        enabledBorder: OutlineInputBorder(
-                                          borderRadius: BorderRadius.circular(
-                                              AppStyles.borderRadius),
-                                          borderSide: BorderSide.none,
-                                        ),
-                                        focusedBorder: OutlineInputBorder(
-                                          borderRadius: BorderRadius.circular(
-                                              AppStyles.borderRadius),
-                                          borderSide: BorderSide(
+                              // Circular country code button
+                              Container(
+                                width: 56.w,
+                                height: 56.w,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: AppStyles.fieldFill,
+                                  border: Border.all(
+                                    color: Colors.grey.shade300,
+                                    width: 1,
+                                  ),
+                                ),
+                                child: Material(
+                                  color: Colors.transparent,
+                                  child: InkWell(
+                                    borderRadius: BorderRadius.circular(28.w),
+                                    onTap: () {
+                                      CountrySelectorModal.show(
+                                        context,
+                                        selectedDialCode:
+                                            _selectedCountry?.dialCode,
+                                        onCountrySelected: (country) {
+                                          setState(() {
+                                            _selectedCountry = country;
+                                            _countryCodeController.text =
+                                                country.dialCode;
+                                          });
+                                        },
+                                      );
+                                    },
+                                    child: Center(
+                                      child: _selectedCountry != null
+                                          ? Text(
+                                              _selectedCountry!.flag,
+                                              style: TextStyle(fontSize: 24.sp),
+                                            )
+                                          : Icon(
+                                              IconlyLight.call,
                                               color: AppStyles.mainBlue,
-                                              width: 2),
-                                        ),
-                                        contentPadding: EdgeInsets.symmetric(
-                                            vertical: 18.h, horizontal: 16.w),
-                                      ),
-                                      style: TextStyle(
-                                        fontSize: 16.sp,
-                                        fontWeight: FontWeight.w500,
-                                        color: Colors.black87,
-                                      ),
+                                              size: 20.sp,
+                                            ),
                                     ),
                                   ),
                                 ),
                               ),
-                              SizedBox(width: 8.w),
+                              SizedBox(width: 12.w),
                               Expanded(
-                                flex: 3,
                                 child: TextFormField(
                                   controller: _phoneController,
                                   decoration: AppStyles.inputDecoration(
@@ -507,6 +705,97 @@ class _RegisterPageState extends State<RegisterPage> {
                             ],
                           ),
                           SizedBox(height: 12.h),
+                          // Hotel/Service Provider specific fields
+                          if (_selectedUserType == 'hotel') ...[
+                            TextFormField(
+                              controller: _addressController,
+                              decoration: AppStyles.inputDecoration(
+                                label: 'auth.address'.tr(),
+                                icon: Icons.location_on,
+                              ),
+                              textInputAction: TextInputAction.next,
+                            ),
+                            SizedBox(height: 12.h),
+                            TextFormField(
+                              controller: _zipCodeController,
+                              decoration: AppStyles.inputDecoration(
+                                label: 'auth.zip_code'.tr(),
+                                icon: Icons.pin,
+                              ),
+                              keyboardType: TextInputType.number,
+                              textInputAction: TextInputAction.next,
+                            ),
+                            SizedBox(height: 12.h),
+                          ],
+                          if (_selectedUserType == 'service_provider') ...[
+                            TextFormField(
+                              controller: _displayNameController,
+                              decoration: AppStyles.inputDecoration(
+                                label: 'auth.display_name'.tr(),
+                                icon: Icons.badge,
+                              ),
+                              textInputAction: TextInputAction.next,
+                            ),
+                            SizedBox(height: 12.h),
+                            TextFormField(
+                              controller: _taglineController,
+                              decoration: AppStyles.inputDecoration(
+                                label: 'auth.tagline'.tr(),
+                                icon: Icons.tag,
+                              ),
+                              textInputAction: TextInputAction.next,
+                            ),
+                            SizedBox(height: 12.h),
+                            TextFormField(
+                              controller: _descriptionController,
+                              decoration: AppStyles.inputDecoration(
+                                label: 'auth.description_skills'.tr(),
+                                icon: Icons.description,
+                              ),
+                              maxLines: 3,
+                              textInputAction: TextInputAction.next,
+                            ),
+                            SizedBox(height: 12.h),
+                            // Currency field first
+                            TextFormField(
+                              controller: _currencyController,
+                              decoration: AppStyles.inputDecoration(
+                                label: 'auth.currency'.tr(),
+                                icon: Icons.currency_exchange,
+                              ),
+                              textInputAction: TextInputAction.next,
+                            ),
+                            SizedBox(height: 12.h),
+                            // Min and Max price fields below currency
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: TextFormField(
+                                    controller: _minPriceController,
+                                    decoration: AppStyles.inputDecoration(
+                                      label: 'auth.min_price'.tr(),
+                                      icon: Icons.attach_money,
+                                    ),
+                                    keyboardType: TextInputType.number,
+                                    textInputAction: TextInputAction.next,
+                                  ),
+                                ),
+                                SizedBox(width: 8.w),
+                                Expanded(
+                                  child: TextFormField(
+                                    controller: _maxPriceController,
+                                    decoration: AppStyles.inputDecoration(
+                                      label: 'auth.max_price'.tr(),
+                                      icon: Icons.attach_money,
+                                    ),
+                                    keyboardType: TextInputType.number,
+                                    textInputAction: TextInputAction.next,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            SizedBox(height: 12.h),
+                          ],
                           TextFormField(
                             controller: _passwordController,
                             obscureText: !_showPassword,
@@ -528,7 +817,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                 return 'password_required'.tr();
                               }
                               if (v.length < 8) {
-                                return 'Password must be at least 8 characters';
+                                return 'auth.password_min_length'.tr();
                               }
                               return null;
                             },
@@ -560,7 +849,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                 return 'confirm_password_required'.tr();
                               }
                               if (v != _passwordController.text) {
-                                return 'Passwords do not match';
+                                return 'auth.passwords_do_not_match'.tr();
                               }
                               return null;
                             },
@@ -584,7 +873,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                   ),
                                   SizedBox(width: 6.w),
                                   Text(
-                                    'Passwords do not match',
+                                    'auth.passwords_do_not_match'.tr(),
                                     style: TextStyle(
                                       color: Colors.red,
                                       fontSize: 12.sp,
@@ -635,7 +924,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                               color: Colors.white,
                                             )
                                           : Text(
-                                              'Create Account',
+                                              'auth.create_account'.tr(),
                                               style: TextStyle(
                                                 color: Colors.white,
                                                 fontWeight: FontWeight.bold,
@@ -658,7 +947,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                 );
                               },
                               child: Text(
-                                "Already have an account? Sign In",
+                                'auth.already_have_account'.tr(),
                                 style: TextStyle(
                                   color: AppStyles.mainBlue,
                                   fontWeight: FontWeight.bold,
@@ -693,6 +982,61 @@ class _RegisterPageState extends State<RegisterPage> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildUserTypeButton({
+    required String label,
+    required String type,
+    required IconData icon,
+  }) {
+    final isSelected = _selectedUserType == type;
+    return InkWell(
+      onTap: () {
+        setState(() {
+          _selectedUserType = type;
+        });
+      },
+      borderRadius: BorderRadius.circular(8.r),
+      child: Container(
+        padding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 8.w),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? WPConfig.primaryColor.withOpacity(0.1)
+              : Colors.grey[100],
+          borderRadius: BorderRadius.circular(8.r),
+          border: Border.all(
+            color: isSelected
+                ? WPConfig.primaryColor
+                : Colors.grey[300]!,
+            width: isSelected ? 2 : 1,
+          ),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              color: isSelected
+                  ? WPConfig.primaryColor
+                  : Colors.grey[600],
+              size: 20.sp,
+            ),
+            SizedBox(height: 4.h),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 11.sp,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                color: isSelected
+                    ? WPConfig.primaryColor
+                    : Colors.grey[700],
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
       ),
     );
   }

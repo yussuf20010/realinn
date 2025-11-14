@@ -55,27 +55,56 @@ class WPConfig {
   static String serviceProviderShowByCategoryApiUrl(
           {required int categoryId, required int id}) =>
       '$apiBaseUrl/service-providers/$categoryId/$id';
-  static String serviceProviderServicesApiUrl(int id) =>
-      '$apiBaseUrl/service-providers/$id/services';
   static String serviceByIdApiUrl(int id) =>
       '$apiBaseUrl/service-providers/service/$id';
-  static String serviceProviderReviewsApiUrl(int id) =>
-      '$apiBaseUrl/service-providers/$id/reviews';
   static String serviceProviderPortfolioApiUrl(int id) =>
       '$apiBaseUrl/service-providers/$id/portfolio';
-  static String serviceProviderCheckAvailabilityApiUrl(int id) =>
-      '$apiBaseUrl/service-providers/$id/check-availability';
 
   // Authentication endpoints
+  // Registration
+  static const String registerUserApiUrl = '$apiBaseUrl/register/user';
+  static const String registerHotelApiUrl = '$apiBaseUrl/register/hotel';
+  static const String registerServiceProviderApiUrl =
+      '$apiBaseUrl/register/service-provider';
+  static const String registerVerifyOtpApiUrl =
+      '$apiBaseUrl/register/verify-otp';
+  static const String registerResendOtpApiUrl =
+      '$apiBaseUrl/register/resend-otp';
+
+  // Legacy endpoints (for backward compatibility)
   static const String userSignupApiUrl = '$apiBaseUrl/user/signup';
   static const String userVerifyApiUrl = '$apiBaseUrl/user/verify-otp';
   static const String userResendVerificationApiUrl =
       '$apiBaseUrl/user/resend-otp';
+
+  // Login & Password
   static const String userLoginApiUrl = '$apiBaseUrl/user/login';
   static const String userForgetPasswordApiUrl =
       '$apiBaseUrl/user/forget-password';
   static const String userResetPasswordApiUrl =
       '$apiBaseUrl/user/reset-password';
+
+  // User endpoints
+  static String addHotelToWishlistApiUrl(int hotelId) =>
+      '$apiBaseUrl/user/add-wishlist/hotel/$hotelId';
+  static String addRoomToWishlistApiUrl(int roomId) =>
+      '$apiBaseUrl/user/add-wishlist/room/$roomId';
+  static const String getUserBookingsApiUrl = '$apiBaseUrl/user/bookings';
+
+  // Bookings endpoints
+  static const String applyCouponApiUrl = '$apiBaseUrl/bookings/apply-coupon';
+  static const String createBookingApiUrl = '$apiBaseUrl/bookings';
+
+  // Service Providers endpoints (updated)
+  static String serviceProviderDetailsApiUrl(int id) =>
+      '$apiBaseUrl/service-providers/$id';
+  static String serviceProviderServicesApiUrl(int id) =>
+      '$apiBaseUrl/service-providers/$id/services';
+  static String serviceProviderReviewsApiUrl(int id) =>
+      '$apiBaseUrl/service-providers/$id/reviews';
+  static String serviceProviderCheckAvailabilityApiUrl(int id) =>
+      '$apiBaseUrl/service-providers/$id/check-availability';
+
   static Color get primaryColor {
     return navbarColor;
   }

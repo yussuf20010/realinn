@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:realinn/pages/profile/profile_page.dart';
 import '../../pages/customer_service/customer_service_page.dart';
 import '../../pages/entrypoint/loading_app_page.dart';
@@ -13,12 +14,14 @@ import '../../pages/auth/reset_password.dart';
 import '../../pages/main/main_scaffold.dart';
 import '../../pages/notifications/notifications_page.dart';
 import '../../pages/favourites/favourites_page.dart';
+import '../../pages/welcome/welcome_page.dart';
 // import '../../pages/waiting_list/waiting_list_page.dart';
 import 'app_routes.dart';
 import 'unknown_page.dart';
 import '../../models/hotel.dart';
 // import '../../models/selected_room.dart';
 import '../../pages/service_providers/pages/categories_page.dart';
+import '../../services/token_storage_service.dart';
 
 class RouteGenerator {
   static Route? onGenerate(RouteSettings settings) {
@@ -46,26 +49,51 @@ class RouteGenerator {
       case AppRoutes.verifyCode:
         final args = settings.arguments;
         String email = '';
-        int userId = 0;
+        int? userId;
+        int? vendorId;
+        String userType = 'user';
         if (args is Map<String, dynamic>) {
           email = (args['email'] as String?) ?? '';
-          userId = (args['userId'] as int?) ?? 0;
+          userId = args['userId'] as int?;
+          vendorId = args['vendorId'] as int?;
+          userType = (args['userType'] as String?) ?? 'user';
         } else if (args is String) {
           email = args;
         }
         return CupertinoPageRoute(
-            builder: (_) => VerifyCodePage(email: email, userId: userId));
+            builder: (_) => VerifyCodePage(
+                  email: email,
+                  userId: userId,
+                  vendorId: vendorId,
+                  userType: userType,
+                ));
 
       case AppRoutes.resetPass:
-        final args = settings.arguments as Map<String, String>?;
+        final args = settings.arguments as Map<String, dynamic>?;
         return CupertinoPageRoute(
             builder: (_) => ResetPasswordPage(
-                  email: args?['email'] ?? '',
-                  verificationCode: args?['verificationCode'] ?? '',
+                  resetToken: args?['resetToken'] as String?,
                 ));
 
       case AppRoutes.homePage:
-        return CupertinoPageRoute(builder: (_) => MainScaffold());
+        // Check user type - if hotel or service provider, show welcome page instead
+        return CupertinoPageRoute(
+          builder: (_) => FutureBuilder<String?>(
+            future: TokenStorageService.getUserType(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Scaffold(
+                  body: Center(child: CircularProgressIndicator()),
+                );
+              }
+              final userType = snapshot.data;
+              if (userType == 'hotel' || userType == 'service_provider') {
+                return WelcomePage();
+              }
+              return MainScaffold();
+            },
+          ),
+        );
       case AppRoutes.profile:
         return CupertinoPageRoute(builder: (_) => const ProfilePage());
 

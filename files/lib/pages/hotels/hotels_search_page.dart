@@ -36,7 +36,7 @@ class _HotelsSearchPageState extends ConsumerState<HotelsSearchPage> {
   bool _isLoading = true;
   String _sortBy = 'recommended';
   double _minRating = 0.0;
-  List<String> _selectedAmenities = [];
+  Set<String> _selectedAmenities = <String>{};
 
   @override
   void initState() {
@@ -125,10 +125,12 @@ class _HotelsSearchPageState extends ConsumerState<HotelsSearchPage> {
 
     // Apply amenities filter
     if (_selectedAmenities.isNotEmpty) {
+      // Create a copy of the Set to avoid concurrent modification issues
+      final selectedAmenitiesCopy = Set<String>.from(_selectedAmenities);
       filtered = filtered.where((hotel) {
         // Check if hotel has any of the selected amenities
         // For now, we'll use a simple check - you can enhance this based on your hotel data structure
-        return _selectedAmenities.any((amenity) {
+        return selectedAmenitiesCopy.any((amenity) {
           switch (amenity) {
             case 'WiFi':
               return true; // Assume all hotels have WiFi for now

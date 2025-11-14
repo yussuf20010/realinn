@@ -344,7 +344,7 @@ class HotelCard extends ConsumerWidget {
                 GestureDetector(
                   onTap: () => _navigateToHotelDetails(context),
                   child: Text(
-                    'RealInn',
+                    'RealN',
                     style: TextStyle(
                       fontSize: 10.sp,
                       color: primaryColor,
@@ -612,7 +612,7 @@ class HotelCard extends ConsumerWidget {
               GestureDetector(
                 onTap: () => _navigateToHotelDetails(context),
                 child: Text(
-                  'RealInn',
+                  'RealN',
                   style: TextStyle(
                     fontSize: 16.sp,
                     color: primaryColor,

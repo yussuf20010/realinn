@@ -201,12 +201,7 @@ class _ProvidersListPageState extends State<ProvidersListPage> {
                           // Removed search and filter controls for details page
                           _buildResultsMeta(),
                           SizedBox(height: 12.h),
-                          ..._buildSortedAndFiltered(_providers)
-                              .map((provider) => Padding(
-                                    padding: EdgeInsets.only(bottom: 16.h),
-                                    child:
-                                        _buildProviderCard(provider, isTablet),
-                                  )),
+                          _buildAvatarGrid(_buildSortedAndFiltered(_providers), isTablet),
                           if (_pagination != null && _pagination!.hasMorePages)
                             Padding(
                               padding: EdgeInsets.only(top: 8.h),
@@ -394,6 +389,109 @@ class _ProvidersListPageState extends State<ProvidersListPage> {
         );
       },
     );
+  }
+
+  Widget _buildAvatarGrid(List<ServiceProvider> providers, bool isTablet) {
+    if (providers.isEmpty) {
+      return SizedBox.shrink();
+    }
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: NeverScrollableScrollPhysics(),
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 3,
+        crossAxisSpacing: isTablet ? 24.w : 16.w,
+        mainAxisSpacing: isTablet ? 32.h : 24.h,
+        childAspectRatio: 0.75, // Adjusted for text below avatars
+      ),
+      itemCount: providers.length,
+      itemBuilder: (context, index) {
+        return _buildAvatarItem(providers[index], isTablet);
+      },
+    );
+  }
+
+  Widget _buildAvatarItem(ServiceProvider provider, bool isTablet) {
+    // Calculate a percentage based on response rate or completion rate
+    final percentage = provider.responseRate > 0
+        ? provider.responseRate.toInt()
+        : (provider.completedOrders > 0 ? (provider.completedOrders * 2).clamp(0, 100) : 0);
+    
+    // Get avatar color based on provider index or name
+    final avatarColor = _getAvatarColor(provider.id.hashCode);
+    
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ProviderDetailsPage(
+              providerId: int.parse(provider.id),
+              categoryId: widget.categoryId,
+            ),
+          ),
+        );
+      },
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Static colored avatar circle - no box, no image loading
+          Container(
+            width: isTablet ? 100.w : 80.w,
+            height: isTablet ? 100.w : 80.w,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: avatarColor,
+            ),
+            child: Icon(
+              Icons.person,
+              size: isTablet ? 50 : 40,
+              color: Colors.white,
+            ),
+          ),
+          SizedBox(height: 8.h),
+          // Provider name
+          Text(
+            provider.name,
+            style: TextStyle(
+              fontSize: isTablet ? 12.sp : 11.sp,
+              fontWeight: FontWeight.w500,
+              color: Colors.black87,
+            ),
+            textAlign: TextAlign.center,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+          SizedBox(height: 4.h),
+          // Percentage
+          Text(
+            '$percentage%',
+            style: TextStyle(
+              fontSize: isTablet ? 11.sp : 10.sp,
+              fontWeight: FontWeight.w600,
+              color: Colors.grey[700],
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Color _getAvatarColor(int index) {
+    final colors = [
+      Color(0xFFFFD700), // Yellow
+      Color(0xFF20B2AA), // Teal
+      Color(0xFF9370DB), // Purple
+      Color(0xFF32CD32), // Green
+      Color(0xFFFF6347), // Orange
+      Color(0xFF4169E1), // Blue
+      Color(0xFFFF69B4), // Pink
+      Color(0xFF00CED1), // Dark Turquoise
+      Color(0xFFFFA500), // Orange
+      Color(0xFF8B008B), // Dark Magenta
+    ];
+    return colors[index.abs() % colors.length];
   }
 
   Widget _buildProviderCard(ServiceProvider provider, bool isTablet) {

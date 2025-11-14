@@ -466,14 +466,12 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             ElevatedButton(
               onPressed: () async {
                 Navigator.of(context).pop();
-                // Handle logout
+                // Handle logout - clear all data
                 await AuthService.logout();
                 if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('logged_out_successfully'.tr())),
-                  );
+                  // Navigate to initial route which will check auth state and route to login
                   Navigator.pushNamedAndRemoveUntil(
-                      context, AppRoutes.login, (route) => false);
+                      context, AppRoutes.initial, (route) => false);
                 }
               },
               style: ElevatedButton.styleFrom(

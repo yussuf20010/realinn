@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -6,13 +7,21 @@ import '../../config/wp_config.dart';
 import '../../config/constants/app_styles.dart';
 import '../../config/routes/app_routes.dart';
 import '../../services/auth_service.dart';
+import '../../services/token_storage_service.dart';
 
 class VerifyCodePage extends StatefulWidget {
   final String email;
-  final int userId;
+  final int? userId;
+  final int? vendorId;
+  final String userType; // 'user', 'hotel', 'service_provider'
 
-  const VerifyCodePage({Key? key, required this.email, required this.userId})
-      : super(key: key);
+  const VerifyCodePage({
+    Key? key,
+    required this.email,
+    required this.userId,
+    this.vendorId,
+    this.userType = 'user',
+  }) : super(key: key);
 
   @override
   State<VerifyCodePage> createState() => _VerifyCodePageState();
@@ -88,7 +97,7 @@ class _VerifyCodePageState extends State<VerifyCodePage> {
     final code = _getCode();
     if (code.length != 6) {
       setState(() {
-        _errorMessage = 'Please enter a valid 6-digit code';
+        _errorMessage = 'auth.please_enter_valid_code'.tr();
       });
       return;
     }
@@ -100,9 +109,11 @@ class _VerifyCodePageState extends State<VerifyCodePage> {
     });
 
     try {
-      final response = await AuthService.verifyEmail(
+      final response = await AuthService.verifyOtp(
         userId: widget.userId,
+        vendorId: widget.vendorId,
         otpCode: code,
+        userType: widget.userType,
       );
 
       if (mounted) {
@@ -110,11 +121,21 @@ class _VerifyCodePageState extends State<VerifyCodePage> {
           _successMessage = response.message;
         });
 
+        // Clear temporary selected user type after successful verification
+        await TokenStorageService.clearSelectedUserType();
+
         // If verification succeeded, user may be considered logged in (cookies set or user returned)
-        // Navigate to Home
-        Future.delayed(Duration(milliseconds: 800), () {
+        // Check user type and navigate accordingly
+        Future.delayed(Duration(milliseconds: 800), () async {
           if (mounted) {
-            Navigator.of(context).pushReplacementNamed(AppRoutes.homePage);
+            final userType = await TokenStorageService.getUserType();
+            if (userType == 'hotel' || userType == 'service_provider') {
+              // Navigate to initial route which will show welcome page
+              Navigator.of(context).pushReplacementNamed(AppRoutes.initial);
+            } else {
+              // Regular users go to home page
+              Navigator.of(context).pushReplacementNamed(AppRoutes.homePage);
+            }
           }
         });
       }
@@ -168,9 +189,9 @@ class _VerifyCodePageState extends State<VerifyCodePage> {
     });
 
     try {
-      final response = await AuthService.resendVerificationCode(
+      final response = await AuthService.resendOtp(
         userId: widget.userId,
-        email: widget.email,
+        userType: widget.userType,
       );
 
       if (mounted) {
@@ -226,7 +247,7 @@ class _VerifyCodePageState extends State<VerifyCodePage> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
-                          'Verify Email',
+                          'auth.verify_email'.tr(),
                           style: TextStyle(
                             fontSize: 28.sp,
                             fontWeight: FontWeight.bold,
@@ -236,7 +257,7 @@ class _VerifyCodePageState extends State<VerifyCodePage> {
                         ),
                         SizedBox(height: 8.h),
                         Text(
-                          'Enter the 6-digit code sent to',
+                          'auth.enter_6_digit_code'.tr(),
                           style: TextStyle(
                             fontSize: 14.sp,
                             color: Colors.grey[600],
@@ -397,7 +418,7 @@ class _VerifyCodePageState extends State<VerifyCodePage> {
                                         EdgeInsets.symmetric(vertical: 16.h),
                                     child: Center(
                                       child: Text(
-                                        'Verify',
+                                        'auth.verify'.tr(),
                                         style: TextStyle(
                                           color: Colors.white,
                                           fontWeight: FontWeight.bold,
@@ -415,7 +436,7 @@ class _VerifyCodePageState extends State<VerifyCodePage> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
-                              "Didn't receive the code? ",
+                              'auth.didnt_receive_code'.tr(),
                               style: TextStyle(
                                 fontSize: 14.sp,
                                 color: Colors.grey[600],
@@ -425,7 +446,7 @@ class _VerifyCodePageState extends State<VerifyCodePage> {
                               GestureDetector(
                                 onTap: _resendCode,
                                 child: Text(
-                                  'Resend',
+                                  'auth.resend'.tr(),
                                   style: TextStyle(
                                     color: AppStyles.mainBlue,
                                     fontWeight: FontWeight.bold,
@@ -453,7 +474,7 @@ class _VerifyCodePageState extends State<VerifyCodePage> {
                               );
                             },
                             child: Text(
-                              "Back to Sign In",
+                              'auth.back_to_sign_in'.tr(),
                               style: TextStyle(
                                 color: AppStyles.mainBlue,
                                 fontWeight: FontWeight.bold,

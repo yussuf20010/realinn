@@ -1242,7 +1242,7 @@ class _HomePageState extends ConsumerState<HomePage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'why_realinn'.tr(),
+          'why_RealN'.tr(),
           style: TextStyle(
             fontSize: 13.sp,
             fontWeight: FontWeight.bold,

@@ -52,15 +52,14 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
       );
 
       if (mounted) {
-        final verificationCode = response['verification_code']?.toString();
+        final resetToken = response['reset_token']?.toString();
 
-        // Navigate to reset password page with email and verification code
+        // Navigate to reset password page with reset token
         Navigator.pushReplacementNamed(
           context,
           AppRoutes.resetPass,
           arguments: {
-            'email': _emailController.text.trim(),
-            'verificationCode': verificationCode ?? '',
+            'resetToken': resetToken ?? '',
           },
         );
       }
@@ -136,7 +135,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
-                            'Forgot Password',
+                            'auth.forgot_password'.tr(),
                             style: TextStyle(
                               fontSize: 28.sp,
                               fontWeight: FontWeight.bold,
@@ -221,7 +220,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                               }
                               if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
                                   .hasMatch(v)) {
-                                return 'Please enter a valid email';
+                                return 'auth.valid_email_required'.tr();
                               }
                               return null;
                             },
@@ -266,7 +265,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                                             color: Colors.white,
                                           )
                                         : Text(
-                                            'Submit',
+                                            'submit'.tr(),
                                             style: TextStyle(
                                               color: Colors.white,
                                               fontWeight: FontWeight.bold,
@@ -288,7 +287,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                                 );
                               },
                               child: Text(
-                                "Back to Sign In",
+                                'auth.back_to_sign_in'.tr(),
                                 style: TextStyle(
                                   color: AppStyles.mainBlue,
                                   fontWeight: FontWeight.bold,

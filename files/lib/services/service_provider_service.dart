@@ -16,7 +16,10 @@ class ServiceProviderService {
       print('URL: $uri');
       print('Headers: ${WPConfig.defaultHeaders}');
 
-      final response = await http.get(uri, headers: await buildAuthHeaders());
+      final headers = await buildAuthHeaders(
+        extra: {'X-API-Key': WPConfig.siteApiKey},
+      );
+      final response = await http.get(uri, headers: headers);
 
       print('🟢 FETCH CATEGORIES RESPONSE:');
       print('Status Code: ${response.statusCode}');
@@ -60,7 +63,10 @@ class ServiceProviderService {
       print('Query Parameters: $cleanedParams');
       print('Headers: ${WPConfig.defaultHeaders}');
 
-      final response = await http.get(uri, headers: await buildAuthHeaders());
+      final headers = await buildAuthHeaders(
+        extra: {'X-API-Key': WPConfig.siteApiKey},
+      );
+      final response = await http.get(uri, headers: headers);
 
       print('🟢 FETCH PROVIDERS RESPONSE:');
       print('Status Code: ${response.statusCode}');
@@ -104,7 +110,10 @@ class ServiceProviderService {
         'per_page': perPage.toString(),
       });
       final headers = await buildAuthHeaders(
-        extra: {'X-Requested-With': 'XMLHttpRequest'},
+        extra: {
+          'X-API-Key': WPConfig.siteApiKey,
+          'X-Requested-With': 'XMLHttpRequest',
+        },
       );
 
       print('🟢 FETCH PROVIDERS BY CATEGORY REQUEST:');
@@ -178,7 +187,10 @@ class ServiceProviderService {
     try {
       final uri = Uri.parse(WPConfig.serviceByIdApiUrl(id));
       final headers = await buildAuthHeaders(
-        extra: {'X-Requested-With': 'XMLHttpRequest'},
+        extra: {
+          'X-API-Key': WPConfig.siteApiKey,
+          'X-Requested-With': 'XMLHttpRequest',
+        },
       );
 
       print('🟢 FETCH SERVICE BY ID REQUEST:');
@@ -223,6 +235,121 @@ class ServiceProviderService {
     final result = ServiceProvider.fromApi(providerJson);
     print('🟢 PROVIDER PARSED (service/id): ${result.name} (ID: ${result.id})');
     return result;
+  }
+
+  // Get service provider details: GET /api/service-providers/{id}
+  static Future<ServiceProvider> fetchProviderDetails(int id) async {
+    try {
+      final uri = Uri.parse(WPConfig.serviceProviderDetailsApiUrl(id));
+      final headers = await buildAuthHeaders(
+        extra: {'X-API-Key': WPConfig.siteApiKey},
+      );
+
+      final response = await http.get(uri, headers: headers);
+
+      if (response.statusCode != 200) {
+        throw Exception('Failed to load provider: ${response.statusCode}');
+      }
+
+      final Map<String, dynamic> data = json.decode(response.body);
+      final providerJson = (data['provider'] as Map<String, dynamic>?) ??
+          (data['data'] as Map<String, dynamic>?) ??
+          (data as Map<String, dynamic>);
+      return ServiceProvider.fromApi(providerJson);
+    } catch (e) {
+      print('🔴 FETCH PROVIDER DETAILS ERROR: ${e.toString()}');
+      rethrow;
+    }
+  }
+
+  // Get services: GET /api/service-providers/{id}/services
+  static Future<List<Map<String, dynamic>>> fetchProviderServices(int id) async {
+    try {
+      final uri = Uri.parse(WPConfig.serviceProviderServicesApiUrl(id));
+      final headers = await buildAuthHeaders(
+        extra: {'X-API-Key': WPConfig.siteApiKey},
+      );
+
+      final response = await http.get(uri, headers: headers);
+
+      if (response.statusCode != 200) {
+        throw Exception('Failed to load services: ${response.statusCode}');
+      }
+
+      final data = json.decode(response.body);
+      if (data is Map<String, dynamic>) {
+        return List<Map<String, dynamic>>.from(
+            (data['services'] as List? ?? data['data'] as List? ?? []));
+      } else if (data is List) {
+        return List<Map<String, dynamic>>.from(data);
+      }
+      return [];
+    } catch (e) {
+      print('🔴 FETCH PROVIDER SERVICES ERROR: ${e.toString()}');
+      rethrow;
+    }
+  }
+
+  // Get reviews: GET /api/service-providers/{id}/reviews
+  static Future<List<Map<String, dynamic>>> fetchProviderReviews(int id) async {
+    try {
+      final uri = Uri.parse(WPConfig.serviceProviderReviewsApiUrl(id));
+      final headers = await buildAuthHeaders(
+        extra: {'X-API-Key': WPConfig.siteApiKey},
+      );
+
+      final response = await http.get(uri, headers: headers);
+
+      if (response.statusCode != 200) {
+        throw Exception('Failed to load reviews: ${response.statusCode}');
+      }
+
+      final data = json.decode(response.body);
+      if (data is Map<String, dynamic>) {
+        return List<Map<String, dynamic>>.from(
+            (data['reviews'] as List? ?? data['data'] as List? ?? []));
+      } else if (data is List) {
+        return List<Map<String, dynamic>>.from(data);
+      }
+      return [];
+    } catch (e) {
+      print('🔴 FETCH PROVIDER REVIEWS ERROR: ${e.toString()}');
+      rethrow;
+    }
+  }
+
+  // Check availability: POST /api/service-providers/{id}/check-availability
+  static Future<Map<String, dynamic>> checkAvailability({
+    required int id,
+    required String date,
+    required String time,
+  }) async {
+    try {
+      final uri = Uri.parse(WPConfig.serviceProviderCheckAvailabilityApiUrl(id));
+      final headers = await buildAuthHeaders(
+        extra: {'X-API-Key': WPConfig.siteApiKey},
+      );
+
+      final body = json.encode({
+        'date': date,
+        'time': time,
+      });
+
+      final response = await http.post(uri, headers: headers, body: body);
+
+      if (response.statusCode != 200) {
+        final errorData = json.decode(response.body) as Map<String, dynamic>;
+        final errorMsg = errorData['error']?.toString() ??
+            errorData['message']?.toString() ??
+            'Failed to check availability';
+        throw Exception(errorMsg);
+      }
+
+      return json.decode(response.body) as Map<String, dynamic>;
+    } catch (e) {
+      print('🔴 CHECK AVAILABILITY ERROR: ${e.toString()}');
+      rethrow;
+    }
   }
 }
 

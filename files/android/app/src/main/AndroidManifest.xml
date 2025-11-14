@@ -14,7 +14,7 @@
 
 
     <application
-        android:label="RealInn"
+        android:label="RealN"
         android:name= "${applicationName}"
         android:icon="@mipmap/ic_launcher"
         android:allowBackup="false"
