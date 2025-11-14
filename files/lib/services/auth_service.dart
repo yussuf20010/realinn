@@ -141,12 +141,17 @@ class AuthService {
         'password_confirmation': passwordConfirmation,
       };
       if (name != null && name.isNotEmpty) body['name'] = name;
-      if (displayName != null && displayName.isNotEmpty) body['display_name'] = displayName;
+      if (displayName != null && displayName.isNotEmpty)
+        body['display_name'] = displayName;
       if (tagline != null && tagline.isNotEmpty) body['tagline'] = tagline;
-      if (description != null && description.isNotEmpty) body['description'] = description;
+      if (description != null && description.isNotEmpty)
+        body['description'] = description;
       if (country != null && country.isNotEmpty) body['country'] = country;
       if (city != null && city.isNotEmpty) body['city'] = city;
-      if (mainCategoryId != null) body['main_category_id'] = mainCategoryId;
+      // Send main_category_id as single integer (NOT category_ids array)
+      if (mainCategoryId != null) {
+        body['main_category_id'] = mainCategoryId; // Single integer, not array
+      }
       if (skills != null && skills.isNotEmpty) body['skills'] = skills;
       if (minPrice != null) body['min_price'] = minPrice;
       if (maxPrice != null) body['max_price'] = maxPrice;
@@ -155,6 +160,8 @@ class AuthService {
       print('🔵 REGISTER SERVICE PROVIDER REQUEST:');
       print('URL: ${WPConfig.registerServiceProviderApiUrl}');
       print('Headers: ${WPConfig.defaultHeaders}');
+      print('🔵 mainCategoryId parameter: $mainCategoryId');
+      print('🔵 main_category_id in body: ${body['main_category_id']}');
       print('Request Body: ${json.encode(body)}');
 
       final response = await http.post(
@@ -219,22 +226,22 @@ class AuthService {
 
       if (response.statusCode == 200) {
         final authResponse = AuthResponse.fromJson(data);
-        
+
         // Save token if provided
         if (data['token'] != null) {
           await TokenStorageService.saveToken(data['token'].toString());
         }
-        
+
         // Save user type
         if (userType.isNotEmpty) {
           await TokenStorageService.saveUserType(userType);
         }
-        
+
         // Save user if provided
         if (authResponse.user != null) {
           await TokenStorageService.saveUser(authResponse.user!);
         }
-        
+
         return authResponse;
       } else {
         final errorMsg = data['error']?.toString() ??

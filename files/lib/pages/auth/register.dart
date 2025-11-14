@@ -8,7 +8,9 @@ import '../../config/wp_config.dart';
 import '../../config/constants/app_styles.dart';
 import '../../config/routes/app_routes.dart';
 import '../../services/auth_service.dart';
+import '../../services/service_provider_service.dart';
 import '../../models/country.dart';
+import '../../models/service_provider_category.dart';
 import '../home/components/country_selector_widget.dart';
 
 enum PasswordStrength {
@@ -20,7 +22,7 @@ enum PasswordStrength {
 
 class RegisterPage extends StatefulWidget {
   final String? initialUserType; // User type selected from outside (login page)
-  
+
   const RegisterPage({Key? key, this.initialUserType}) : super(key: key);
 
   @override
@@ -49,7 +51,9 @@ class _RegisterPageState extends State<RegisterPage> {
   String? _selectedUserType; // 'user', 'hotel', 'service_provider'
   String? _selectedState;
   String? _selectedCity;
-  int? _selectedCategoryId;
+  int? _selectedCategoryId; // Single category selection
+  List<ServiceProviderCategory> _categories = [];
+  bool _isLoadingCategories = false;
   bool _isCreating = false;
   bool _showPassword = false;
   bool _showConfirmPassword = false;
@@ -84,6 +88,32 @@ class _RegisterPageState extends State<RegisterPage> {
     _usernameController.addListener(() => setState(() {}));
     _emailController.addListener(() => setState(() {}));
     _phoneController.addListener(() => setState(() {}));
+
+    // Load categories if service provider is pre-selected
+    if (_selectedUserType == 'service_provider') {
+      _loadCategories();
+    }
+  }
+
+  Future<void> _loadCategories() async {
+    if (_isLoadingCategories) return;
+
+    setState(() {
+      _isLoadingCategories = true;
+    });
+
+    try {
+      final categories = await ServiceProviderService.fetchCategories();
+      setState(() {
+        _categories = categories;
+        _isLoadingCategories = false;
+      });
+    } catch (e) {
+      setState(() {
+        _isLoadingCategories = false;
+      });
+      // Silently fail - categories are optional
+    }
   }
 
   @override
@@ -142,11 +172,11 @@ class _RegisterPageState extends State<RegisterPage> {
         _confirmPasswordController.text.isNotEmpty &&
         _passwordController.text.length >= 8 &&
         _passwordController.text == _confirmPasswordController.text;
-    
+
     if (_selectedUserType == 'hotel') {
       return baseValid && _hotelNameController.text.isNotEmpty;
     }
-    
+
     return baseValid;
   }
 
@@ -197,6 +227,18 @@ class _RegisterPageState extends State<RegisterPage> {
             .map((s) => s.trim())
             .where((s) => s.isNotEmpty)
             .toList();
+
+        // Ensure category is selected
+        if (_selectedCategoryId == null) {
+          setState(() {
+            _errorMessage = 'auth.category_required'.tr();
+            _isCreating = false;
+          });
+          return;
+        }
+
+        print('🔵 Registering SP - Selected Category ID: $_selectedCategoryId');
+
         response = await AuthService.registerServiceProvider(
           username: _usernameController.text.trim(),
           email: _emailController.text.trim(),
@@ -488,7 +530,8 @@ class _RegisterPageState extends State<RegisterPage> {
                           ] else ...[
                             // Show selected user type badge if provided from outside
                             Container(
-                              padding: EdgeInsets.symmetric(vertical: 8.h, horizontal: 12.w),
+                              padding: EdgeInsets.symmetric(
+                                  vertical: 8.h, horizontal: 12.w),
                               decoration: BoxDecoration(
                                 color: WPConfig.primaryColor.withOpacity(0.1),
                                 borderRadius: BorderRadius.circular(8.r),
@@ -579,7 +622,8 @@ class _RegisterPageState extends State<RegisterPage> {
                             SizedBox(height: 16.h),
                           ],
                           // Name field (for user and service provider)
-                          if (_selectedUserType == 'user' || _selectedUserType == 'service_provider')
+                          if (_selectedUserType == 'user' ||
+                              _selectedUserType == 'service_provider')
                             TextFormField(
                               controller: _nameController,
                               decoration: AppStyles.inputDecoration(
@@ -589,7 +633,8 @@ class _RegisterPageState extends State<RegisterPage> {
                               textInputAction: TextInputAction.next,
                               onChanged: (value) => setState(() {}),
                             ),
-                          if (_selectedUserType == 'user' || _selectedUserType == 'service_provider')
+                          if (_selectedUserType == 'user' ||
+                              _selectedUserType == 'service_provider')
                             SizedBox(height: 12.h),
                           // Hotel Name (for hotel)
                           if (_selectedUserType == 'hotel')
@@ -599,7 +644,8 @@ class _RegisterPageState extends State<RegisterPage> {
                                 label: 'auth.hotel_name_label'.tr(),
                                 icon: Icons.hotel,
                               ),
-                              validator: (v) => _selectedUserType == 'hotel' && (v == null || v.isEmpty)
+                              validator: (v) => _selectedUserType == 'hotel' &&
+                                      (v == null || v.isEmpty)
                                   ? 'auth.hotel_name_required'.tr()
                                   : null,
                               textInputAction: TextInputAction.next,
@@ -794,6 +840,68 @@ class _RegisterPageState extends State<RegisterPage> {
                                 ),
                               ],
                             ),
+                            SizedBox(height: 12.h),
+                            // Service Categories Selection
+                            _isLoadingCategories
+                                ? Center(
+                                    child: Padding(
+                                      padding:
+                                          EdgeInsets.symmetric(vertical: 16.h),
+                                      child: CircularProgressIndicator(
+                                        color: WPConfig.primaryColor,
+                                      ),
+                                    ),
+                                  )
+                                : _categories.isEmpty
+                                    ? Padding(
+                                        padding:
+                                            EdgeInsets.symmetric(vertical: 8.h),
+                                        child: Text(
+                                          'auth.no_categories_available'.tr(),
+                                          style: TextStyle(
+                                            fontSize: 12.sp,
+                                            color: Colors.grey[600],
+                                          ),
+                                        ),
+                                      )
+                                    : DropdownButtonFormField<int>(
+                                        decoration: AppStyles.inputDecoration(
+                                          label: 'auth.select_categories'.tr(),
+                                          icon: Icons.category,
+                                        ),
+                                        value: _selectedCategoryId,
+                                        hint: Text(
+                                          'auth.select_categories'.tr(),
+                                          style: TextStyle(
+                                            fontSize: 14.sp,
+                                            color: Colors.grey[600],
+                                          ),
+                                        ),
+                                        items: _categories.map((category) {
+                                          return DropdownMenuItem<int>(
+                                            value: category.id,
+                                            child: Text(
+                                              category.name,
+                                              style: TextStyle(
+                                                fontSize: 14.sp,
+                                                color: Colors.grey[800],
+                                              ),
+                                            ),
+                                          );
+                                        }).toList(),
+                                        onChanged: (value) {
+                                          setState(() {
+                                            _selectedCategoryId = value;
+                                          });
+                                        },
+                                        validator: (value) {
+                                          if (value == null) {
+                                            return 'auth.category_required'
+                                                .tr();
+                                          }
+                                          return null;
+                                        },
+                                      ),
                             SizedBox(height: 12.h),
                           ],
                           TextFormField(
@@ -996,7 +1104,13 @@ class _RegisterPageState extends State<RegisterPage> {
       onTap: () {
         setState(() {
           _selectedUserType = type;
+          _selectedCategoryId =
+              null; // Reset selected category when changing user type
         });
+        // Load categories if service provider is selected
+        if (type == 'service_provider') {
+          _loadCategories();
+        }
       },
       borderRadius: BorderRadius.circular(8.r),
       child: Container(
@@ -1007,9 +1121,7 @@ class _RegisterPageState extends State<RegisterPage> {
               : Colors.grey[100],
           borderRadius: BorderRadius.circular(8.r),
           border: Border.all(
-            color: isSelected
-                ? WPConfig.primaryColor
-                : Colors.grey[300]!,
+            color: isSelected ? WPConfig.primaryColor : Colors.grey[300]!,
             width: isSelected ? 2 : 1,
           ),
         ),
@@ -1018,9 +1130,7 @@ class _RegisterPageState extends State<RegisterPage> {
           children: [
             Icon(
               icon,
-              color: isSelected
-                  ? WPConfig.primaryColor
-                  : Colors.grey[600],
+              color: isSelected ? WPConfig.primaryColor : Colors.grey[600],
               size: 20.sp,
             ),
             SizedBox(height: 4.h),
@@ -1029,9 +1139,7 @@ class _RegisterPageState extends State<RegisterPage> {
               style: TextStyle(
                 fontSize: 11.sp,
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                color: isSelected
-                    ? WPConfig.primaryColor
-                    : Colors.grey[700],
+                color: isSelected ? WPConfig.primaryColor : Colors.grey[700],
               ),
               textAlign: TextAlign.center,
             ),
