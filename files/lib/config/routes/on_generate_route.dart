@@ -21,7 +21,6 @@ import 'unknown_page.dart';
 import '../../models/hotel.dart';
 // import '../../models/selected_room.dart';
 import '../../pages/service_providers/pages/categories_page.dart';
-import '../../pages/payment_documents/payment_documents_page.dart';
 import '../../services/token_storage_service.dart';
 
 class RouteGenerator {
@@ -168,9 +167,6 @@ class RouteGenerator {
 
       case AppRoutes.serviceProviderCategories:
         return CupertinoPageRoute(builder: (_) => const CategoriesPage());
-
-      case AppRoutes.paymentDocuments:
-        return CupertinoPageRoute(builder: (_) => const PaymentDocumentsPage());
 
       default:
         return errorRoute();

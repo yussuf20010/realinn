@@ -531,7 +531,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                                             : (isTablet ? 22.sp : 16.sp),
                                         height: isLandscape
                                             ? (isTablet ? 20.sp : 12.sp)
-                                            : (isTablet ? 22.sp : 16.sp),
+                                            : (isTablet ? 22  .sp : 16.sp),
                                         colorFilter: ColorFilter.mode(
                                           Colors.white,
                                           BlendMode.srcIn,
@@ -725,11 +725,6 @@ class _HomePageState extends ConsumerState<HomePage> {
 
           SizedBox(height: isTablet ? 16.h : 12.h),
 
-          // Extra Payment section
-          _buildExtraPaymentSection(isTablet, primaryColor),
-
-          SizedBox(height: isTablet ? 16.h : 12.h),
-
           // Offers section
           _buildOffersSection(isTablet, primaryColor),
 
@@ -746,93 +741,6 @@ class _HomePageState extends ConsumerState<HomePage> {
           SizedBox(height: isTablet ? 16.h : 12.h),
         ],
       ),
-    );
-  }
-
-  Widget _buildExtraPaymentSection(bool isTablet, Color primaryColor) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'extra_payment'.tr(),
-          style: TextStyle(
-            fontSize: isTablet ? 14.sp : 15.sp,
-            fontWeight: FontWeight.bold,
-            color: Colors.black,
-          ),
-        ),
-        SizedBox(height: isTablet ? 8.h : 6.h),
-        GestureDetector(
-          onTap: () {
-            Navigator.pushNamed(context, AppRoutes.paymentDocuments);
-          },
-          child: Container(
-            height: isTablet ? 120.h : 120.h,
-            padding: EdgeInsets.all(isTablet ? 16.w : 16.w),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(12.r),
-              border: Border.all(color: primaryColor, width: 2),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
-                  blurRadius: 8,
-                  offset: Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Row(
-              children: [
-                Container(
-                  width: isTablet ? 60.w : 60.w,
-                  height: isTablet ? 60.h : 60.h,
-                  decoration: BoxDecoration(
-                    color: primaryColor.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(12.r),
-                  ),
-                  child: Icon(
-                    Icons.payment,
-                    color: primaryColor,
-                    size: isTablet ? 28.sp : 28.sp,
-                  ),
-                ),
-                SizedBox(width: 16.w),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        'extra_payment'.tr(),
-                        style: TextStyle(
-                          fontSize: isTablet ? 14.sp : 16.sp,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
-                        ),
-                      ),
-                      SizedBox(height: 4.h),
-                      Text(
-                        'upload_payment_documents'.tr(),
-                        style: TextStyle(
-                          fontSize: isTablet ? 11.sp : 12.sp,
-                          color: Colors.grey[600],
-                        ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ),
-                ),
-                Icon(
-                  Icons.arrow_forward_ios,
-                  color: primaryColor,
-                  size: isTablet ? 18.sp : 18.sp,
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
     );
   }
 
