@@ -8,7 +8,9 @@ import '../home/home_page.dart';
 import '../favourites/favourites_page.dart';
 import '../waiting_list/waiting_list_page.dart';
 import '../history/history_page.dart';
-import '../../config/wp_config.dart';
+import '../../config/constants/app_colors.dart';
+import '../../widgets/whatsapp_floating_button.dart';
+import '../../widgets/ads/ads_timer_widget.dart';
 
 class MainScaffold extends ConsumerStatefulWidget {
   final int initialIndex;
@@ -35,23 +37,46 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
     HistoryPage(),
   ];
 
+  String _getCurrentPageName() {
+    switch (_currentIndex) {
+      case 0:
+        return 'home';
+      case 1:
+        return 'favourites';
+      case 2:
+        return 'waiting_list';
+      case 3:
+        return 'history';
+      default:
+        return 'home';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: _pages[_currentIndex],
-      bottomNavigationBar: _buildBottomNavigationBar(),
+    return AdsTimerWidget(
+      currentPage: _getCurrentPageName(),
+      child: Scaffold(
+        body: Stack(
+          children: [
+            _pages[_currentIndex],
+            WhatsAppFloatingButton(),
+          ],
+        ),
+        bottomNavigationBar: _buildBottomNavigationBar(),
+      ),
     );
   }
 
   Widget _buildBottomNavigationBar() {
-    final primaryColor = WPConfig.navbarColor;
+    final primaryColor = AppColors.primary(context);
     final screenSize = MediaQuery.of(context).size;
     final isTablet = screenSize.width >= 768;
     final isLandscape = screenSize.width > screenSize.height;
 
     // Adjust heights based on orientation
     final navBarHeight =
-        isLandscape ? (isTablet ? 60.h : 50.h) : (isTablet ? 80.h : 70.h);
+        isLandscape ? (isTablet ? 50.h : 50.h) : (isTablet ? 65.h : 70.h);
 
     return Container(
       decoration: BoxDecoration(
@@ -94,11 +119,15 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
 
     // Adjust sizes based on orientation
     final iconSize =
-        isLandscape ? (isTablet ? 20.sp : 18.sp) : (isTablet ? 28.sp : 24.sp);
+        isLandscape ? (isTablet ? 18.sp : 18.sp) : (isTablet ? 22.sp : 24.sp);
+    // Increase waiting list icon size (index 2)
+    final waitingIconSize = index == 2
+        ? (isLandscape ? (isTablet ? 22.sp : 18.sp) : (isTablet ? 22.sp : 24.sp))
+        : iconSize;
     final textSize =
-        isLandscape ? (isTablet ? 10.sp : 8.sp) : (isTablet ? 12.sp : 10.sp);
+        isLandscape ? (isTablet ? 9.sp : 8.sp) : (isTablet ? 10.sp : 10.sp);
     final spacing =
-        isLandscape ? (isTablet ? 2.h : 1.h) : (isTablet ? 6.h : 4.h);
+        isLandscape ? (isTablet ? 2.h : 1.h) : (isTablet ? 4.h : 4.h);
 
     return GestureDetector(
       onTap: () {
@@ -114,8 +143,8 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
           index == 2
               ? SvgPicture.asset(
                   AssetsManager.waiting,
-                  width: iconSize,
-                  height: iconSize,
+                  width: waitingIconSize,
+                  height: waitingIconSize,
                   color: isSelected ? primaryColor : Colors.black,
                 )
               : Icon(

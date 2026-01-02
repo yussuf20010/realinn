@@ -2,9 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 
 import '../../../config/constants/app_colors.dart';
-import '../../../config/constants/sizedbox_const.dart';
-import '../constants/app_defaults.dart';
-
 
 class AppShimmer extends StatelessWidget {
   const AppShimmer({
@@ -20,7 +17,7 @@ class AppShimmer extends StatelessWidget {
   Widget build(BuildContext context) {
     return Shimmer.fromColors(
       highlightColor: Theme.of(context).cardColor,
-      baseColor: AppColors.primary.withOpacity(0.1),
+      baseColor: AppColors.primary(context).withOpacity(0.1),
       enabled: enabled,
       child: child,
     );

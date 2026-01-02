@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import '../../config/wp_config.dart';
+import '../../config/constants/app_colors.dart';
 import '../../models/hotel.dart';
 import '../../models/selected_room.dart';
 import '../../services/favorites_provider.dart';
 import '../../services/waiting_list_provider.dart';
+import '../../widgets/ads/ads_timer_widget.dart';
 import '../service_providers/pages/categories_page.dart';
 
 class HotelDetailsPage extends ConsumerStatefulWidget {
@@ -33,32 +34,36 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
 
   @override
   Widget build(BuildContext context) {
-    final primaryColor = WPConfig.navbarColor;
+    final primaryColor = AppColors.primary(context);
     final isTablet = MediaQuery.of(context).size.width > 600;
 
-    return Scaffold(
-      backgroundColor: Colors.grey[50],
-      appBar: PreferredSize(
-        preferredSize: Size.fromHeight(100.h),
-        child: _buildCustomAppBar(primaryColor, isTablet),
-      ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            _buildPropertiesSection(primaryColor, isTablet), // Images first
-            _buildHotelInfo(primaryColor, isTablet), // Description second
-            _buildLocationSection(primaryColor, isTablet),
-            _buildAmenitiesSection(primaryColor, isTablet),
-            _buildReviewsSection(primaryColor, isTablet),
-            _buildPropertyInfoSection(primaryColor, isTablet),
-            SizedBox(height: 100.h), // Space for bottom bar
-          ],
+    return AdsTimerWidget(
+      currentPage: 'hotel',
+      child: Scaffold(
+        backgroundColor: Colors.grey[50],
+        appBar: PreferredSize(
+          preferredSize: Size.fromHeight(100.h),
+          child: _buildCustomAppBar(primaryColor, isTablet),
         ),
+        body: SingleChildScrollView(
+          child: Column(
+            children: [
+              _buildPropertiesSection(primaryColor, isTablet), // Images first
+              _buildHotelInfo(primaryColor,
+                  isTablet), // Description second with service provider icon
+              _buildLocationSection(primaryColor, isTablet), // Maps section
+              _buildAmenitiesSection(primaryColor, isTablet),
+              _buildReviewsSection(primaryColor, isTablet),
+              _buildPropertyInfoSection(primaryColor, isTablet),
+              SizedBox(height: 100.h), // Space for bottom bar
+            ],
+          ),
+        ),
+        bottomNavigationBar: _buildBottomBar(primaryColor, isTablet),
+        floatingActionButton: _selectedRooms.isNotEmpty
+            ? _buildBookNowButton(primaryColor, isTablet)
+            : null,
       ),
-      bottomNavigationBar: _buildBottomBar(primaryColor, isTablet),
-      floatingActionButton: _selectedRooms.isNotEmpty
-          ? _buildBookNowButton(primaryColor, isTablet)
-          : null,
     );
   }
 
@@ -200,6 +205,33 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
           SizedBox(height: 16),
           Row(
             children: [
+              // Service Provider icon button at first position - bigger and more related
+              GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => CategoriesPage(),
+                    ),
+                  );
+                },
+                child: Container(
+                  padding: EdgeInsets.all(isTablet ? 14 : 12),
+                  decoration: BoxDecoration(
+                    color: primaryColor.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                        color: primaryColor.withOpacity(0.3), width: 1.5),
+                  ),
+                  child: Icon(
+                    Icons
+                        .room_service, // More related icon for service providers
+                    color: primaryColor,
+                    size: isTablet ? 32 : 28,
+                  ),
+                ),
+              ),
+              SizedBox(width: 8),
               _buildInfoChip(Icons.wifi, 'free_wifi'.tr(), isTablet),
               SizedBox(width: 8),
               _buildInfoChip(Icons.local_parking, 'parking'.tr(), isTablet),
@@ -318,6 +350,40 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Service Providers button at start
+          Row(
+            children: [
+              Expanded(
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => CategoriesPage(),
+                      ),
+                    );
+                  },
+                  icon: Icon(Icons.design_services, color: Colors.white),
+                  label: Text(
+                    'hotel.service_providers'.tr(),
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: isTablet ? 14 : 12,
+                    ),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: primaryColor,
+                    padding: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 20),
           // Title
           Text(
             'most_popular_facilities'.tr(),
@@ -802,27 +868,6 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
               ],
             ),
           ),
-          // Service Providers button
-          Container(
-            margin: EdgeInsets.only(right: 8.w),
-            decoration: BoxDecoration(
-              color: Colors.grey[100],
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: Colors.grey[300]!),
-            ),
-            child: IconButton(
-              icon: Icon(Icons.handyman, color: primaryColor),
-              tooltip: 'hotel.service_providers'.tr(),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => CategoriesPage(),
-                  ),
-                );
-              },
-            ),
-          ),
           SizedBox(
             width: 120,
             child: ElevatedButton(
@@ -935,7 +980,7 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
                           style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.bold,
-                            color: WPConfig.navbarColor,
+                            color: AppColors.primary(context),
                           ),
                           textAlign: TextAlign.center,
                         ),
@@ -965,7 +1010,7 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
               // Rooms list
               Expanded(
                 child: _buildModalRoomsList(
-                    WPConfig.navbarColor, false, setModalState),
+                    AppColors.primary(context), false, setModalState),
               ),
               // Bottom action bar
               if (_selectedRooms.isNotEmpty)
@@ -1001,7 +1046,7 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
                             _navigateToBooking();
                           },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: WPConfig.navbarColor,
+                            backgroundColor: AppColors.primary(context),
                             padding: EdgeInsets.symmetric(vertical: 16),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8),

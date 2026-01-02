@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
-import '../../config/wp_config.dart';
+import 'package:url_launcher/url_launcher.dart';
+import '../../config/constants/app_colors.dart';
+import '../../services/site_settings_controller.dart';
 
 class CustomerServicePage extends ConsumerStatefulWidget {
   const CustomerServicePage({Key? key}) : super(key: key);
@@ -14,7 +16,7 @@ class CustomerServicePage extends ConsumerStatefulWidget {
 class _CustomerServicePageState extends ConsumerState<CustomerServicePage> {
   @override
   Widget build(BuildContext context) {
-    final primaryColor = WPConfig.navbarColor;
+    final primaryColor = AppColors.primary(context);
     final isTablet = MediaQuery.of(context).size.width >= 768;
 
     return Scaffold(
@@ -88,143 +90,83 @@ class _CustomerServicePageState extends ConsumerState<CustomerServicePage> {
           ),
           SizedBox(height: isTablet ? 32 : 24),
 
-          // Chat option
-          _buildChatOption(isTablet, primaryColor),
-          SizedBox(height: 20),
-
-          // Other support options
-          _buildSupportOption(
-            icon: Icons.phone,
-            title: 'call_us'.tr(),
-            subtitle: 'speak_directly_team'.tr(),
-            action: 'call_now'.tr(),
-            onTap: () {
-              // Handle phone call
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('calling_customer_service'.tr())),
+          // Email and Phone support options from site settings
+          Consumer(
+            builder: (context, ref, child) {
+              final siteSettingsAsync = ref.watch(siteSettingsProvider);
+              return siteSettingsAsync.when(
+                data: (siteSettings) {
+                  return Column(
+                    children: [
+                      // Email support
+                      if (siteSettings.emailAddress != null && siteSettings.emailAddress!.isNotEmpty)
+                        _buildSupportOption(
+                          icon: Icons.email,
+                          title: 'email_support'.tr(),
+                          subtitle: siteSettings.emailAddress!,
+                          action: 'send_email'.tr(),
+                          onTap: () async {
+                            final email = siteSettings.emailAddress!;
+                            final uri = Uri.parse('mailto:$email');
+                            try {
+                              if (await canLaunchUrl(uri)) {
+                                await launchUrl(uri);
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text('cannot_open_email'.tr())),
+                                );
+                              }
+                            } catch (e) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text('error_opening_email'.tr())),
+                              );
+                            }
+                          },
+                          isTablet: isTablet,
+                          primaryColor: primaryColor,
+                        ),
+                      if (siteSettings.emailAddress != null && siteSettings.emailAddress!.isNotEmpty)
+                        SizedBox(height: 16),
+                      // Phone support
+                      if (siteSettings.contactNumber != null && siteSettings.contactNumber!.isNotEmpty)
+                        _buildSupportOption(
+                          icon: Icons.phone,
+                          title: 'call_us'.tr(),
+                          subtitle: siteSettings.contactNumber!,
+                          action: 'call_now'.tr(),
+                          onTap: () async {
+                            final phoneNumber = siteSettings.contactNumber!;
+                            final uri = Uri.parse('tel:$phoneNumber');
+                            try {
+                              if (await canLaunchUrl(uri)) {
+                                await launchUrl(uri);
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text('cannot_make_call'.tr())),
+                                );
+                              }
+                            } catch (e) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text('error_making_call'.tr())),
+                              );
+                            }
+                          },
+                          isTablet: isTablet,
+                          primaryColor: primaryColor,
+                        ),
+                    ],
+                  );
+                },
+                loading: () => Center(child: CircularProgressIndicator()),
+                error: (_, __) => Text('error_loading_contact_info'.tr()),
               );
             },
-            isTablet: isTablet,
-            primaryColor: primaryColor,
-          ),
-          SizedBox(height: 16),
-
-          _buildSupportOption(
-            icon: Icons.email,
-            title: 'email_support'.tr(),
-            subtitle: 'send_detailed_message'.tr(),
-            action: 'send_email'.tr(),
-            onTap: () {
-              // Handle email
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('opening_email_client'.tr())),
-              );
-            },
-            isTablet: isTablet,
-            primaryColor: primaryColor,
-          ),
-          SizedBox(height: 16),
-
-          _buildSupportOption(
-            icon: Icons.help_outline,
-            title: 'faq'.tr(),
-            subtitle: 'find_common_answers'.tr(),
-            action: 'browse_faq'.tr(),
-            onTap: () {
-              // Handle FAQ
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('opening_faq_section'.tr())),
-              );
-            },
-            isTablet: isTablet,
-            primaryColor: primaryColor,
           ),
         ],
       ),
     );
   }
 
-  Widget _buildChatOption(bool isTablet, Color primaryColor) {
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.all(isTablet ? 24 : 20),
-      decoration: BoxDecoration(
-        color: primaryColor.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: primaryColor.withOpacity(0.3)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                padding: EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: primaryColor,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(
-                  Icons.chat_bubble,
-                  color: Colors.white,
-                  size: isTablet ? 28 : 24,
-                ),
-              ),
-              SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                                         Text(
-                       'live_chat'.tr(),
-                       style: TextStyle(
-                         fontSize: isTablet ? 22 : 20,
-                         fontWeight: FontWeight.bold,
-                         color: Colors.black,
-                       ),
-                     ),
-                    SizedBox(height: 4),
-                                         Text(
-                       'chat_support_real_time'.tr(),
-                       style: TextStyle(
-                         fontSize: isTablet ? 16 : 14,
-                         color: Colors.grey[600],
-                       ),
-                     ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: 20),
-          SizedBox(
-            width: double.infinity,
-            height: isTablet ? 56 : 48,
-            child: ElevatedButton(
-              onPressed: () {
-                Navigator.pushNamed(context, '/chat');
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: primaryColor,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                elevation: 0,
-              ),
-                             child: Text(
-                 'start_chat'.tr(),
-                 style: TextStyle(
-                   fontSize: isTablet ? 18 : 16,
-                   fontWeight: FontWeight.bold,
-                 ),
-               ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
   Widget _buildSupportOption({
     required IconData icon,

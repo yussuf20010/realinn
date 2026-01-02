@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
-import '../../config/wp_config.dart';
+import '../../config/constants/app_colors.dart';
 
 class NotificationsPage extends ConsumerStatefulWidget {
   const NotificationsPage({Key? key}) : super(key: key);
@@ -13,7 +13,7 @@ class NotificationsPage extends ConsumerStatefulWidget {
 class _NotificationsPageState extends ConsumerState<NotificationsPage> {
   @override
   Widget build(BuildContext context) {
-    final primaryColor = WPConfig.navbarColor;
+    final primaryColor = AppColors.primary(context);
     final isTablet = MediaQuery.of(context).size.width >= 768;
 
     return Scaffold(

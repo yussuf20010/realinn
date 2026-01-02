@@ -40,7 +40,7 @@ class HeadlineRow extends StatelessWidget {
           width: width ?? MediaQuery.of(context).size.width * 0.1,
           height: 2,
           decoration: BoxDecoration(
-            color: AppColors.primary,
+            color: AppColors.primary(context),
             borderRadius: AppDefaults.borderRadius,
           ),
         )

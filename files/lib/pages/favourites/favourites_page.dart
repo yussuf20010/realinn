@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
-import '../../config/wp_config.dart';
+import '../../config/constants/app_colors.dart';
 import '../../services/favorites_provider.dart';
 import '../../models/hotel.dart';
 import '../hotels/hotel_details_page.dart';
@@ -16,7 +16,7 @@ class FavouritesPage extends ConsumerStatefulWidget {
 class _FavouritesPageState extends ConsumerState<FavouritesPage> {
   @override
   Widget build(BuildContext context) {
-    final primaryColor = WPConfig.navbarColor;
+    final primaryColor = AppColors.primary(context);
     final isTablet = MediaQuery.of(context).size.width >= 768;
 
     return Scaffold(

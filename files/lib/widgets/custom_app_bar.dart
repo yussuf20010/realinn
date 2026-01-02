@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import '../config/wp_config.dart';
 import '../config/dynamic_config.dart';
+import '../config/constants/app_colors.dart';
 import '../config/constants/assets.dart';
 import '../pages/profile/profile_page.dart';
 import '../pages/customer_service/customer_service_page.dart';
@@ -114,7 +114,8 @@ class _CustomAppBarState extends ConsumerState<CustomAppBar> {
     final isTablet = screenWidth >= 768;
     final toolbarHeight = isTablet ? 80.h : 64.h;
     ref.watch(dynamicConfigProvider);
-    final primaryColor = WPConfig.navbarColor; // Use constant color directly
+    final primaryColor =
+        AppColors.primary(context); // Use dynamic color from API
 
     if (widget.backAndLogoOnly) {
       return AppBar(
@@ -128,10 +129,29 @@ class _CustomAppBarState extends ConsumerState<CustomAppBar> {
                 onPressed: () => Navigator.of(context).maybePop(),
               )
             : null,
-        title: Image.asset(
-          AssetsManager.appbar,
-          height: isTablet ? 64.h : 40.h,
-          fit: BoxFit.contain,
+        title: Consumer(
+          builder: (context, ref, child) {
+            final dynamicConfig = ref.watch(dynamicConfigProvider);
+            final logoUrl = dynamicConfig.logoUrl ?? dynamicConfig.logoTwo;
+            return logoUrl != null && logoUrl.isNotEmpty
+                ? Image.network(
+                    logoUrl,
+                    height: isTablet ? 64.h : 40.h,
+                    fit: BoxFit.contain,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Image.asset(
+                        AssetsManager.appbar,
+                        height: isTablet ? 64.h : 40.h,
+                        fit: BoxFit.contain,
+                      );
+                    },
+                  )
+                : Image.asset(
+                    AssetsManager.appbar,
+                    height: isTablet ? 64.h : 40.h,
+                    fit: BoxFit.contain,
+                  );
+          },
         ),
         centerTitle: true,
         actions: [
@@ -257,10 +277,29 @@ class _CustomAppBarState extends ConsumerState<CustomAppBar> {
                 )
               : null,
       leadingWidth: widget.showBackButton ? null : (isTablet ? 120.w : 100.w),
-      title: Image.asset(
-        AssetsManager.appbar,
-        height: isTablet ? 30.h : 30.h,
-        fit: BoxFit.contain,
+      title: Consumer(
+        builder: (context, ref, child) {
+          final dynamicConfig = ref.watch(dynamicConfigProvider);
+          final logoUrl = dynamicConfig.logoUrl ?? dynamicConfig.logoTwo;
+          return logoUrl != null && logoUrl.isNotEmpty
+              ? Image.network(
+                  logoUrl,
+                  height: isTablet ? 30.h : 30.h,
+                  fit: BoxFit.contain,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Image.asset(
+                      AssetsManager.appbar,
+                      height: isTablet ? 30.h : 30.h,
+                      fit: BoxFit.contain,
+                    );
+                  },
+                )
+              : Image.asset(
+                  AssetsManager.appbar,
+                  height: isTablet ? 30.h : 30.h,
+                  fit: BoxFit.contain,
+                );
+        },
       ),
       centerTitle: true,
       actions: [

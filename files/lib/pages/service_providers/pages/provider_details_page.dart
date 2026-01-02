@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../models/service_provider.dart';
 import '../../../services/service_provider_service.dart';
 import '../../../config/wp_config.dart';
+import '../../../config/constants/app_colors.dart';
 import '../../../config/components/network_image.dart';
 import '../../../models/hotel.dart';
 import '../../../models/selected_room.dart';
@@ -552,7 +553,7 @@ class _ProviderDetailsPageState extends State<ProviderDetailsPage> {
                     label: 'provider.on_time_delivery'.tr(),
                     value:
                         '${_provider!.onTimeDeliveryRate.toStringAsFixed(0)}%',
-                    color: Colors.purple,
+                    color: AppColors.primary(context),
                     isTablet: isTablet,
                   ),
                 ),

@@ -15,6 +15,13 @@ final siteSettingsProvider = FutureProvider<SiteSettings>((ref) async {
   try {
     final response = await http.get(Uri.parse(url), headers: headers);
 
+    // Print site settings API response
+    print('=== Site Settings API Response ===');
+    print('URL: $url');
+    print('Status Code: ${response.statusCode}');
+    print('Response Body: ${response.body}');
+    print('===================================');
+
     if (response.statusCode == 200) {
       final data = json.decode(response.body) as Map<String, dynamic>;
       final settingsData = data['settings'] ?? {};

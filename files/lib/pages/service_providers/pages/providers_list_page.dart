@@ -5,7 +5,7 @@ import '../../../models/service_provider.dart';
 import '../../../services/service_provider_service.dart';
 import '../../../models/pagination.dart';
 import '../../../models/providers_by_category_response.dart';
-import '../../../config/wp_config.dart';
+import '../../../config/constants/app_colors.dart';
 import 'provider_details_page.dart';
 import '../../../config/components/network_image.dart';
 
@@ -127,7 +127,7 @@ class _ProvidersListPageState extends State<ProvidersListPage> {
             fontWeight: FontWeight.bold,
           ),
         ),
-        backgroundColor: WPConfig.primaryColor,
+        backgroundColor: AppColors.primary(context),
         foregroundColor: Colors.white,
         elevation: 0,
       ),
@@ -155,7 +155,7 @@ class _ProvidersListPageState extends State<ProvidersListPage> {
                       ElevatedButton(
                         onPressed: _loadProviders,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: WPConfig.primaryColor,
+                          backgroundColor: AppColors.primary(context),
                           foregroundColor: Colors.white,
                         ),
                         child: Text('retry'.tr()),
@@ -188,7 +188,7 @@ class _ProvidersListPageState extends State<ProvidersListPage> {
                     )
                   : RefreshIndicator(
                       onRefresh: _loadProviders,
-                      color: WPConfig.primaryColor,
+                      color: AppColors.primary(context),
                       child: ListView(
                         controller: _scrollController,
                         padding: EdgeInsets.only(
@@ -201,14 +201,15 @@ class _ProvidersListPageState extends State<ProvidersListPage> {
                           // Removed search and filter controls for details page
                           _buildResultsMeta(),
                           SizedBox(height: 12.h),
-                          _buildAvatarGrid(_buildSortedAndFiltered(_providers), isTablet),
+                          _buildAvatarGrid(
+                              _buildSortedAndFiltered(_providers), isTablet),
                           if (_pagination != null && _pagination!.hasMorePages)
                             Padding(
                               padding: EdgeInsets.only(top: 8.h),
                               child: ElevatedButton(
                                 onPressed: _isLoadingMore ? null : _loadMore,
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: WPConfig.primaryColor,
+                                  backgroundColor: AppColors.primary(context),
                                   foregroundColor: Colors.white,
                                 ),
                                 child: _isLoadingMore
@@ -232,7 +233,7 @@ class _ProvidersListPageState extends State<ProvidersListPage> {
                                   width: 22,
                                   child: CircularProgressIndicator(
                                     strokeWidth: 2,
-                                    color: WPConfig.primaryColor,
+                                    color: AppColors.primary(context),
                                   ),
                                 ),
                               ),
@@ -415,11 +416,13 @@ class _ProvidersListPageState extends State<ProvidersListPage> {
     // Calculate a percentage based on response rate or completion rate
     final percentage = provider.responseRate > 0
         ? provider.responseRate.toInt()
-        : (provider.completedOrders > 0 ? (provider.completedOrders * 2).clamp(0, 100) : 0);
-    
+        : (provider.completedOrders > 0
+            ? (provider.completedOrders * 2).clamp(0, 100)
+            : 0);
+
     // Get avatar color based on provider index or name
-    final avatarColor = _getAvatarColor(provider.id.hashCode);
-    
+    final avatarColor = _getAvatarColor(provider.id.hashCode, context);
+
     return GestureDetector(
       onTap: () {
         Navigator.push(
@@ -435,7 +438,7 @@ class _ProvidersListPageState extends State<ProvidersListPage> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Static colored avatar circle - no box, no image loading
+          // Use provider image if available, otherwise use colored circle with icon
           Container(
             width: isTablet ? 100.w : 80.w,
             height: isTablet ? 100.w : 80.w,
@@ -443,11 +446,24 @@ class _ProvidersListPageState extends State<ProvidersListPage> {
               shape: BoxShape.circle,
               color: avatarColor,
             ),
-            child: Icon(
-              Icons.person,
-              size: isTablet ? 50 : 40,
-              color: Colors.white,
-            ),
+            clipBehavior: Clip.antiAlias,
+            child: provider.imageUrl.isNotEmpty
+                ? Image.network(
+                    provider.imageUrl,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Icon(
+                        Icons.person,
+                        size: isTablet ? 50 : 40,
+                        color: Colors.white,
+                      );
+                    },
+                  )
+                : Icon(
+                    Icons.person,
+                    size: isTablet ? 50 : 40,
+                    color: Colors.white,
+                  ),
           ),
           SizedBox(height: 8.h),
           // Provider name
@@ -478,18 +494,20 @@ class _ProvidersListPageState extends State<ProvidersListPage> {
     );
   }
 
-  Color _getAvatarColor(int index) {
+  Color _getAvatarColor(int index, BuildContext context) {
+    final primaryColor = AppColors.primary(context);
+    // Generate colors based on primary color with variations
     final colors = [
-      Color(0xFFFFD700), // Yellow
-      Color(0xFF20B2AA), // Teal
-      Color(0xFF9370DB), // Purple
-      Color(0xFF32CD32), // Green
-      Color(0xFFFF6347), // Orange
-      Color(0xFF4169E1), // Blue
-      Color(0xFFFF69B4), // Pink
-      Color(0xFF00CED1), // Dark Turquoise
-      Color(0xFFFFA500), // Orange
-      Color(0xFF8B008B), // Dark Magenta
+      primaryColor,
+      primaryColor.withOpacity(0.8),
+      primaryColor.withOpacity(0.6),
+      primaryColor.withOpacity(0.9),
+      primaryColor.withOpacity(0.7),
+      primaryColor.withOpacity(0.85),
+      primaryColor.withOpacity(0.75),
+      primaryColor.withOpacity(0.65),
+      primaryColor.withOpacity(0.95),
+      primaryColor.withOpacity(0.55),
     ];
     return colors[index.abs() % colors.length];
   }
@@ -812,10 +830,12 @@ class _ProvidersListPageState extends State<ProvidersListPage> {
                                   vertical: 6.h,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: Colors.purple.shade50,
+                                  color: AppColors.primary(context)
+                                      .withOpacity(0.1),
                                   borderRadius: BorderRadius.circular(10.r),
                                   border: Border.all(
-                                    color: Colors.purple.shade100,
+                                    color: AppColors.primary(context)
+                                        .withOpacity(0.3),
                                     width: 1,
                                   ),
                                 ),
@@ -824,13 +844,13 @@ class _ProvidersListPageState extends State<ProvidersListPage> {
                                   children: [
                                     Icon(Icons.category_rounded,
                                         size: 16,
-                                        color: Colors.purple.shade700),
+                                        color: AppColors.primary(context)),
                                     SizedBox(width: 6.w),
                                     Text(
                                       provider.mainCategory!.name,
                                       style: TextStyle(
                                         fontSize: isTablet ? 12.sp : 11.sp,
-                                        color: Colors.purple.shade800,
+                                        color: AppColors.primary(context),
                                         fontWeight: FontWeight.w600,
                                       ),
                                       overflow: TextOverflow.ellipsis,
@@ -854,14 +874,16 @@ class _ProvidersListPageState extends State<ProvidersListPage> {
                                 decoration: BoxDecoration(
                                   gradient: LinearGradient(
                                     colors: [
-                                      WPConfig.primaryColor.withOpacity(0.1),
-                                      WPConfig.primaryColor.withOpacity(0.05),
+                                      AppColors.primary(context)
+                                          .withOpacity(0.1),
+                                      AppColors.primary(context)
+                                          .withOpacity(0.05),
                                     ],
                                   ),
                                   borderRadius: BorderRadius.circular(10.r),
                                   border: Border.all(
-                                    color:
-                                        WPConfig.primaryColor.withOpacity(0.3),
+                                    color: AppColors.primary(context)
+                                        .withOpacity(0.3),
                                     width: 1,
                                   ),
                                 ),
@@ -873,7 +895,7 @@ class _ProvidersListPageState extends State<ProvidersListPage> {
                                       style: TextStyle(
                                         fontSize: isTablet ? 13.sp : 12.sp,
                                         fontWeight: FontWeight.w600,
-                                        color: WPConfig.primaryColor,
+                                        color: AppColors.primary(context),
                                       ),
                                     ),
                                     SizedBox(width: 4.w),
@@ -883,7 +905,7 @@ class _ProvidersListPageState extends State<ProvidersListPage> {
                                         style: TextStyle(
                                           fontSize: isTablet ? 15.sp : 14.sp,
                                           fontWeight: FontWeight.bold,
-                                          color: WPConfig.primaryColor,
+                                          color: AppColors.primary(context),
                                         ),
                                         overflow: TextOverflow.ellipsis,
                                       ),
@@ -946,8 +968,8 @@ class _ProvidersListPageState extends State<ProvidersListPage> {
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
-                      WPConfig.primaryColor,
-                      WPConfig.primaryColor.withOpacity(0.8),
+                      AppColors.primary(context),
+                      AppColors.primary(context).withOpacity(0.8),
                     ],
                     begin: Alignment.centerLeft,
                     end: Alignment.centerRight,
@@ -955,7 +977,7 @@ class _ProvidersListPageState extends State<ProvidersListPage> {
                   borderRadius: BorderRadius.circular(12.r),
                   boxShadow: [
                     BoxShadow(
-                      color: WPConfig.primaryColor.withOpacity(0.3),
+                      color: AppColors.primary(context).withOpacity(0.3),
                       blurRadius: 8,
                       offset: Offset(0, 4),
                     ),

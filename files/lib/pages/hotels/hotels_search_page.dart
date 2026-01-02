@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:realinn/config/wp_config.dart';
+import 'package:realinn/config/constants/app_colors.dart';
 import 'package:realinn/services/hotel_service.dart';
 import 'package:realinn/models/hotel.dart';
 import 'package:realinn/pages/home/components/hotel_card.dart';
@@ -161,7 +162,7 @@ class _HotelsSearchPageState extends ConsumerState<HotelsSearchPage> {
   @override
   Widget build(BuildContext context) {
     final isTablet = MediaQuery.of(context).size.width > 600;
-    final primaryColor = WPConfig.navbarColor;
+    final primaryColor = AppColors.primary(context);
 
     return Scaffold(
       backgroundColor: primaryColor,
@@ -406,7 +407,7 @@ class _HotelsSearchPageState extends ConsumerState<HotelsSearchPage> {
             ListTile(
               title: Text('recommended'.tr()),
               trailing: _sortBy == 'recommended'
-                  ? Icon(Icons.check, color: WPConfig.navbarColor)
+                  ? Icon(Icons.check, color: AppColors.primary(context))
                   : null,
               onTap: () {
                 setState(() {
@@ -418,7 +419,7 @@ class _HotelsSearchPageState extends ConsumerState<HotelsSearchPage> {
             ListTile(
               title: Text('price_low_high'.tr()),
               trailing: _sortBy == 'price_low'
-                  ? Icon(Icons.check, color: WPConfig.navbarColor)
+                  ? Icon(Icons.check, color: AppColors.primary(context))
                   : null,
               onTap: () {
                 setState(() {
@@ -430,7 +431,7 @@ class _HotelsSearchPageState extends ConsumerState<HotelsSearchPage> {
             ListTile(
               title: Text('price_high_low'.tr()),
               trailing: _sortBy == 'price_high'
-                  ? Icon(Icons.check, color: WPConfig.navbarColor)
+                  ? Icon(Icons.check, color: AppColors.primary(context))
                   : null,
               onTap: () {
                 setState(() {
@@ -442,7 +443,7 @@ class _HotelsSearchPageState extends ConsumerState<HotelsSearchPage> {
             ListTile(
               title: Text('rating'.tr()),
               trailing: _sortBy == 'rating'
-                  ? Icon(Icons.check, color: WPConfig.navbarColor)
+                  ? Icon(Icons.check, color: AppColors.primary(context))
                   : null,
               onTap: () {
                 setState(() {
@@ -454,7 +455,7 @@ class _HotelsSearchPageState extends ConsumerState<HotelsSearchPage> {
             ListTile(
               title: Text('distance'.tr()),
               trailing: _sortBy == 'distance'
-                  ? Icon(Icons.check, color: WPConfig.navbarColor)
+                  ? Icon(Icons.check, color: AppColors.primary(context))
                   : null,
               onTap: () {
                 setState(() {
@@ -580,7 +581,7 @@ class _HotelsSearchPageState extends ConsumerState<HotelsSearchPage> {
                     Navigator.pop(context);
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: WPConfig.navbarColor,
+                    backgroundColor: AppColors.primary(context),
                     padding: EdgeInsets.symmetric(vertical: 15),
                   ),
                   child: Text(

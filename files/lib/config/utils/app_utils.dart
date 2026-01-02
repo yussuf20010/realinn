@@ -119,7 +119,8 @@ class AppUtil {
         safariVCOptions: SafariViewControllerOptions(
           barCollapsingEnabled: true,
           preferredBarTintColor: AppColors.scaffoldBackground,
-          preferredControlTintColor: AppColors.primary,
+          preferredControlTintColor:
+              AppColors.primaryStatic, // Use static color as fallback
           dismissButtonStyle: SafariViewControllerDismissButtonStyle.close,
           modalPresentationCapturesStatusBarAppearance: true,
         ),
@@ -160,7 +161,8 @@ class AppUtil {
   }
 
   /// Safely show snackbar to prevent unmounted widget errors
-  static void showSafeSnackBar(BuildContext context, {
+  static void showSafeSnackBar(
+    BuildContext context, {
     required String message,
     Color? backgroundColor,
     Color? textColor,
@@ -170,10 +172,11 @@ class AppUtil {
   }) {
     // Check if context is still mounted before showing snackbar
     if (!context.mounted) return;
-    
+
     // Use app's primary color as default background
-    final defaultBackgroundColor = backgroundColor ?? WPConfig.navbarColor;
-    
+    final defaultBackgroundColor =
+        backgroundColor ?? AppColors.primaryStatic; // Use static as fallback
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
@@ -191,7 +194,8 @@ class AppUtil {
           borderRadius: BorderRadius.circular(8), // Smaller radius
         ),
         margin: EdgeInsets.all(12), // Smaller margin
-        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12), // Smaller padding
+        padding: EdgeInsets.symmetric(
+            horizontal: 16, vertical: 12), // Smaller padding
         action: actionLabel != null && onActionPressed != null
             ? SnackBarAction(
                 label: actionLabel,

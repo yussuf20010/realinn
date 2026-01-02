@@ -16,7 +16,7 @@ class WPConfig {
 
   // Build headers with optional Authorization and Cookie
   static Map<String, String> buildHeaders({
-    Map<String, String>? extra,
+    Map<String, String>? extra, 
     String? bearerToken,
     String? cookies,
   }) {
@@ -94,6 +94,12 @@ class WPConfig {
   // Bookings endpoints
   static const String applyCouponApiUrl = '$apiBaseUrl/bookings/apply-coupon';
   static const String createBookingApiUrl = '$apiBaseUrl/bookings';
+
+  // Payment Documents endpoints
+  static const String paymentDocumentsApiUrl = '$apiBaseUrl/payment-documents';
+  static const String paymentDocumentsUploadApiUrl = '$apiBaseUrl/payment-documents/upload';
+  static String paymentDocumentApiUrl(int id) =>
+      '$apiBaseUrl/payment-documents/$id';
 
   // Service Providers endpoints (updated)
   static String serviceProviderDetailsApiUrl(int id) =>

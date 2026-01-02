@@ -910,8 +910,7 @@
       "dont_have_account": "أليس لديك حساب؟ إنشاء حساب",
       "already_have_account": "هل لديك حساب بالفعل؟ تسجيل الدخول",
       "valid_email_required": "الرجاء إدخال بريد إلكتروني صحيح"
-    }
-  },
+    },
   "hotel": {
     "service_providers": "مقدمي الخدمات",
     "view_all_providers": "عرض الكل",
@@ -934,5 +933,30 @@
     "user": "مستخدم",
     "manage_hotel": "إدارة الفندق",
     "manage_profile": "إدارة الملف الشخصي"
-  }
+  },
+  "ad": "إعلان",
+  "close": "إغلاق",
+  "ad_closing_in": "سيتم الإغلاق خلال {0} ثانية",
+  "whatsapp_default_message": "مرحباً",
+  "whatsapp_button": "واتساب",
+  "customer_service": "خدمة العملاء",
+  "home": "الرئيسية",
+  "favorites": "المفضلة",
+  "waiting_list": "قائمة الانتظار",
+  "history": "السجل",
+  "stays": "الإقامات",
+  "services": "الخدمات",
+  "search_failed": "فشل البحث: {0}",
+  "provider_approved": "تم الموافقة على مقدم الخدمة",
+  "change_language": "تغيير اللغة",
+  "language_changed_success": "تم تغيير اللغة بنجاح",
+  "error": "خطأ",
+  "ok": "موافق",
+  "cancel": "إلغاء",
+  "confirm": "تأكيد",
+  "cannot_open_email": "لا يمكن فتح عميل البريد الإلكتروني",
+  "error_opening_email": "خطأ في فتح عميل البريد الإلكتروني",
+  "cannot_make_call": "لا يمكن إجراء مكالمة هاتفية",
+  "error_making_call": "خطأ في إجراء مكالمة هاتفية",
+  "error_loading_contact_info": "خطأ في تحميل معلومات الاتصال"
 }

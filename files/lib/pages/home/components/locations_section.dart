@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../services/hotel_service.dart';
 import '../../../../models/hotel.dart';
 import '../../../../config/wp_config.dart';
+import '../../../../config/constants/app_colors.dart';
 
 class LocationsSection extends StatelessWidget {
   const LocationsSection({Key? key}) : super(key: key);
@@ -100,7 +101,7 @@ class LocationsSection extends StatelessWidget {
                           name: city.name ?? 'City',
                           subtitle: 'Explore hotels',
                           icon: Icons.location_city,
-                          color: _getLocationColor(index),
+                          color: _getLocationColor(index, context),
                           isTablet: isTablet,
                           imageUrl: cityImageUrl,
                           onTap: () =>
@@ -128,7 +129,7 @@ class LocationsSection extends StatelessWidget {
                             name: country.name ?? 'Country',
                             subtitle: 'Discover destinations',
                             icon: Icons.flag,
-                            color: _getLocationColor(index + 6),
+                            color: _getLocationColor(index + 6, context),
                             isTablet: isTablet,
                             onTap: () => _navigateToLocation(
                                 context, country.name ?? 'Country'),
@@ -476,16 +477,18 @@ class LocationsSection extends StatelessWidget {
     );
   }
 
-  Color _getLocationColor(int index) {
+  Color _getLocationColor(int index, BuildContext context) {
+    final primaryColor = AppColors.primary(context);
+    // Generate colors based on primary color with variations
     final colors = [
-      Colors.blue,
-      Colors.green,
-      Colors.orange,
-      Colors.purple,
-      Colors.red,
-      Colors.teal,
-      Colors.indigo,
-      Colors.amber,
+      primaryColor,
+      primaryColor.withOpacity(0.8),
+      primaryColor.withOpacity(0.6),
+      primaryColor.withOpacity(0.9),
+      primaryColor.withOpacity(0.7),
+      primaryColor.withOpacity(0.85),
+      primaryColor.withOpacity(0.75),
+      primaryColor.withOpacity(0.65),
     ];
     return colors[index % colors.length];
   }

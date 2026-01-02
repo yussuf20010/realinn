@@ -37,7 +37,7 @@ class CategoryIcons {
     } else if (name.contains('mobile') || name.contains('app')) {
       return Colors.green;
     } else if (name.contains('graphic') || name.contains('design')) {
-      return Colors.purple;
+      return Colors.grey; // Will be replaced with primary color dynamically
     } else if (name.contains('digital') || name.contains('marketing')) {
       return Colors.orange;
     } else if (name.contains('content') || name.contains('writing')) {

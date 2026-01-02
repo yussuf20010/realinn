@@ -5,6 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../config/wp_config.dart';
 import '../../config/constants/app_styles.dart';
+import '../../config/constants/app_colors.dart';
 import '../../config/routes/app_routes.dart';
 import '../../services/auth_service.dart';
 import '../../services/token_storage_service.dart';
@@ -226,7 +227,7 @@ class _VerifyCodePageState extends State<VerifyCodePage> {
             height: screenHeight,
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [Color(0xFF2D0C4E), WPConfig.primaryColor],
+                colors: [Color(0xFF2D0C4E), AppColors.primary(context)],
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
               ),
@@ -389,7 +390,7 @@ class _VerifyCodePageState extends State<VerifyCodePage> {
                               gradient: LinearGradient(
                                 colors: [
                                   Color(0xFF2196F3),
-                                  WPConfig.primaryColor
+                                  AppColors.primary(context)
                                 ],
                                 begin: Alignment.centerLeft,
                                 end: Alignment.centerRight,

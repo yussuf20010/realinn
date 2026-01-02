@@ -3,9 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../config/wp_config.dart';
+import '../../config/constants/app_colors.dart';
 import '../../services/auth_service.dart';
 import '../../models/user.dart';
 import '../../config/routes/app_routes.dart';
+import '../../services/site_settings_controller.dart';
+import '../../config/dynamic_config.dart';
 
 class ProfilePage extends ConsumerStatefulWidget {
   const ProfilePage({Key? key}) : super(key: key);
@@ -44,7 +47,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
-    final primaryColor = WPConfig.primaryColor;
+    final primaryColor = AppColors.primary(context);
     final isTablet = MediaQuery.of(context).size.width >= 768;
 
     return Scaffold(
@@ -266,7 +269,10 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           ),
           SizedBox(height: 24.h),
 
-          // User info section removed
+          // Site Information Section
+          _buildSiteInfoSection(isTablet, primaryColor),
+
+          SizedBox(height: 24.h),
 
           // Logout button
           SizedBox(
@@ -430,6 +436,77 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildSiteInfoSection(bool isTablet, Color primaryColor) {
+    return Consumer(
+      builder: (context, ref, child) {
+        final siteSettingsAsync = ref.watch(siteSettingsProvider);
+        final dynamicConfig = ref.watch(dynamicConfigProvider);
+        
+        return siteSettingsAsync.when(
+          data: (siteSettings) {
+            return _buildMenuSection(
+              title: 'site_information'.tr(),
+              items: [
+                // Logo
+                if (dynamicConfig.logoUrl != null && dynamicConfig.logoUrl!.isNotEmpty)
+                  Container(
+                    padding: EdgeInsets.all(16.w),
+                    margin: EdgeInsets.only(bottom: 12.h),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12.r),
+                      border: Border.all(color: Colors.grey[200]!),
+                    ),
+                    child: Center(
+                      child: Image.network(
+                        dynamicConfig.logoUrl!,
+                        height: 60.h,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Icon(Icons.image, size: 40, color: Colors.grey);
+                        },
+                      ),
+                    ),
+                  ),
+                // Contact Information
+                if (siteSettings.emailAddress != null && siteSettings.emailAddress!.isNotEmpty)
+                  _buildMenuItem(
+                    icon: Icons.email,
+                    title: 'email'.tr(),
+                    subtitle: siteSettings.emailAddress!,
+                    onTap: () {},
+                    isTablet: isTablet,
+                    primaryColor: primaryColor,
+                  ),
+                if (siteSettings.contactNumber != null && siteSettings.contactNumber!.isNotEmpty)
+                  _buildMenuItem(
+                    icon: Icons.phone,
+                    title: 'phone'.tr(),
+                    subtitle: siteSettings.contactNumber!,
+                    onTap: () {},
+                    isTablet: isTablet,
+                    primaryColor: primaryColor,
+                  ),
+                if (siteSettings.address != null && siteSettings.address!.isNotEmpty)
+                  _buildMenuItem(
+                    icon: Icons.location_on,
+                    title: 'address'.tr(),
+                    subtitle: siteSettings.address!,
+                    onTap: () {},
+                    isTablet: isTablet,
+                    primaryColor: primaryColor,
+                  ),
+              ],
+              isTablet: isTablet,
+              primaryColor: primaryColor,
+            );
+          },
+          loading: () => SizedBox.shrink(),
+          error: (_, __) => SizedBox.shrink(),
+        );
+      },
     );
   }
 

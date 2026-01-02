@@ -14,6 +14,9 @@ class AssetsManager {
 
   // svg
   static const cloud = 'assets/svg/clouds.svg';
+
+  static const customer_service = 'assets/svg/customer_service.svg';
+  static const service_providers = 'assets/svg/service_providers.svg';
   static const favorites = 'assets/svg/nav/favorite.svg';
   static const pin_hotel = 'assets/svg/pin_hotels.svg';
   static const booking = 'assets/svg/nav/booking.svg';

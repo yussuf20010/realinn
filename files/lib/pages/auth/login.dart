@@ -3,12 +3,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_iconly/flutter_iconly.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:http/http.dart' as http;
 
 import '../../config/wp_config.dart';
 import '../../config/constants/app_styles.dart';
+import '../../config/constants/app_colors.dart';
 import '../../config/routes/app_routes.dart';
 import '../../services/auth_service.dart';
 import '../../services/token_storage_service.dart';
+import '../../services/http_headers.dart';
+import '../../widgets/ads/side_ad_widget.dart';
 import 'register.dart';
 
 class LoginPage extends StatefulWidget {
@@ -34,17 +38,62 @@ class _LoginPageState extends State<LoginPage> {
     _usernameController = TextEditingController();
     _passwordController = TextEditingController();
     _loadSelectedUserType();
+    _fetchRolesFromApi();
+  }
+
+  Future<void> _fetchRolesFromApi() async {
+    try {
+      final url = WPConfig.userLoginApiUrl;
+      final headers = await buildAuthHeaders(extra: {
+        'Accept': 'application/json',
+      });
+
+      print('=== Fetching Roles from API ===');
+      print('URL: $url');
+      print('Method: GET');
+
+      final response = await http.get(Uri.parse(url), headers: headers);
+
+      print('Status Code: ${response.statusCode}');
+      print('Response Body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body) as Map<String, dynamic>;
+
+        // Print all roles from API response
+        print('=== All Roles from API ===');
+        print('Full Response: $data');
+
+        // Check for roles in various possible fields
+        if (data.containsKey('roles')) {
+          print('Roles found in "roles" field: ${data['roles']}');
+        }
+        if (data.containsKey('userTypes')) {
+          print('Roles found in "userTypes" field: ${data['userTypes']}');
+        }
+        if (data.containsKey('user_types')) {
+          print('Roles found in "user_types" field: ${data['user_types']}');
+        }
+        if (data.containsKey('availableRoles')) {
+          print(
+              'Roles found in "availableRoles" field: ${data['availableRoles']}');
+        }
+
+        // Print all keys to help identify where roles might be
+        print('All response keys: ${data.keys.toList()}');
+        print('====================================');
+      } else {
+        print(
+            'Failed to fetch roles: ${response.statusCode} - ${response.body}');
+      }
+    } catch (e) {
+      print('Error fetching roles from API: $e');
+    }
   }
 
   Future<void> _loadSelectedUserType() async {
-    final savedType = await TokenStorageService.getSelectedUserType();
-    if (savedType != null && mounted) {
-      setState(() {
-        _selectedUserType = savedType;
-        _showLoginForm =
-            true; // Automatically show login form if type was saved
-      });
-    }
+    // Don't auto-load saved type - wait for user to select
+    // This ensures no default selection
   }
 
   @override
@@ -136,6 +185,8 @@ class _LoginPageState extends State<LoginPage> {
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
 
+    final isTablet = MediaQuery.of(context).size.width >= 768;
+
     return Scaffold(
       body: Stack(
         children: [
@@ -144,28 +195,57 @@ class _LoginPageState extends State<LoginPage> {
             height: screenHeight,
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [Color(0xFF2D0C4E), WPConfig.primaryColor],
+                colors: [
+                  AppColors.primary(context).withOpacity(0.8),
+                  AppColors.primary(context)
+                ],
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
               ),
             ),
-            child: Center(
-              child: SingleChildScrollView(
-                child: Card(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(24),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Left side ad (only on tablet)
+                if (isTablet) ...[
+                  Container(
+                    width: 120.w,
+                    margin: EdgeInsets.only(left: 16.w, top: 80.h),
+                    child: SideAdWidget(page: 'login'),
                   ),
-                  elevation: 8,
-                  margin: EdgeInsets.symmetric(horizontal: 24.w),
-                  child: Padding(
-                    padding:
-                        EdgeInsets.symmetric(vertical: 32.h, horizontal: 24.w),
-                    child: _showLoginForm
-                        ? _buildLoginForm()
-                        : _buildUserTypeSelection(),
+                  SizedBox(width: 16.w),
+                ],
+                // Main content
+                Expanded(
+                  child: Center(
+                    child: SingleChildScrollView(
+                      child: Card(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(24),
+                        ),
+                        elevation: 8,
+                        margin: EdgeInsets.symmetric(horizontal: 24.w),
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(
+                              vertical: 32.h, horizontal: 24.w),
+                          child: _showLoginForm
+                              ? _buildLoginForm()
+                              : _buildUserTypeSelection(),
+                        ),
+                      ),
+                    ),
                   ),
                 ),
-              ),
+                // Right side ad (only on tablet)
+                if (isTablet) ...[
+                  SizedBox(width: 16.w),
+                  Container(
+                    width: 120.w,
+                    margin: EdgeInsets.only(right: 16.w, top: 80.h),
+                    child: SideAdWidget(page: 'login'),
+                  ),
+                ],
+              ],
             ),
           ),
           Positioned(
@@ -191,6 +271,9 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Widget _buildUserTypeSelection() {
+    // Roles are fetched from API in initState and printed there
+    // This method just builds the UI with static roles for now
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisSize: MainAxisSize.min,
@@ -205,7 +288,7 @@ class _LoginPageState extends State<LoginPage> {
           textAlign: TextAlign.center,
         ),
         SizedBox(height: 32.h),
-        // Three buttons of same size
+        // User type buttons
         _buildUserTypeButton(
           label: 'auth.user'.tr(),
           type: 'user',
@@ -222,6 +305,24 @@ class _LoginPageState extends State<LoginPage> {
           label: 'auth.service_provider'.tr(),
           type: 'service_provider',
           icon: Icons.business,
+        ),
+        SizedBox(height: 16.h),
+        _buildUserTypeButton(
+          label: 'Restaurant',
+          type: 'restaurant',
+          icon: Icons.restaurant,
+        ),
+        SizedBox(height: 16.h),
+        _buildUserTypeButton(
+          label: 'Property',
+          type: 'property',
+          icon: Icons.home_work,
+        ),
+        SizedBox(height: 16.h),
+        _buildUserTypeButton(
+          label: 'Product',
+          type: 'product',
+          icon: Icons.shopping_bag,
         ),
       ],
     );
@@ -268,7 +369,7 @@ class _LoginPageState extends State<LoginPage> {
             Container(
               padding: EdgeInsets.symmetric(vertical: 8.h, horizontal: 12.w),
               decoration: BoxDecoration(
-                color: WPConfig.primaryColor.withOpacity(0.1),
+                color: AppColors.primary(context).withOpacity(0.1),
                 borderRadius: BorderRadius.circular(8.r),
               ),
               child: Row(
@@ -279,8 +380,14 @@ class _LoginPageState extends State<LoginPage> {
                         ? Icons.person
                         : _selectedUserType == 'hotel'
                             ? Icons.hotel
-                            : Icons.business,
-                    color: WPConfig.primaryColor,
+                            : _selectedUserType == 'service_provider'
+                                ? Icons.business
+                                : _selectedUserType == 'restaurant'
+                                    ? Icons.restaurant
+                                    : _selectedUserType == 'property'
+                                        ? Icons.home_work
+                                        : Icons.shopping_bag,
+                    color: AppColors.primary(context),
                     size: 16.sp,
                   ),
                   SizedBox(width: 8.w),
@@ -289,9 +396,15 @@ class _LoginPageState extends State<LoginPage> {
                         ? 'auth.user'.tr()
                         : _selectedUserType == 'hotel'
                             ? 'auth.hotel'.tr()
-                            : 'auth.service_provider'.tr(),
+                            : _selectedUserType == 'service_provider'
+                                ? 'auth.service_provider'.tr()
+                                : _selectedUserType == 'restaurant'
+                                    ? 'Restaurant'
+                                    : _selectedUserType == 'property'
+                                        ? 'Property'
+                                        : 'Product',
                     style: TextStyle(
-                      color: WPConfig.primaryColor,
+                      color: AppColors.primary(context),
                       fontWeight: FontWeight.w600,
                       fontSize: 14.sp,
                     ),
@@ -383,7 +496,10 @@ class _LoginPageState extends State<LoginPage> {
             width: double.infinity,
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [Color(0xFF2196F3), WPConfig.primaryColor],
+                colors: [
+                  AppColors.primary(context).withOpacity(0.8),
+                  AppColors.primary(context)
+                ],
                 begin: Alignment.centerLeft,
                 end: Alignment.centerRight,
               ),
@@ -487,7 +603,7 @@ class _LoginPageState extends State<LoginPage> {
           children: [
             Icon(
               icon,
-              color: WPConfig.primaryColor,
+              color: AppColors.primary(context),
               size: 24.sp,
             ),
             SizedBox(width: 12.w),

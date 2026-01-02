@@ -6,10 +6,25 @@ import '../../config/dynamic_config.dart';
 
 class AppColors {
   /* <----------- Colors ------------> */
-  /// Primary Color of this App
-  static Color get primary {
-    return WPConfig.navbarColor; // Use constant color as primary color for whole app
+  /// Primary Color of this App - Uses dynamic color from API
+  static Color primary(BuildContext? context) {
+    if (context != null) {
+      try {
+        final dynamicConfig = ProviderScope.containerOf(context, listen: false)
+            .read(dynamicConfigProvider);
+        return dynamicConfig.primaryColor;
+      } catch (e) {
+        return WPConfig.navbarColor; // Fallback to constant
+      }
+    }
+    return WPConfig.navbarColor; // Fallback to constant
   }
+
+  // Legacy getter for backward compatibility (uses constant)
+  static Color get primaryStatic {
+    return WPConfig.navbarColor;
+  }
+
   static const Color primaryImportant = Colors.yellow;
 
   // Others Color
@@ -22,8 +37,10 @@ class AppColors {
 
   // Dark
 
-  static const Color scaffoldBackgrounDark = Color(0xFF000000); // Dark muted green
-  static const Color cardColorDark = Color(0xFF210A79); // Slightly lighter than scaffold
+  static const Color scaffoldBackgrounDark =
+      Color(0xFF000000); // Dark muted green
+  static const Color cardColorDark =
+      Color(0xFF210A79); // Slightly lighter than scaffold
 
   static const Color colorE5D1B2 = Color(0xFFE5D1B2);
 
@@ -34,5 +51,4 @@ class AppColors {
     Color(0xFFd673f4), // Lighter shade
     Color(0xFFe586fa), // Lightest shade
   ];
-
 }

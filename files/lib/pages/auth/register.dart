@@ -4,13 +4,14 @@ import 'package:flutter_iconly/flutter_iconly.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../../config/wp_config.dart';
 import '../../config/constants/app_styles.dart';
+import '../../config/constants/app_colors.dart';
 import '../../config/routes/app_routes.dart';
 import '../../services/auth_service.dart';
 import '../../services/service_provider_service.dart';
 import '../../models/country.dart';
 import '../../models/service_provider_category.dart';
+import '../../widgets/ads/side_ad_widget.dart';
 import '../home/components/country_selector_widget.dart';
 
 enum PasswordStrength {
@@ -448,6 +449,8 @@ class _RegisterPageState extends State<RegisterPage> {
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
 
+    final isTablet = MediaQuery.of(context).size.width >= 768;
+
     return Scaffold(
       body: Stack(
         children: [
@@ -456,620 +459,667 @@ class _RegisterPageState extends State<RegisterPage> {
             height: screenHeight,
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [Color(0xFF2D0C4E), WPConfig.primaryColor],
+                colors: [
+                  AppColors.primary(context).withOpacity(0.8),
+                  AppColors.primary(context)
+                ],
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
               ),
             ),
-            child: Center(
-              child: SingleChildScrollView(
-                child: Card(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(24),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Left side ad (only on tablet)
+                if (isTablet) ...[
+                  Container(
+                    width: 120.w,
+                    margin: EdgeInsets.only(left: 16.w, top: 40.h),
+                    child: SideAdWidget(page: 'register'),
                   ),
-                  elevation: 8,
-                  margin: EdgeInsets.symmetric(horizontal: 24.w),
-                  child: Padding(
-                    padding:
-                        EdgeInsets.symmetric(vertical: 32.h, horizontal: 24.w),
-                    child: Form(
-                      key: _formKey,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            'auth.create_account'.tr(),
-                            style: TextStyle(
-                              fontSize: 28.sp,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black87,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                          SizedBox(height: 24.h),
-                          // User Type Selection - only show if not provided from outside
-                          if (widget.initialUserType == null) ...[
-                            Text(
-                              'auth.register_as'.tr(),
-                              style: TextStyle(
-                                fontSize: 14.sp,
-                                color: Colors.grey[700],
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                            SizedBox(height: 8.h),
-                            Row(
+                  SizedBox(width: 16.w),
+                ],
+                // Main content
+                Expanded(
+                  child: Center(
+                    child: SingleChildScrollView(
+                      child: Card(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(24),
+                        ),
+                        elevation: 8,
+                        margin: EdgeInsets.symmetric(horizontal: 24.w),
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(
+                              vertical: 32.h, horizontal: 24.w),
+                          child: Form(
+                            key: _formKey,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              mainAxisSize: MainAxisSize.min,
                               children: [
-                                Expanded(
-                                  child: _buildUserTypeButton(
-                                    label: 'auth.user'.tr(),
-                                    type: 'user',
-                                    icon: Icons.person,
+                                Text(
+                                  'auth.create_account'.tr(),
+                                  style: TextStyle(
+                                    fontSize: 28.sp,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black87,
                                   ),
+                                  textAlign: TextAlign.center,
                                 ),
-                                SizedBox(width: 8.w),
-                                Expanded(
-                                  child: _buildUserTypeButton(
-                                    label: 'auth.hotel'.tr(),
-                                    type: 'hotel',
-                                    icon: Icons.hotel,
-                                  ),
-                                ),
-                                SizedBox(width: 8.w),
-                                Expanded(
-                                  child: _buildUserTypeButton(
-                                    label: 'auth.service_provider'.tr(),
-                                    type: 'service_provider',
-                                    icon: Icons.business,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            SizedBox(height: 24.h),
-                          ] else ...[
-                            // Show selected user type badge if provided from outside
-                            Container(
-                              padding: EdgeInsets.symmetric(
-                                  vertical: 8.h, horizontal: 12.w),
-                              decoration: BoxDecoration(
-                                color: WPConfig.primaryColor.withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(8.r),
-                              ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(
-                                    _selectedUserType == 'user'
-                                        ? Icons.person
-                                        : _selectedUserType == 'hotel'
-                                            ? Icons.hotel
-                                            : Icons.business,
-                                    color: WPConfig.primaryColor,
-                                    size: 16.sp,
-                                  ),
-                                  SizedBox(width: 8.w),
+                                SizedBox(height: 24.h),
+                                // User Type Selection - only show if not provided from outside
+                                if (widget.initialUserType == null) ...[
                                   Text(
-                                    _selectedUserType == 'user'
-                                        ? 'auth.user'.tr()
-                                        : _selectedUserType == 'hotel'
-                                            ? 'auth.hotel'.tr()
-                                            : 'auth.service_provider'.tr(),
+                                    'auth.register_as'.tr(),
                                     style: TextStyle(
-                                      color: WPConfig.primaryColor,
-                                      fontWeight: FontWeight.w600,
                                       fontSize: 14.sp,
+                                      color: Colors.grey[700],
+                                      fontWeight: FontWeight.w600,
                                     ),
                                   ),
-                                ],
-                              ),
-                            ),
-                            SizedBox(height: 24.h),
-                          ],
-                          if (_errorMessage != null) ...[
-                            Container(
-                              padding: EdgeInsets.all(12.w),
-                              decoration: BoxDecoration(
-                                color: Colors.red.shade50,
-                                borderRadius: BorderRadius.circular(8.r),
-                                border: Border.all(color: Colors.red.shade200),
-                              ),
-                              child: Row(
-                                children: [
-                                  Icon(Icons.error_outline,
-                                      color: Colors.red, size: 20.sp),
-                                  SizedBox(width: 8.w),
-                                  Expanded(
-                                    child: Text(
-                                      _errorMessage!,
-                                      style: TextStyle(
-                                        color: Colors.red.shade700,
-                                        fontSize: 14.sp,
+                                  SizedBox(height: 8.h),
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: _buildUserTypeButton(
+                                          label: 'auth.user'.tr(),
+                                          type: 'user',
+                                          icon: Icons.person,
+                                        ),
                                       ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            SizedBox(height: 16.h),
-                          ],
-                          if (_successMessage != null) ...[
-                            Container(
-                              padding: EdgeInsets.all(12.w),
-                              decoration: BoxDecoration(
-                                color: Colors.green.shade50,
-                                borderRadius: BorderRadius.circular(8.r),
-                                border:
-                                    Border.all(color: Colors.green.shade200),
-                              ),
-                              child: Row(
-                                children: [
-                                  Icon(Icons.check_circle_outline,
-                                      color: Colors.green, size: 20.sp),
-                                  SizedBox(width: 8.w),
-                                  Expanded(
-                                    child: Text(
-                                      _successMessage!,
-                                      style: TextStyle(
-                                        color: Colors.green.shade700,
-                                        fontSize: 14.sp,
+                                      SizedBox(width: 8.w),
+                                      Expanded(
+                                        child: _buildUserTypeButton(
+                                          label: 'auth.hotel'.tr(),
+                                          type: 'hotel',
+                                          icon: Icons.hotel,
+                                        ),
                                       ),
+                                      SizedBox(width: 8.w),
+                                      Expanded(
+                                        child: _buildUserTypeButton(
+                                          label: 'auth.service_provider'.tr(),
+                                          type: 'service_provider',
+                                          icon: Icons.business,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  SizedBox(height: 24.h),
+                                ] else ...[
+                                  // Show selected user type badge if provided from outside
+                                  Container(
+                                    padding: EdgeInsets.symmetric(
+                                        vertical: 8.h, horizontal: 12.w),
+                                    decoration: BoxDecoration(
+                                      color: AppColors.primary(context)
+                                          .withOpacity(0.1),
+                                      borderRadius: BorderRadius.circular(8.r),
+                                    ),
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Icon(
+                                          _selectedUserType == 'user'
+                                              ? Icons.person
+                                              : _selectedUserType == 'hotel'
+                                                  ? Icons.hotel
+                                                  : Icons.business,
+                                          color: AppColors.primary(context),
+                                          size: 16.sp,
+                                        ),
+                                        SizedBox(width: 8.w),
+                                        Text(
+                                          _selectedUserType == 'user'
+                                              ? 'auth.user'.tr()
+                                              : _selectedUserType == 'hotel'
+                                                  ? 'auth.hotel'.tr()
+                                                  : 'auth.service_provider'
+                                                      .tr(),
+                                          style: TextStyle(
+                                            color: AppColors.primary(context),
+                                            fontWeight: FontWeight.w600,
+                                            fontSize: 14.sp,
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ),
+                                  SizedBox(height: 24.h),
                                 ],
-                              ),
-                            ),
-                            SizedBox(height: 16.h),
-                          ],
-                          // Name field (for user and service provider)
-                          if (_selectedUserType == 'user' ||
-                              _selectedUserType == 'service_provider')
-                            TextFormField(
-                              controller: _nameController,
-                              decoration: AppStyles.inputDecoration(
-                                label: 'auth.full_name'.tr(),
-                                icon: IconlyLight.profile,
-                              ),
-                              textInputAction: TextInputAction.next,
-                              onChanged: (value) => setState(() {}),
-                            ),
-                          if (_selectedUserType == 'user' ||
-                              _selectedUserType == 'service_provider')
-                            SizedBox(height: 12.h),
-                          // Hotel Name (for hotel)
-                          if (_selectedUserType == 'hotel')
-                            TextFormField(
-                              controller: _hotelNameController,
-                              decoration: AppStyles.inputDecoration(
-                                label: 'auth.hotel_name_label'.tr(),
-                                icon: Icons.hotel,
-                              ),
-                              validator: (v) => _selectedUserType == 'hotel' &&
-                                      (v == null || v.isEmpty)
-                                  ? 'auth.hotel_name_required'.tr()
-                                  : null,
-                              textInputAction: TextInputAction.next,
-                              onChanged: (value) => setState(() {}),
-                            ),
-                          if (_selectedUserType == 'hotel')
-                            SizedBox(height: 12.h),
-                          TextFormField(
-                            controller: _usernameController,
-                            decoration: AppStyles.inputDecoration(
-                              label: 'username'.tr(),
-                              icon: IconlyLight.profile,
-                            ),
-                            validator: (v) => v == null || v.isEmpty
-                                ? 'username_required'.tr()
-                                : null,
-                            textInputAction: TextInputAction.next,
-                            onChanged: (value) => setState(() {}),
-                          ),
-                          SizedBox(height: 12.h),
-                          TextFormField(
-                            controller: _emailController,
-                            decoration: AppStyles.inputDecoration(
-                              label: 'email'.tr(),
-                              icon: IconlyLight.message,
-                            ),
-                            validator: (v) {
-                              if (v == null || v.isEmpty) {
-                                return 'email_required'.tr();
-                              }
-                              if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
-                                  .hasMatch(v)) {
-                                return 'auth.valid_email_required'.tr();
-                              }
-                              return null;
-                            },
-                            keyboardType: TextInputType.emailAddress,
-                            textInputAction: TextInputAction.next,
-                            onChanged: (value) => setState(() {}),
-                          ),
-                          SizedBox(height: 12.h),
-                          Row(
-                            children: [
-                              // Circular country code button
-                              Container(
-                                width: 56.w,
-                                height: 56.w,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: AppStyles.fieldFill,
-                                  border: Border.all(
-                                    color: Colors.grey.shade300,
-                                    width: 1,
-                                  ),
-                                ),
-                                child: Material(
-                                  color: Colors.transparent,
-                                  child: InkWell(
-                                    borderRadius: BorderRadius.circular(28.w),
-                                    onTap: () {
-                                      CountrySelectorModal.show(
-                                        context,
-                                        selectedDialCode:
-                                            _selectedCountry?.dialCode,
-                                        onCountrySelected: (country) {
-                                          setState(() {
-                                            _selectedCountry = country;
-                                            _countryCodeController.text =
-                                                country.dialCode;
-                                          });
-                                        },
-                                      );
-                                    },
-                                    child: Center(
-                                      child: _selectedCountry != null
-                                          ? Text(
-                                              _selectedCountry!.flag,
-                                              style: TextStyle(fontSize: 24.sp),
-                                            )
-                                          : Icon(
-                                              IconlyLight.call,
-                                              color: AppStyles.mainBlue,
-                                              size: 20.sp,
+                                if (_errorMessage != null) ...[
+                                  Container(
+                                    padding: EdgeInsets.all(12.w),
+                                    decoration: BoxDecoration(
+                                      color: Colors.red.shade50,
+                                      borderRadius: BorderRadius.circular(8.r),
+                                      border: Border.all(
+                                          color: Colors.red.shade200),
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        Icon(Icons.error_outline,
+                                            color: Colors.red, size: 20.sp),
+                                        SizedBox(width: 8.w),
+                                        Expanded(
+                                          child: Text(
+                                            _errorMessage!,
+                                            style: TextStyle(
+                                              color: Colors.red.shade700,
+                                              fontSize: 14.sp,
                                             ),
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ),
-                                ),
-                              ),
-                              SizedBox(width: 12.w),
-                              Expanded(
-                                child: TextFormField(
-                                  controller: _phoneController,
+                                  SizedBox(height: 16.h),
+                                ],
+                                if (_successMessage != null) ...[
+                                  Container(
+                                    padding: EdgeInsets.all(12.w),
+                                    decoration: BoxDecoration(
+                                      color: Colors.green.shade50,
+                                      borderRadius: BorderRadius.circular(8.r),
+                                      border: Border.all(
+                                          color: Colors.green.shade200),
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        Icon(Icons.check_circle_outline,
+                                            color: Colors.green, size: 20.sp),
+                                        SizedBox(width: 8.w),
+                                        Expanded(
+                                          child: Text(
+                                            _successMessage!,
+                                            style: TextStyle(
+                                              color: Colors.green.shade700,
+                                              fontSize: 14.sp,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  SizedBox(height: 16.h),
+                                ],
+                                // Name field (for user and service provider)
+                                if (_selectedUserType == 'user' ||
+                                    _selectedUserType == 'service_provider')
+                                  TextFormField(
+                                    controller: _nameController,
+                                    decoration: AppStyles.inputDecoration(
+                                      label: 'auth.full_name'.tr(),
+                                      icon: IconlyLight.profile,
+                                    ),
+                                    textInputAction: TextInputAction.next,
+                                    onChanged: (value) => setState(() {}),
+                                  ),
+                                if (_selectedUserType == 'user' ||
+                                    _selectedUserType == 'service_provider')
+                                  SizedBox(height: 12.h),
+                                // Hotel Name (for hotel)
+                                if (_selectedUserType == 'hotel')
+                                  TextFormField(
+                                    controller: _hotelNameController,
+                                    decoration: AppStyles.inputDecoration(
+                                      label: 'auth.hotel_name_label'.tr(),
+                                      icon: Icons.hotel,
+                                    ),
+                                    validator: (v) =>
+                                        _selectedUserType == 'hotel' &&
+                                                (v == null || v.isEmpty)
+                                            ? 'auth.hotel_name_required'.tr()
+                                            : null,
+                                    textInputAction: TextInputAction.next,
+                                    onChanged: (value) => setState(() {}),
+                                  ),
+                                if (_selectedUserType == 'hotel')
+                                  SizedBox(height: 12.h),
+                                TextFormField(
+                                  controller: _usernameController,
                                   decoration: AppStyles.inputDecoration(
-                                      label:
-                                          'mobile_number'.tr() + ' (Optional)',
-                                      icon: IconlyLight.call),
-                                  validator: (v) => null, // Phone is optional
-                                  keyboardType: TextInputType.phone,
+                                    label: 'username'.tr(),
+                                    icon: IconlyLight.profile,
+                                  ),
+                                  validator: (v) => v == null || v.isEmpty
+                                      ? 'username_required'.tr()
+                                      : null,
                                   textInputAction: TextInputAction.next,
                                   onChanged: (value) => setState(() {}),
                                 ),
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: 12.h),
-                          // Hotel/Service Provider specific fields
-                          if (_selectedUserType == 'hotel') ...[
-                            TextFormField(
-                              controller: _addressController,
-                              decoration: AppStyles.inputDecoration(
-                                label: 'auth.address'.tr(),
-                                icon: Icons.location_on,
-                              ),
-                              textInputAction: TextInputAction.next,
-                            ),
-                            SizedBox(height: 12.h),
-                            TextFormField(
-                              controller: _zipCodeController,
-                              decoration: AppStyles.inputDecoration(
-                                label: 'auth.zip_code'.tr(),
-                                icon: Icons.pin,
-                              ),
-                              keyboardType: TextInputType.number,
-                              textInputAction: TextInputAction.next,
-                            ),
-                            SizedBox(height: 12.h),
-                          ],
-                          if (_selectedUserType == 'service_provider') ...[
-                            TextFormField(
-                              controller: _displayNameController,
-                              decoration: AppStyles.inputDecoration(
-                                label: 'auth.display_name'.tr(),
-                                icon: Icons.badge,
-                              ),
-                              textInputAction: TextInputAction.next,
-                            ),
-                            SizedBox(height: 12.h),
-                            TextFormField(
-                              controller: _taglineController,
-                              decoration: AppStyles.inputDecoration(
-                                label: 'auth.tagline'.tr(),
-                                icon: Icons.tag,
-                              ),
-                              textInputAction: TextInputAction.next,
-                            ),
-                            SizedBox(height: 12.h),
-                            TextFormField(
-                              controller: _descriptionController,
-                              decoration: AppStyles.inputDecoration(
-                                label: 'auth.description_skills'.tr(),
-                                icon: Icons.description,
-                              ),
-                              maxLines: 3,
-                              textInputAction: TextInputAction.next,
-                            ),
-                            SizedBox(height: 12.h),
-                            // Currency field first
-                            TextFormField(
-                              controller: _currencyController,
-                              decoration: AppStyles.inputDecoration(
-                                label: 'auth.currency'.tr(),
-                                icon: Icons.currency_exchange,
-                              ),
-                              textInputAction: TextInputAction.next,
-                            ),
-                            SizedBox(height: 12.h),
-                            // Min and Max price fields below currency
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: TextFormField(
-                                    controller: _minPriceController,
-                                    decoration: AppStyles.inputDecoration(
-                                      label: 'auth.min_price'.tr(),
-                                      icon: Icons.attach_money,
-                                    ),
-                                    keyboardType: TextInputType.number,
-                                    textInputAction: TextInputAction.next,
+                                SizedBox(height: 12.h),
+                                TextFormField(
+                                  controller: _emailController,
+                                  decoration: AppStyles.inputDecoration(
+                                    label: 'email'.tr(),
+                                    icon: IconlyLight.message,
                                   ),
+                                  validator: (v) {
+                                    if (v == null || v.isEmpty) {
+                                      return 'email_required'.tr();
+                                    }
+                                    if (!RegExp(
+                                            r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
+                                        .hasMatch(v)) {
+                                      return 'auth.valid_email_required'.tr();
+                                    }
+                                    return null;
+                                  },
+                                  keyboardType: TextInputType.emailAddress,
+                                  textInputAction: TextInputAction.next,
+                                  onChanged: (value) => setState(() {}),
                                 ),
-                                SizedBox(width: 8.w),
-                                Expanded(
-                                  child: TextFormField(
-                                    controller: _maxPriceController,
-                                    decoration: AppStyles.inputDecoration(
-                                      label: 'auth.max_price'.tr(),
-                                      icon: Icons.attach_money,
-                                    ),
-                                    keyboardType: TextInputType.number,
-                                    textInputAction: TextInputAction.next,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            SizedBox(height: 12.h),
-                            // Service Categories Selection
-                            _isLoadingCategories
-                                ? Center(
-                                    child: Padding(
-                                      padding:
-                                          EdgeInsets.symmetric(vertical: 16.h),
-                                      child: CircularProgressIndicator(
-                                        color: WPConfig.primaryColor,
+                                SizedBox(height: 12.h),
+                                Row(
+                                  children: [
+                                    // Circular country code button
+                                    Container(
+                                      width: 56.w,
+                                      height: 56.w,
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        color: AppStyles.fieldFill,
+                                        border: Border.all(
+                                          color: Colors.grey.shade300,
+                                          width: 1,
+                                        ),
                                       ),
-                                    ),
-                                  )
-                                : _categories.isEmpty
-                                    ? Padding(
-                                        padding:
-                                            EdgeInsets.symmetric(vertical: 8.h),
-                                        child: Text(
-                                          'auth.no_categories_available'.tr(),
-                                          style: TextStyle(
-                                            fontSize: 12.sp,
-                                            color: Colors.grey[600],
+                                      child: Material(
+                                        color: Colors.transparent,
+                                        child: InkWell(
+                                          borderRadius:
+                                              BorderRadius.circular(28.w),
+                                          onTap: () {
+                                            CountrySelectorModal.show(
+                                              context,
+                                              selectedDialCode:
+                                                  _selectedCountry?.dialCode,
+                                              onCountrySelected: (country) {
+                                                setState(() {
+                                                  _selectedCountry = country;
+                                                  _countryCodeController.text =
+                                                      country.dialCode;
+                                                });
+                                              },
+                                            );
+                                          },
+                                          child: Center(
+                                            child: _selectedCountry != null
+                                                ? Text(
+                                                    _selectedCountry!.flag,
+                                                    style: TextStyle(
+                                                        fontSize: 24.sp),
+                                                  )
+                                                : Icon(
+                                                    IconlyLight.call,
+                                                    color: AppStyles.mainBlue,
+                                                    size: 20.sp,
+                                                  ),
                                           ),
                                         ),
-                                      )
-                                    : DropdownButtonFormField<int>(
+                                      ),
+                                    ),
+                                    SizedBox(width: 12.w),
+                                    Expanded(
+                                      child: TextFormField(
+                                        controller: _phoneController,
                                         decoration: AppStyles.inputDecoration(
-                                          label: 'auth.select_categories'.tr(),
-                                          icon: Icons.category,
+                                            label: 'mobile_number'.tr() +
+                                                ' (Optional)',
+                                            icon: IconlyLight.call),
+                                        validator: (v) =>
+                                            null, // Phone is optional
+                                        keyboardType: TextInputType.phone,
+                                        textInputAction: TextInputAction.next,
+                                        onChanged: (value) => setState(() {}),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(height: 12.h),
+                                // Hotel/Service Provider specific fields
+                                if (_selectedUserType == 'hotel') ...[
+                                  TextFormField(
+                                    controller: _addressController,
+                                    decoration: AppStyles.inputDecoration(
+                                      label: 'auth.address'.tr(),
+                                      icon: Icons.location_on,
+                                    ),
+                                    textInputAction: TextInputAction.next,
+                                  ),
+                                  SizedBox(height: 12.h),
+                                  TextFormField(
+                                    controller: _zipCodeController,
+                                    decoration: AppStyles.inputDecoration(
+                                      label: 'auth.zip_code'.tr(),
+                                      icon: Icons.pin,
+                                    ),
+                                    keyboardType: TextInputType.number,
+                                    textInputAction: TextInputAction.next,
+                                  ),
+                                  SizedBox(height: 12.h),
+                                ],
+                                if (_selectedUserType ==
+                                    'service_provider') ...[
+                                  TextFormField(
+                                    controller: _displayNameController,
+                                    decoration: AppStyles.inputDecoration(
+                                      label: 'auth.display_name'.tr(),
+                                      icon: Icons.badge,
+                                    ),
+                                    textInputAction: TextInputAction.next,
+                                  ),
+                                  SizedBox(height: 12.h),
+                                  TextFormField(
+                                    controller: _taglineController,
+                                    decoration: AppStyles.inputDecoration(
+                                      label: 'auth.tagline'.tr(),
+                                      icon: Icons.tag,
+                                    ),
+                                    textInputAction: TextInputAction.next,
+                                  ),
+                                  SizedBox(height: 12.h),
+                                  TextFormField(
+                                    controller: _descriptionController,
+                                    decoration: AppStyles.inputDecoration(
+                                      label: 'auth.description_skills'.tr(),
+                                      icon: Icons.description,
+                                    ),
+                                    maxLines: 3,
+                                    textInputAction: TextInputAction.next,
+                                  ),
+                                  SizedBox(height: 12.h),
+                                  // Currency field first
+                                  TextFormField(
+                                    controller: _currencyController,
+                                    decoration: AppStyles.inputDecoration(
+                                      label: 'auth.currency'.tr(),
+                                      icon: Icons.currency_exchange,
+                                    ),
+                                    textInputAction: TextInputAction.next,
+                                  ),
+                                  SizedBox(height: 12.h),
+                                  // Min and Max price fields below currency
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: TextFormField(
+                                          controller: _minPriceController,
+                                          decoration: AppStyles.inputDecoration(
+                                            label: 'auth.min_price'.tr(),
+                                            icon: Icons.attach_money,
+                                          ),
+                                          keyboardType: TextInputType.number,
+                                          textInputAction: TextInputAction.next,
                                         ),
-                                        value: _selectedCategoryId,
-                                        hint: Text(
-                                          'auth.select_categories'.tr(),
+                                      ),
+                                      SizedBox(width: 8.w),
+                                      Expanded(
+                                        child: TextFormField(
+                                          controller: _maxPriceController,
+                                          decoration: AppStyles.inputDecoration(
+                                            label: 'auth.max_price'.tr(),
+                                            icon: Icons.attach_money,
+                                          ),
+                                          keyboardType: TextInputType.number,
+                                          textInputAction: TextInputAction.next,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  SizedBox(height: 12.h),
+                                  // Service Categories Selection
+                                  _isLoadingCategories
+                                      ? Center(
+                                          child: Padding(
+                                            padding: EdgeInsets.symmetric(
+                                                vertical: 16.h),
+                                            child: CircularProgressIndicator(
+                                              color: AppColors.primary(context),
+                                            ),
+                                          ),
+                                        )
+                                      : _categories.isEmpty
+                                          ? Padding(
+                                              padding: EdgeInsets.symmetric(
+                                                  vertical: 8.h),
+                                              child: Text(
+                                                'auth.no_categories_available'
+                                                    .tr(),
+                                                style: TextStyle(
+                                                  fontSize: 12.sp,
+                                                  color: Colors.grey[600],
+                                                ),
+                                              ),
+                                            )
+                                          : DropdownButtonFormField<int>(
+                                              decoration:
+                                                  AppStyles.inputDecoration(
+                                                label: 'auth.select_categories'
+                                                    .tr(),
+                                                icon: Icons.category,
+                                              ),
+                                              value: _selectedCategoryId,
+                                              hint: Text(
+                                                'auth.select_categories'.tr(),
+                                                style: TextStyle(
+                                                  fontSize: 14.sp,
+                                                  color: Colors.grey[600],
+                                                ),
+                                              ),
+                                              items:
+                                                  _categories.map((category) {
+                                                return DropdownMenuItem<int>(
+                                                  value: category.id,
+                                                  child: Text(
+                                                    category.name,
+                                                    style: TextStyle(
+                                                      fontSize: 14.sp,
+                                                      color: Colors.grey[800],
+                                                    ),
+                                                  ),
+                                                );
+                                              }).toList(),
+                                              onChanged: (value) {
+                                                setState(() {
+                                                  _selectedCategoryId = value;
+                                                });
+                                              },
+                                              validator: (value) {
+                                                if (value == null) {
+                                                  return 'auth.category_required'
+                                                      .tr();
+                                                }
+                                                return null;
+                                              },
+                                            ),
+                                  SizedBox(height: 12.h),
+                                ],
+                                TextFormField(
+                                  controller: _passwordController,
+                                  obscureText: !_showPassword,
+                                  decoration: AppStyles.inputDecoration(
+                                    label: 'password'.tr(),
+                                    icon: IconlyLight.password,
+                                    suffixIcon: IconButton(
+                                      icon: Icon(
+                                        _showPassword
+                                            ? IconlyLight.show
+                                            : IconlyLight.hide,
+                                        color: AppStyles.mainBlue,
+                                      ),
+                                      onPressed: _toggleShowPassword,
+                                    ),
+                                  ),
+                                  validator: (v) {
+                                    if (v == null || v.isEmpty) {
+                                      return 'password_required'.tr();
+                                    }
+                                    if (v.length < 8) {
+                                      return 'auth.password_min_length'.tr();
+                                    }
+                                    return null;
+                                  },
+                                  textInputAction: TextInputAction.next,
+                                ),
+                                if (_passwordController.text.isNotEmpty) ...[
+                                  SizedBox(height: 8.h),
+                                  _buildPasswordStrengthIndicator(),
+                                ],
+                                SizedBox(height: 12.h),
+                                TextFormField(
+                                  controller: _confirmPasswordController,
+                                  obscureText: !_showConfirmPassword,
+                                  decoration: AppStyles.inputDecoration(
+                                    label: 'confirm_password'.tr(),
+                                    icon: IconlyLight.password,
+                                    suffixIcon: IconButton(
+                                      icon: Icon(
+                                        _showConfirmPassword
+                                            ? IconlyLight.show
+                                            : IconlyLight.hide,
+                                        color: AppStyles.mainBlue,
+                                      ),
+                                      onPressed: _toggleShowConfirmPassword,
+                                    ),
+                                  ),
+                                  validator: (v) {
+                                    if (v == null || v.isEmpty) {
+                                      return 'confirm_password_required'.tr();
+                                    }
+                                    if (v != _passwordController.text) {
+                                      return 'auth.passwords_do_not_match'.tr();
+                                    }
+                                    return null;
+                                  },
+                                  textInputAction: TextInputAction.done,
+                                  onFieldSubmitted: (_) => _register(),
+                                  onChanged: (value) => setState(() {}),
+                                ),
+                                if (_confirmPasswordController
+                                        .text.isNotEmpty &&
+                                    _passwordController.text.isNotEmpty &&
+                                    _confirmPasswordController.text !=
+                                        _passwordController.text) ...[
+                                  SizedBox(height: 4.h),
+                                  Padding(
+                                    padding: EdgeInsets.only(left: 16.w),
+                                    child: Row(
+                                      children: [
+                                        Icon(
+                                          Icons.error_outline,
+                                          color: Colors.red,
+                                          size: 16.sp,
+                                        ),
+                                        SizedBox(width: 6.w),
+                                        Text(
+                                          'auth.passwords_do_not_match'.tr(),
                                           style: TextStyle(
-                                            fontSize: 14.sp,
-                                            color: Colors.grey[600],
+                                            color: Colors.red,
+                                            fontSize: 12.sp,
                                           ),
                                         ),
-                                        items: _categories.map((category) {
-                                          return DropdownMenuItem<int>(
-                                            value: category.id,
-                                            child: Text(
-                                              category.name,
-                                              style: TextStyle(
-                                                fontSize: 14.sp,
-                                                color: Colors.grey[800],
-                                              ),
-                                            ),
-                                          );
-                                        }).toList(),
-                                        onChanged: (value) {
-                                          setState(() {
-                                            _selectedCategoryId = value;
-                                          });
-                                        },
-                                        validator: (value) {
-                                          if (value == null) {
-                                            return 'auth.category_required'
-                                                .tr();
-                                          }
-                                          return null;
-                                        },
-                                      ),
-                            SizedBox(height: 12.h),
-                          ],
-                          TextFormField(
-                            controller: _passwordController,
-                            obscureText: !_showPassword,
-                            decoration: AppStyles.inputDecoration(
-                              label: 'password'.tr(),
-                              icon: IconlyLight.password,
-                              suffixIcon: IconButton(
-                                icon: Icon(
-                                  _showPassword
-                                      ? IconlyLight.show
-                                      : IconlyLight.hide,
-                                  color: AppStyles.mainBlue,
-                                ),
-                                onPressed: _toggleShowPassword,
-                              ),
-                            ),
-                            validator: (v) {
-                              if (v == null || v.isEmpty) {
-                                return 'password_required'.tr();
-                              }
-                              if (v.length < 8) {
-                                return 'auth.password_min_length'.tr();
-                              }
-                              return null;
-                            },
-                            textInputAction: TextInputAction.next,
-                          ),
-                          if (_passwordController.text.isNotEmpty) ...[
-                            SizedBox(height: 8.h),
-                            _buildPasswordStrengthIndicator(),
-                          ],
-                          SizedBox(height: 12.h),
-                          TextFormField(
-                            controller: _confirmPasswordController,
-                            obscureText: !_showConfirmPassword,
-                            decoration: AppStyles.inputDecoration(
-                              label: 'confirm_password'.tr(),
-                              icon: IconlyLight.password,
-                              suffixIcon: IconButton(
-                                icon: Icon(
-                                  _showConfirmPassword
-                                      ? IconlyLight.show
-                                      : IconlyLight.hide,
-                                  color: AppStyles.mainBlue,
-                                ),
-                                onPressed: _toggleShowConfirmPassword,
-                              ),
-                            ),
-                            validator: (v) {
-                              if (v == null || v.isEmpty) {
-                                return 'confirm_password_required'.tr();
-                              }
-                              if (v != _passwordController.text) {
-                                return 'auth.passwords_do_not_match'.tr();
-                              }
-                              return null;
-                            },
-                            textInputAction: TextInputAction.done,
-                            onFieldSubmitted: (_) => _register(),
-                            onChanged: (value) => setState(() {}),
-                          ),
-                          if (_confirmPasswordController.text.isNotEmpty &&
-                              _passwordController.text.isNotEmpty &&
-                              _confirmPasswordController.text !=
-                                  _passwordController.text) ...[
-                            SizedBox(height: 4.h),
-                            Padding(
-                              padding: EdgeInsets.only(left: 16.w),
-                              child: Row(
-                                children: [
-                                  Icon(
-                                    Icons.error_outline,
-                                    color: Colors.red,
-                                    size: 16.sp,
-                                  ),
-                                  SizedBox(width: 6.w),
-                                  Text(
-                                    'auth.passwords_do_not_match'.tr(),
-                                    style: TextStyle(
-                                      color: Colors.red,
-                                      fontSize: 12.sp,
+                                      ],
                                     ),
                                   ),
                                 ],
-                              ),
-                            ),
-                          ],
-                          SizedBox(height: 24.h),
-                          Container(
-                            width: double.infinity,
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                colors: [
-                                  Color(0xFF2196F3),
-                                  WPConfig.primaryColor
-                                ],
-                                begin: Alignment.centerLeft,
-                                end: Alignment.centerRight,
-                              ),
-                              borderRadius:
-                                  BorderRadius.circular(AppStyles.borderRadius),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black12,
-                                  blurRadius: 8,
-                                  offset: Offset(0, 4),
+                                SizedBox(height: 24.h),
+                                Container(
+                                  width: double.infinity,
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      colors: [
+                                        Color(0xFF2196F3),
+                                        AppColors.primary(context)
+                                      ],
+                                      begin: Alignment.centerLeft,
+                                      end: Alignment.centerRight,
+                                    ),
+                                    borderRadius: BorderRadius.circular(
+                                        AppStyles.borderRadius),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black12,
+                                        blurRadius: 8,
+                                        offset: Offset(0, 4),
+                                      ),
+                                    ],
+                                  ),
+                                  child: Material(
+                                    color: Colors.transparent,
+                                    child: InkWell(
+                                      borderRadius: BorderRadius.circular(
+                                          AppStyles.borderRadius),
+                                      onTap:
+                                          _areAllFieldsValid() && !_isCreating
+                                              ? _register
+                                              : null,
+                                      child: Opacity(
+                                        opacity:
+                                            _areAllFieldsValid() ? 1.0 : 0.5,
+                                        child: Padding(
+                                          padding: EdgeInsets.symmetric(
+                                              vertical: 16.h),
+                                          child: Center(
+                                            child: _isCreating
+                                                ? CircularProgressIndicator(
+                                                    color: Colors.white,
+                                                  )
+                                                : Text(
+                                                    'auth.create_account'.tr(),
+                                                    style: TextStyle(
+                                                      color: Colors.white,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                      fontSize: 18.sp,
+                                                    ),
+                                                  ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(height: 12.h),
+                                Center(
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      Navigator.pushReplacementNamed(
+                                        context,
+                                        AppRoutes.login,
+                                      );
+                                    },
+                                    child: Text(
+                                      'auth.already_have_account'.tr(),
+                                      style: TextStyle(
+                                        color: AppStyles.mainBlue,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 15.sp,
+                                      ),
+                                    ),
+                                  ),
                                 ),
                               ],
                             ),
-                            child: Material(
-                              color: Colors.transparent,
-                              child: InkWell(
-                                borderRadius: BorderRadius.circular(
-                                    AppStyles.borderRadius),
-                                onTap: _areAllFieldsValid() && !_isCreating
-                                    ? _register
-                                    : null,
-                                child: Opacity(
-                                  opacity: _areAllFieldsValid() ? 1.0 : 0.5,
-                                  child: Padding(
-                                    padding:
-                                        EdgeInsets.symmetric(vertical: 16.h),
-                                    child: Center(
-                                      child: _isCreating
-                                          ? CircularProgressIndicator(
-                                              color: Colors.white,
-                                            )
-                                          : Text(
-                                              'auth.create_account'.tr(),
-                                              style: TextStyle(
-                                                color: Colors.white,
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 18.sp,
-                                              ),
-                                            ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
                           ),
-                          SizedBox(height: 12.h),
-                          Center(
-                            child: GestureDetector(
-                              onTap: () {
-                                Navigator.pushReplacementNamed(
-                                  context,
-                                  AppRoutes.login,
-                                );
-                              },
-                              child: Text(
-                                'auth.already_have_account'.tr(),
-                                style: TextStyle(
-                                  color: AppStyles.mainBlue,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 15.sp,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
+                // Right side ad (only on tablet)
+                if (isTablet) ...[
+                  SizedBox(width: 16.w),
+                  Container(
+                    width: 120.w,
+                    margin: EdgeInsets.only(right: 16.w, top: 40.h),
+                    child: SideAdWidget(page: 'register'),
+                  ),
+                ],
+              ],
             ),
           ),
           Positioned(
@@ -1117,11 +1167,11 @@ class _RegisterPageState extends State<RegisterPage> {
         padding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 8.w),
         decoration: BoxDecoration(
           color: isSelected
-              ? WPConfig.primaryColor.withOpacity(0.1)
+              ? AppColors.primary(context).withOpacity(0.1)
               : Colors.grey[100],
           borderRadius: BorderRadius.circular(8.r),
           border: Border.all(
-            color: isSelected ? WPConfig.primaryColor : Colors.grey[300]!,
+            color: isSelected ? AppColors.primary(context) : Colors.grey[300]!,
             width: isSelected ? 2 : 1,
           ),
         ),
@@ -1130,7 +1180,7 @@ class _RegisterPageState extends State<RegisterPage> {
           children: [
             Icon(
               icon,
-              color: isSelected ? WPConfig.primaryColor : Colors.grey[600],
+              color: isSelected ? AppColors.primary(context) : Colors.grey[600],
               size: 20.sp,
             ),
             SizedBox(height: 4.h),
@@ -1139,7 +1189,8 @@ class _RegisterPageState extends State<RegisterPage> {
               style: TextStyle(
                 fontSize: 11.sp,
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                color: isSelected ? WPConfig.primaryColor : Colors.grey[700],
+                color:
+                    isSelected ? AppColors.primary(context) : Colors.grey[700],
               ),
               textAlign: TextAlign.center,
             ),

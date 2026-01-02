@@ -47,4 +47,5 @@ class AppRoutes {
   static const String homePage = '/homePage';
   static const String serviceProviderCategories =
       '/service-provider-categories';
+  static const String paymentDocuments = '/payment-documents';
 }

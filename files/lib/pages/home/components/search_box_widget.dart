@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:easy_localization/easy_localization.dart';
 import '../../../services/hotel_service.dart';
 import '../../../models/hotel.dart';
+import '../../../config/constants/app_colors.dart';
 
 class SearchBoxWidget extends StatefulWidget {
   final Function(String destination, DateTime? checkIn, DateTime? checkOut,
@@ -32,7 +33,7 @@ class _SearchBoxWidgetState extends State<SearchBoxWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final primaryColor = const Color(0xFFa93ae1); // Purple color from t heme
+    final primaryColor = AppColors.primary(context); // Dynamic color from API
     final screenSize = MediaQuery.of(context).size;
     final isTablet = screenSize.width >= 768;
     final isLandscape = screenSize.width > screenSize.height;
@@ -558,7 +559,7 @@ class _DestinationSelectionModalState extends State<DestinationSelectionModal> {
 
   @override
   Widget build(BuildContext context) {
-    final primaryColor = const Color(0xFFa93ae1);
+    final primaryColor = AppColors.primary(context);
     final isTablet = MediaQuery.of(context).size.width >= 768;
     Future.microtask(() async {
       if (_destinations.isNotEmpty) return;

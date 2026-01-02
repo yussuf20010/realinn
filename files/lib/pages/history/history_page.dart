@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import '../../config/wp_config.dart';
+import '../../config/constants/app_colors.dart';
 import '../../services/waiting_list_provider.dart';
 
 class HistoryPage extends ConsumerWidget {
@@ -10,7 +10,7 @@ class HistoryPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final primaryColor = WPConfig.navbarColor;
+    final primaryColor = AppColors.primary(context);
     final isTablet = MediaQuery.of(context).size.width >= 768;
     final waitingList = ref.watch(waitingListProvider);
 

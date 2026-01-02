@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../models/service_provider_category.dart';
 import '../../../services/service_provider_service.dart';
 import '../../../config/wp_config.dart';
+import '../../../config/constants/app_colors.dart';
 import 'providers_list_page.dart';
 
 class CategoriesPage extends StatefulWidget {
@@ -61,13 +62,14 @@ class _CategoriesPageState extends State<CategoriesPage> {
             fontWeight: FontWeight.bold,
           ),
         ),
-        backgroundColor: WPConfig.primaryColor,
+        backgroundColor: AppColors.primary(context),
         foregroundColor: Colors.white,
         elevation: 0,
       ),
       body: _isLoading
           ? Center(
-              child: CircularProgressIndicator(color: WPConfig.primaryColor),
+              child:
+                  CircularProgressIndicator(color: AppColors.primary(context)),
             )
           : _error != null
               ? Center(
@@ -91,7 +93,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
                       ElevatedButton(
                         onPressed: _loadCategories,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: WPConfig.primaryColor,
+                          backgroundColor: AppColors.primary(context),
                           foregroundColor: Colors.white,
                         ),
                         child: Text('Retry'),
@@ -117,7 +119,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
                     )
                   : RefreshIndicator(
                       onRefresh: _loadCategories,
-                      color: WPConfig.primaryColor,
+                      color: AppColors.primary(context),
                       child: ListView(
                         padding: EdgeInsets.all(isTablet ? 20.w : 16.w),
                         children: [
@@ -239,7 +241,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
       ServiceProviderCategory category, int index, bool isTablet) {
     // Calculate percentage based on index (for demo, you can use actual data)
     final percentage = ((index + 1) * 15) % 100;
-    final avatarColor = _getAvatarColor(index);
+    final avatarColor = _getAvatarColor(index, context);
 
     return GestureDetector(
       onTap: () {
@@ -257,7 +259,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
         mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          // Static colored avatar circle - no box
+          // Use category image if available, otherwise use icon, fallback to colored circle
           Container(
             width: isTablet ? 100.w : 80.w,
             height: isTablet ? 100.w : 80.w,
@@ -265,7 +267,50 @@ class _CategoriesPageState extends State<CategoriesPage> {
               shape: BoxShape.circle,
               color: avatarColor,
             ),
-            child: Icon(
+            clipBehavior: Clip.antiAlias,
+            child: category.image != null && category.image!.isNotEmpty
+                ? Image.network(
+                    category.image!.startsWith('http')
+                        ? category.image!
+                        : '${WPConfig.siteStorageUrl}${category.image!}',
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return category.icon != null && category.icon!.isNotEmpty
+                          ? Image.network(
+                              category.icon!.startsWith('http')
+                                  ? category.icon!
+                                  : '${WPConfig.siteStorageUrl}${category.icon!}',
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) {
+                                return Icon(
+                                  Icons.person,
+                                  size: isTablet ? 50 : 40,
+                                  color: Colors.white,
+                                );
+                              },
+                            )
+                          : Icon(
+                              Icons.person,
+                              size: isTablet ? 50 : 40,
+                              color: Colors.white,
+                            );
+                    },
+                  )
+                : category.icon != null && category.icon!.isNotEmpty
+                    ? Image.network(
+                        category.icon!.startsWith('http')
+                            ? category.icon!
+                            : '${WPConfig.siteStorageUrl}${category.icon!}',
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Icon(
+                            Icons.person,
+                            size: isTablet ? 50 : 40,
+                            color: Colors.white,
+                          );
+                        },
+                      )
+                    : Icon(
               Icons.person,
               size: isTablet ? 50 : 40,
               color: Colors.white,
@@ -302,18 +347,20 @@ class _CategoriesPageState extends State<CategoriesPage> {
     );
   }
 
-  Color _getAvatarColor(int index) {
+  Color _getAvatarColor(int index, BuildContext context) {
+    final primaryColor = AppColors.primary(context);
+    // Generate colors based on primary color with variations
     final colors = [
-      Color(0xFFFFD700), // Yellow
-      Color(0xFF20B2AA), // Teal
-      Color(0xFF9370DB), // Purple
-      Color(0xFF32CD32), // Green
-      Color(0xFFFF6347), // Orange
-      Color(0xFF4169E1), // Blue
-      Color(0xFFFF69B4), // Pink
-      Color(0xFF00CED1), // Dark Turquoise
-      Color(0xFFFFA500), // Orange
-      Color(0xFF8B008B), // Dark Magenta
+      primaryColor,
+      primaryColor.withOpacity(0.8),
+      primaryColor.withOpacity(0.6),
+      primaryColor.withOpacity(0.9),
+      primaryColor.withOpacity(0.7),
+      primaryColor.withOpacity(0.85),
+      primaryColor.withOpacity(0.75),
+      primaryColor.withOpacity(0.65),
+      primaryColor.withOpacity(0.95),
+      primaryColor.withOpacity(0.55),
     ];
     return colors[index % colors.length];
   }

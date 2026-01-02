@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../config/wp_config.dart';
+import '../../config/constants/app_colors.dart';
 import '../../config/routes/app_routes.dart';
 import '../../services/token_storage_service.dart';
 import '../../services/auth_service.dart';
@@ -136,7 +137,7 @@ class _WelcomePageState extends ConsumerState<WelcomePage> {
 
   @override
   Widget build(BuildContext context) {
-    final primaryColor = WPConfig.primaryColor;
+    final primaryColor = AppColors.primary(context);
     final isTablet = MediaQuery.of(context).size.width >= 768;
 
     if (_isLoading) {
@@ -311,7 +312,7 @@ class _WelcomePageState extends ConsumerState<WelcomePage> {
         Icon(
           icon,
           size: isTablet ? 20.sp : 18.sp,
-          color: WPConfig.primaryColor,
+          color: AppColors.primary(context),
         ),
         SizedBox(width: 12.w),
         Expanded(

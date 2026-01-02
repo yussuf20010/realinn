@@ -2,15 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import '../../config/wp_config.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import '../../config/dynamic_config.dart';
 import '../../config/routes/app_routes.dart';
+import '../../config/constants/app_colors.dart';
 import '../../models/hotel.dart';
 import '../../models/service_provider.dart';
 import '../../services/hotel_service.dart';
 import '../../services/service_provider_service.dart';
 import '../../services/auth_service.dart';
 import '../../config/constants/assets.dart';
+import '../../widgets/ads/ads_timer_widget.dart';
 import 'components/search_box_widget.dart';
 
 class HomePage extends ConsumerStatefulWidget {
@@ -33,8 +35,6 @@ class _HomePageState extends ConsumerState<HomePage> {
   bool _isLoadingHotels = true;
   String? _selectedDestination;
   int _selectedServiceType = 0;
-
-  // Service providers flow state
   bool _isSearchingProviders = false;
   bool _showProvidersList = false;
   bool _showApprovalPrompt = false;
@@ -56,7 +56,6 @@ class _HomePageState extends ConsumerState<HomePage> {
     super.dispose();
   }
 
-  // Service providers flow methods
   void _handleServiceTypeChange(int index) {
     setState(() {
       _selectedServiceType = index;
@@ -307,46 +306,48 @@ class _HomePageState extends ConsumerState<HomePage> {
       _checkOutDate = checkOut;
       _rooms = rooms;
     });
-
-    // Perform the search using the existing search logic
     _performSearch();
   }
 
   @override
   Widget build(BuildContext context) {
     ref.watch(dynamicConfigProvider);
-    final primaryColor = WPConfig.navbarColor;
+    final primaryColor = AppColors.primary(context);
     final screenSize = MediaQuery.of(context).size;
     final isTablet = screenSize.width >= 768;
     final isLandscape = screenSize.width > screenSize.height;
 
     // Adjust app bar height based on orientation
-    final appBarHeight = isLandscape ? (isTablet ? 100.h : 80.h) : 120.h;
+    final appBarHeight = isLandscape ? (isTablet ? 85.h : 80.h) : 100.h;
 
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: PreferredSize(
-        preferredSize: Size.fromHeight(appBarHeight),
-        child: _buildCustomAppBar(context, primaryColor, isTablet, isLandscape),
-      ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            if (_selectedServiceType == 0) ...[
-              SearchBoxWidget(
-                onSearch: _handleSearchBoxSearch,
-                isLoading: _isSearching,
-              ),
-              SizedBox(height: 16),
+    return AdsTimerWidget(
+      currentPage: 'home',
+      child: Scaffold(
+        backgroundColor: Colors.white,
+        appBar: PreferredSize(
+          preferredSize: Size.fromHeight(appBarHeight),
+          child:
+              _buildCustomAppBar(context, primaryColor, isTablet, isLandscape),
+        ),
+        body: SingleChildScrollView(
+          child: Column(
+            children: [
+              if (_selectedServiceType == 0) ...[
+                SearchBoxWidget(
+                  onSearch: _handleSearchBoxSearch,
+                  isLoading: _isSearching,
+                ),
+                SizedBox(height: 16),
+              ],
+
+              // Service providers flow when Services is selected
+              if (_selectedServiceType == 1) ...[
+                _buildServiceProvidersFlow(),
+              ],
+
+              _buildMainContent(isTablet, primaryColor),
             ],
-
-            // Service providers flow when Services is selected
-            if (_selectedServiceType == 1) ...[
-              _buildServiceProvidersFlow(),
-            ],
-
-            _buildMainContent(isTablet, primaryColor),
-          ],
+          ),
         ),
       ),
     );
@@ -375,18 +376,26 @@ class _HomePageState extends ConsumerState<HomePage> {
                             icon: Icon(Icons.notifications_outlined,
                                 color: Colors.white,
                                 size: isLandscape
-                                    ? (isTablet ? 20.sp : 18.sp)
-                                    : (isTablet ? 24.sp : 20.sp)),
+                                    ? (isTablet ? 18.sp : 18.sp)
+                                    : (isTablet ? 20.sp : 20.sp)),
                             onPressed: () {
                               Navigator.pushNamed(context, '/notifications');
                             },
                           ),
                           IconButton(
-                            icon: Icon(Icons.chat,
-                                color: Colors.white,
-                                size: isLandscape
-                                    ? (isTablet ? 20.sp : 18.sp)
-                                    : (isTablet ? 24.sp : 20.sp)),
+                            icon: SvgPicture.asset(
+                              AssetsManager.customer_service,
+                              width: isLandscape
+                                  ? (isTablet ? 18.sp : 18.sp)
+                                  : (isTablet ? 20.sp : 20.sp),
+                              height: isLandscape
+                                  ? (isTablet ? 18.sp : 18.sp)
+                                  : (isTablet ? 20.sp : 20.sp),
+                              colorFilter: ColorFilter.mode(
+                                Colors.white,
+                                BlendMode.srcIn,
+                              ),
+                            ),
                             onPressed: () {
                               Navigator.pushNamed(context, '/customer-service');
                             },
@@ -394,16 +403,43 @@ class _HomePageState extends ConsumerState<HomePage> {
                         ],
                       ),
 
-                      // Center - Logo
+                      // Center - Logo from API
                       Expanded(
                         child: Center(
-                            child: Image.asset(
-                          AssetsManager.appbar,
-                          height: isLandscape
-                              ? (isTablet ? 30.h : 24.h)
-                              : (isTablet ? 40.h : 32.h),
-                          fit: BoxFit.contain,
-                        )),
+                          child: Consumer(
+                            builder: (context, ref, child) {
+                              final dynamicConfig =
+                                  ref.watch(dynamicConfigProvider);
+                              final logoUrl = dynamicConfig.logoUrl ??
+                                  dynamicConfig.logoTwo;
+                              return logoUrl != null && logoUrl.isNotEmpty
+                                  ? Image.network(
+                                      logoUrl,
+                                      height: isLandscape
+                                          ? (isTablet ? 26.h : 24.h)
+                                          : (isTablet ? 32.h : 32.h),
+                                      fit: BoxFit.contain,
+                                      errorBuilder:
+                                          (context, error, stackTrace) {
+                                        return Image.asset(
+                                          AssetsManager.appbar,
+                                          height: isLandscape
+                                              ? (isTablet ? 26.h : 24.h)
+                                              : (isTablet ? 32.h : 32.h),
+                                          fit: BoxFit.contain,
+                                        );
+                                      },
+                                    )
+                                  : Image.asset(
+                                      AssetsManager.appbar,
+                                      height: isLandscape
+                                          ? (isTablet ? 26.h : 24.h)
+                                          : (isTablet ? 32.h : 32.h),
+                                      fit: BoxFit.contain,
+                                    );
+                            },
+                          ),
+                        ),
                       ),
 
                       // Right side - Language and Profile/Login
@@ -437,8 +473,8 @@ class _HomePageState extends ConsumerState<HomePage> {
                                       color: Colors.white,
                                       fontWeight: FontWeight.bold,
                                       fontSize: isLandscape
-                                          ? (isTablet ? 12.sp : 10.sp)
-                                          : (isTablet ? 14.sp : 12.sp),
+                                          ? (isTablet ? 11.sp : 10.sp)
+                                          : (isTablet ? 12.sp : 12.sp),
                                     ),
                                   ),
                                 ),
@@ -462,15 +498,15 @@ class _HomePageState extends ConsumerState<HomePage> {
 
                       return Container(
                         width: isLandscape
-                            ? (isTablet ? 100.w : 80.w)
-                            : (isTablet ? 120.w : 100.w),
+                            ? (isTablet ? 90.w : 80.w)
+                            : (isTablet ? 100.w : 100.w),
                         margin: EdgeInsets.symmetric(horizontal: 6.w),
                         child: GestureDetector(
                           onTap: () {
                             _handleServiceTypeChange(index);
                           },
                           child: Container(
-                            height: isLandscape ? 20.h : 25.h,
+                            height: isLandscape ? 20.h : 23.h,
                             decoration: BoxDecoration(
                               color: Colors.transparent,
                               borderRadius: BorderRadius.circular(25.r),
@@ -487,13 +523,27 @@ class _HomePageState extends ConsumerState<HomePage> {
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Icon(
-                                  _getServiceIcon(serviceType),
-                                  color: Colors.white,
-                                  size: isLandscape
-                                      ? (isTablet ? 14.sp : 12.sp)
-                                      : (isTablet ? 18.sp : 16.sp),
-                                ),
+                                serviceType == 'services'
+                                    ? SvgPicture.asset(
+                                        AssetsManager.service_providers,
+                                        width: isLandscape
+                                            ? (isTablet ? 20.sp : 12.sp)
+                                            : (isTablet ? 22.sp : 16.sp),
+                                        height: isLandscape
+                                            ? (isTablet ? 20.sp : 12.sp)
+                                            : (isTablet ? 22.sp : 16.sp),
+                                        colorFilter: ColorFilter.mode(
+                                          Colors.white,
+                                          BlendMode.srcIn,
+                                        ),
+                                      )
+                                    : Icon(
+                                        _getServiceIcon(serviceType),
+                                        color: Colors.white,
+                                        size: isLandscape
+                                            ? (isTablet ? 12.sp : 12.sp)
+                                            : (isTablet ? 16.sp : 16.sp),
+                                      ),
                                 SizedBox(width: isLandscape ? 4.w : 6.w),
                                 Flexible(
                                   child: Text(
@@ -501,8 +551,8 @@ class _HomePageState extends ConsumerState<HomePage> {
                                     style: TextStyle(
                                       color: Colors.white,
                                       fontSize: isLandscape
-                                          ? (isTablet ? 12.sp : 10.sp)
-                                          : (isTablet ? 14.sp : 12.sp),
+                                          ? (isTablet ? 11.sp : 10.sp)
+                                          : (isTablet ? 12.sp : 12.sp),
                                       fontWeight: FontWeight.bold,
                                     ),
                                     textAlign: TextAlign.center,
@@ -531,7 +581,7 @@ class _HomePageState extends ConsumerState<HomePage> {
       case 'stays':
         return Icons.bed;
       case 'services':
-        return Icons.restaurant;
+        return Icons.room_service; // More related icon for service providers
       default:
         return Icons.bed;
     }
@@ -539,7 +589,7 @@ class _HomePageState extends ConsumerState<HomePage> {
 
   Widget _buildAuthAction(bool isTablet, bool isLandscape) {
     final size =
-        isLandscape ? (isTablet ? 20.sp : 18.sp) : (isTablet ? 24.sp : 20.sp);
+        isLandscape ? (isTablet ? 18.sp : 18.sp) : (isTablet ? 20.sp : 20.sp);
 
     return FutureBuilder<bool>(
       future: AuthService.isLoggedIn(),
@@ -663,120 +713,126 @@ class _HomePageState extends ConsumerState<HomePage> {
   }
 
   Widget _buildMainContent(bool isTablet, Color primaryColor) {
-    return Row(
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: isTablet ? 16.w : 16.w),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(height: isTablet ? 16.h : 12.h),
+
+          // Travel more, spend less section
+          _buildTravelMoreSection(isTablet, primaryColor),
+
+          SizedBox(height: isTablet ? 16.h : 12.h),
+
+          // Extra Payment section
+          _buildExtraPaymentSection(isTablet, primaryColor),
+
+          SizedBox(height: isTablet ? 16.h : 12.h),
+
+          // Offers section
+          _buildOffersSection(isTablet, primaryColor),
+
+          SizedBox(height: isTablet ? 16.h : 12.h),
+
+          // Explore locations section (from API)
+          _buildExploreLocationsSection(isTablet, primaryColor),
+
+          SizedBox(height: isTablet ? 16.h : 12.h),
+
+          // Why RealInn section
+          _buildWhyRealInnSection(isTablet, primaryColor),
+
+          SizedBox(height: isTablet ? 16.h : 12.h),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildExtraPaymentSection(bool isTablet, Color primaryColor) {
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Left side ad (only on tablet)
-        if (isTablet) ...[
-          Container(
-            width: 120.w,
-            margin: EdgeInsets.only(left: 16.w, top: 8.h),
-            child: _buildSideAd(isTablet, primaryColor),
+        Text(
+          'extra_payment'.tr(),
+          style: TextStyle(
+            fontSize: isTablet ? 14.sp : 15.sp,
+            fontWeight: FontWeight.bold,
+            color: Colors.black,
           ),
-          SizedBox(width: 16.w),
-        ],
-
-        // Main content
-        Expanded(
-          child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: isTablet ? 0 : 16.w),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+        ),
+        SizedBox(height: isTablet ? 8.h : 6.h),
+        GestureDetector(
+          onTap: () {
+            Navigator.pushNamed(context, AppRoutes.paymentDocuments);
+          },
+          child: Container(
+            height: isTablet ? 120.h : 120.h,
+            padding: EdgeInsets.all(isTablet ? 16.w : 16.w),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12.r),
+              border: Border.all(color: primaryColor, width: 2),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 8,
+                  offset: Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Row(
               children: [
-                SizedBox(height: isTablet ? 16.h : 12.h),
-
-                // Travel more, spend less section
-                _buildTravelMoreSection(isTablet, primaryColor),
-
-                SizedBox(height: isTablet ? 16.h : 12.h),
-
-                // Offers section
-                _buildOffersSection(isTablet, primaryColor),
-
-                SizedBox(height: isTablet ? 16.h : 12.h),
-
-                // Explore locations section (from API)
-                _buildExploreLocationsSection(isTablet, primaryColor),
-
-                SizedBox(height: isTablet ? 16.h : 12.h),
-
-                // Why RealInn section
-                _buildWhyRealInnSection(isTablet, primaryColor),
-
-                SizedBox(height: isTablet ? 16.h : 12.h),
+                Container(
+                  width: isTablet ? 60.w : 60.w,
+                  height: isTablet ? 60.h : 60.h,
+                  decoration: BoxDecoration(
+                    color: primaryColor.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12.r),
+                  ),
+                  child: Icon(
+                    Icons.payment,
+                    color: primaryColor,
+                    size: isTablet ? 28.sp : 28.sp,
+                  ),
+                ),
+                SizedBox(width: 16.w),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        'extra_payment'.tr(),
+                        style: TextStyle(
+                          fontSize: isTablet ? 14.sp : 16.sp,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                        ),
+                      ),
+                      SizedBox(height: 4.h),
+                      Text(
+                        'upload_payment_documents'.tr(),
+                        style: TextStyle(
+                          fontSize: isTablet ? 11.sp : 12.sp,
+                          color: Colors.grey[600],
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+                Icon(
+                  Icons.arrow_forward_ios,
+                  color: primaryColor,
+                  size: isTablet ? 18.sp : 18.sp,
+                ),
               ],
             ),
           ),
         ),
-
-        // Right side ad (only on tablet)
-        if (isTablet) ...[
-          SizedBox(width: 16.w),
-          Container(
-            width: 120.w,
-            margin: EdgeInsets.only(right: 16.w, top: 20.h),
-            child: _buildSideAd(isTablet, primaryColor),
-          ),
-        ],
       ],
-    );
-  }
-
-  Widget _buildSideAd(bool isTablet, Color primaryColor) {
-    return Container(
-      height: 300.h,
-      decoration: BoxDecoration(
-        color: Colors.grey[100],
-        borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(color: Colors.grey[300]!, width: 1),
-      ),
-      child: Column(
-        children: [
-          Container(
-            height: 200.h,
-            decoration: BoxDecoration(
-              color: primaryColor.withOpacity(0.1),
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(12.r),
-                topRight: Radius.circular(12.r),
-              ),
-            ),
-            child: Center(
-              child: Icon(
-                Icons.campaign,
-                color: primaryColor,
-                size: 40.sp,
-              ),
-            ),
-          ),
-          Expanded(
-            child: Padding(
-              padding: EdgeInsets.all(8.w),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    'ad_space'.tr(),
-                    style: TextStyle(
-                      fontSize: 12.sp,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.grey[600],
-                    ),
-                  ),
-                  SizedBox(height: 4.h),
-                  Text(
-                    'non_intrusive'.tr(),
-                    style: TextStyle(
-                      fontSize: 10.sp,
-                      color: Colors.grey[500],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
     );
   }
 
@@ -787,7 +843,7 @@ class _HomePageState extends ConsumerState<HomePage> {
         Text(
           'travel_more_spend_less'.tr(),
           style: TextStyle(
-            fontSize: 15.sp,
+            fontSize: isTablet ? 14.sp : 15.sp,
             fontWeight: FontWeight.bold,
             color: Colors.black,
           ),
@@ -797,8 +853,8 @@ class _HomePageState extends ConsumerState<HomePage> {
           children: [
             Expanded(
               child: Container(
-                height: isTablet ? 140.h : 120.h, // Fixed height
-                padding: EdgeInsets.all(isTablet ? 20.w : 16.w),
+                height: isTablet ? 120.h : 120.h, // Fixed height
+                padding: EdgeInsets.all(isTablet ? 16.w : 16.w),
                 decoration: BoxDecoration(
                   color: primaryColor,
                   borderRadius: BorderRadius.circular(12.r),
@@ -810,7 +866,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                       'genius'.tr(),
                       style: TextStyle(
                         color: Colors.white,
-                        fontSize: 10.sp,
+                        fontSize: 9.sp,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -830,8 +886,8 @@ class _HomePageState extends ConsumerState<HomePage> {
             SizedBox(width: 16.w),
             Expanded(
               child: Container(
-                height: isTablet ? 140.h : 120.h, // Fixed height
-                padding: EdgeInsets.all(isTablet ? 20.w : 16.w),
+                height: isTablet ? 120.h : 120.h, // Fixed height
+                padding: EdgeInsets.all(isTablet ? 16.w : 16.w),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(12.r),
@@ -844,7 +900,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                       'discounts_10'.tr(),
                       style: TextStyle(
                         color: Colors.black,
-                        fontSize: 10.sp,
+                        fontSize: 9.sp,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -853,7 +909,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                       'discounts_description'.tr(),
                       style: TextStyle(
                         color: Colors.black,
-                        fontSize: 10.sp,
+                        fontSize: 9.sp,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -874,7 +930,7 @@ class _HomePageState extends ConsumerState<HomePage> {
         Text(
           'offers'.tr(),
           style: TextStyle(
-            fontSize: 15.sp,
+            fontSize: isTablet ? 14.sp : 15.sp,
             fontWeight: FontWeight.bold,
             color: Colors.black,
           ),
@@ -883,15 +939,15 @@ class _HomePageState extends ConsumerState<HomePage> {
         Text(
           'offers_description'.tr(),
           style: TextStyle(
-            fontSize: 15.sp,
+            fontSize: isTablet ? 14.sp : 15.sp,
             color: Colors.black,
             fontWeight: FontWeight.bold,
           ),
         ),
-        SizedBox(height: isTablet ? 20.h : 16.h),
+        SizedBox(height: isTablet ? 16.h : 16.h),
         Container(
-          height: isTablet ? 120.h : 105.h, // Fixed height
-          padding: EdgeInsets.all(isTablet ? 20.w : 16.w),
+          height: isTablet ? 105.h : 105.h, // Fixed height
+          padding: EdgeInsets.all(isTablet ? 16.w : 16.w),
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(12.r),
@@ -913,7 +969,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                     Text(
                       'quick_escape_quality_time'.tr(),
                       style: TextStyle(
-                        fontSize: 12.sp,
+                        fontSize: isTablet ? 11.sp : 12.sp,
                         fontWeight: FontWeight.bold,
                         color: Colors.black,
                       ),
@@ -921,7 +977,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                     Text(
                       'save_up_to_20_percent'.tr(),
                       style: TextStyle(
-                        fontSize: 13.sp,
+                        fontSize: isTablet ? 12.sp : 13.sp,
                         color: Colors.black,
                         fontWeight: FontWeight.bold,
                       ),
@@ -930,8 +986,8 @@ class _HomePageState extends ConsumerState<HomePage> {
                 ),
               ),
               Container(
-                width: isTablet ? 80.w : 60.w,
-                height: isTablet ? 80.h : 60.h,
+                width: isTablet ? 60.w : 60.w,
+                height: isTablet ? 60.h : 60.h,
                 decoration: BoxDecoration(
                   color: Colors.blue[100],
                   borderRadius: BorderRadius.circular(8.r),
@@ -939,7 +995,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                 child: Icon(
                   Icons.people,
                   color: Colors.blue[600],
-                  size: isTablet ? 32.sp : 24.sp,
+                  size: isTablet ? 24.sp : 24.sp,
                 ),
               ),
             ],
@@ -956,7 +1012,7 @@ class _HomePageState extends ConsumerState<HomePage> {
         Text(
           'explore_destinations'.tr(),
           style: TextStyle(
-            fontSize: 15.sp,
+            fontSize: isTablet ? 14.sp : 15.sp,
             fontWeight: FontWeight.bold,
             color: Colors.black,
           ),
@@ -973,7 +1029,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                   Text(
                     'loading_destinations'.tr(),
                     style: TextStyle(
-                      fontSize: 15.sp,
+                      fontSize: isTablet ? 14.sp : 15.sp,
                       color: Colors.grey[600],
                     ),
                   ),
@@ -989,14 +1045,14 @@ class _HomePageState extends ConsumerState<HomePage> {
                 children: [
                   Icon(
                     Icons.location_off,
-                    size: isTablet ? 64.sp : 48.sp,
+                    size: isTablet ? 48.sp : 48.sp,
                     color: Colors.grey[400],
                   ),
                   SizedBox(height: 16.h),
                   Text(
                     'no_destinations_available'.tr(),
                     style: TextStyle(
-                      fontSize: 15.sp,
+                      fontSize: isTablet ? 14.sp : 15.sp,
                       color: Colors.grey[600],
                       fontWeight: FontWeight.w500,
                     ),
@@ -1005,7 +1061,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                   Text(
                     'check_network_connection'.tr(),
                     style: TextStyle(
-                      fontSize: isTablet ? 14.sp : 12.sp,
+                      fontSize: isTablet ? 12.sp : 12.sp,
                       color: Colors.grey[500],
                     ),
                   ),
@@ -1059,9 +1115,9 @@ class _HomePageState extends ConsumerState<HomePage> {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: isTablet ? 200.w : 150.w,
-        height: isTablet ? 120.h : 100.h,
-        margin: EdgeInsets.only(right: isTablet ? 16.w : 12.w),
+        width: isTablet ? 150.w : 150.w,
+        height: isTablet ? 100.h : 100.h,
+        margin: EdgeInsets.only(right: isTablet ? 12.w : 12.w),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12.r),
           color: isCountry
@@ -1106,7 +1162,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                     Icon(
                       isCountry ? Icons.public : Icons.location_city,
                       color: Colors.white,
-                      size: isTablet ? 16.sp : 14.sp,
+                      size: isTablet ? 14.sp : 14.sp,
                     ),
                     SizedBox(width: 4.w),
                     Expanded(
@@ -1115,7 +1171,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                         style: TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
-                          fontSize: isTablet ? 18.sp : 16.sp,
+                          fontSize: isTablet ? 14.sp : 16.sp,
                         ),
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -1128,7 +1184,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                     properties,
                     style: TextStyle(
                       color: Colors.white,
-                      fontSize: isTablet ? 12.sp : 10.sp,
+                      fontSize: isTablet ? 10.sp : 10.sp,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -1244,12 +1300,12 @@ class _HomePageState extends ConsumerState<HomePage> {
         Text(
           'why_RealN'.tr(),
           style: TextStyle(
-            fontSize: 13.sp,
+            fontSize: isTablet ? 12.sp : 13.sp,
             fontWeight: FontWeight.bold,
             color: Colors.black,
           ),
         ),
-        SizedBox(height: isTablet ? 15.h : 12.h),
+        SizedBox(height: isTablet ? 12.h : 12.h),
         // Horizontal scrollable feature cards with same size
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
@@ -1285,19 +1341,81 @@ class _HomePageState extends ConsumerState<HomePage> {
                 iconColor: Colors.green[600]!,
               ),
               SizedBox(width: 16.w),
-              _buildFeatureCard(
-                icon: Icons.support_agent,
+              _buildFeatureCardWithSvg(
+                svgAsset: AssetsManager.customer_service,
                 title: 'support_24_7'.tr(),
                 description: 'support_24_7_description'.tr(),
                 isTablet: isTablet,
                 primaryColor: primaryColor,
-                backgroundColor: Colors.purple[100]!,
-                iconColor: Colors.purple[600]!,
+                backgroundColor: primaryColor.withOpacity(0.1),
+                iconColor: primaryColor,
               ),
             ],
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildFeatureCardWithSvg({
+    required String svgAsset,
+    required String title,
+    required String description,
+    required bool isTablet,
+    required Color primaryColor,
+    required Color backgroundColor,
+    required Color iconColor,
+  }) {
+    return Container(
+      width: isTablet ? 200.w : 200.w,
+      height: isTablet ? 140.h : 160.h,
+      padding: EdgeInsets.all(isTablet ? 16.w : 16.w),
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(12.r),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 8,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SvgPicture.asset(
+            svgAsset,
+            width: isTablet ? 28.sp : 28.sp,
+            height: isTablet ? 28.sp : 28.sp,
+            colorFilter: ColorFilter.mode(
+              iconColor,
+              BlendMode.srcIn,
+            ),
+          ),
+          SizedBox(height: 12.h),
+          Text(
+            title,
+            style: TextStyle(
+              fontSize: isTablet ? 10.sp : 10.sp,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+            ),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+          SizedBox(height: 8.h),
+          Text(
+            description,
+            style: TextStyle(
+              fontSize: isTablet ? 11.sp : 11.sp,
+              color: Colors.black,
+            ),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
+      ),
     );
   }
 
@@ -1311,9 +1429,9 @@ class _HomePageState extends ConsumerState<HomePage> {
     required Color iconColor,
   }) {
     return Container(
-      width: isTablet ? 250.w : 200.w,
-      height: isTablet ? 160.h : 160.h,
-      padding: EdgeInsets.all(isTablet ? 20.w : 16.w),
+      width: isTablet ? 200.w : 200.w,
+      height: isTablet ? 140.h : 160.h,
+      padding: EdgeInsets.all(isTablet ? 16.w : 16.w),
       decoration: BoxDecoration(
         color: backgroundColor,
         borderRadius: BorderRadius.circular(12.r),
@@ -1331,13 +1449,13 @@ class _HomePageState extends ConsumerState<HomePage> {
           Icon(
             icon,
             color: iconColor,
-            size: isTablet ? 32.sp : 28.sp,
+            size: isTablet ? 28.sp : 28.sp,
           ),
           SizedBox(height: 12.h),
           Text(
             title,
             style: TextStyle(
-              fontSize: isTablet ? 12.sp : 10.sp,
+              fontSize: isTablet ? 10.sp : 10.sp,
               fontWeight: FontWeight.bold,
               color: Colors.black,
             ),
@@ -1348,7 +1466,7 @@ class _HomePageState extends ConsumerState<HomePage> {
           Text(
             description,
             style: TextStyle(
-              fontSize: isTablet ? 14.sp : 11.sp,
+              fontSize: isTablet ? 11.sp : 11.sp,
               color: Colors.black,
             ),
             maxLines: 2,
@@ -1359,12 +1477,12 @@ class _HomePageState extends ConsumerState<HomePage> {
     );
   }
 
-  // Service Providers Flow UI
   Widget _buildServiceProvidersFlow() {
+    final isTablet = MediaQuery.of(context).size.width >= 768;
     if (_isSearchingProviders) {
-      return _buildSearchingProvidersScreen();
+      return _buildSearchingProvidersScreen(isTablet);
     } else if (_showProvidersList) {
-      return _buildProvidersListScreen();
+      return _buildProvidersListScreen(isTablet);
     } else if (_showApprovalPrompt) {
       return _buildApprovalPromptScreen();
     }
@@ -1372,7 +1490,7 @@ class _HomePageState extends ConsumerState<HomePage> {
     return SizedBox.shrink();
   }
 
-  Widget _buildSearchingProvidersScreen() {
+  Widget _buildSearchingProvidersScreen(bool isTablet) {
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 20.h),
       padding: EdgeInsets.all(24.w),
@@ -1391,14 +1509,14 @@ class _HomePageState extends ConsumerState<HomePage> {
         children: [
           SizedBox(height: 20.h),
           CircularProgressIndicator(
-            color: WPConfig.navbarColor,
+            color: AppColors.primary(context),
             strokeWidth: 3,
           ),
           SizedBox(height: 24.h),
           Text(
             'searching_providers'.tr(),
             style: TextStyle(
-              fontSize: 18.sp,
+              fontSize: isTablet ? 16.sp : 18.sp,
               fontWeight: FontWeight.bold,
               color: Colors.black,
             ),
@@ -1407,7 +1525,7 @@ class _HomePageState extends ConsumerState<HomePage> {
           Text(
             'finding_best_providers'.tr(),
             style: TextStyle(
-              fontSize: 14.sp,
+              fontSize: isTablet ? 13.sp : 14.sp,
               color: Colors.grey[600],
             ),
             textAlign: TextAlign.center,
@@ -1418,7 +1536,7 @@ class _HomePageState extends ConsumerState<HomePage> {
     );
   }
 
-  Widget _buildProvidersListScreen() {
+  Widget _buildProvidersListScreen(bool isTablet) {
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 20.h),
       child: Column(
@@ -1427,7 +1545,7 @@ class _HomePageState extends ConsumerState<HomePage> {
           Text(
             'available_providers'.tr(),
             style: TextStyle(
-              fontSize: 20.sp,
+              fontSize: isTablet ? 18.sp : 20.sp,
               fontWeight: FontWeight.bold,
               color: Colors.black,
             ),
@@ -1436,7 +1554,7 @@ class _HomePageState extends ConsumerState<HomePage> {
           Text(
             'select_provider_message'.tr(),
             style: TextStyle(
-              fontSize: 14.sp,
+              fontSize: isTablet ? 13.sp : 14.sp,
               color: Colors.grey[600],
             ),
           ),
@@ -1537,7 +1655,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                   style: TextStyle(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.bold,
-                    color: WPConfig.navbarColor,
+                    color: AppColors.primary(context),
                   ),
                 ),
               ],
@@ -1547,7 +1665,7 @@ class _HomePageState extends ConsumerState<HomePage> {
           ElevatedButton(
             onPressed: () => _selectProvider(provider.id),
             style: ElevatedButton.styleFrom(
-              backgroundColor: WPConfig.navbarColor,
+              backgroundColor: AppColors.primary(context),
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8.r),
@@ -1605,7 +1723,7 @@ class _HomePageState extends ConsumerState<HomePage> {
             style: TextStyle(
               fontSize: 18.sp,
               fontWeight: FontWeight.bold,
-              color: WPConfig.navbarColor,
+              color: AppColors.primary(context),
             ),
           ),
           SizedBox(height: 8.h),

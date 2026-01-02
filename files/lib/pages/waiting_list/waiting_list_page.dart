@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import '../../config/wp_config.dart';
+import '../../config/constants/app_colors.dart';
 import '../../services/waiting_list_provider.dart';
 import '../../services/bookings_service.dart';
 import '../../config/constants/assets.dart';
@@ -13,7 +13,7 @@ class WaitingListPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final primaryColor = WPConfig.navbarColor;
+    final primaryColor = AppColors.primary(context);
     final isTablet = MediaQuery.of(context).size.width >= 768;
     final waitingList = ref.watch(waitingListProvider);
 
@@ -443,7 +443,7 @@ class _CouponSectionWidgetState extends State<_CouponSectionWidget> {
             ElevatedButton(
               onPressed: _isApplyingCoupon ? null : _applyCoupon,
               style: ElevatedButton.styleFrom(
-                backgroundColor: WPConfig.navbarColor,
+                backgroundColor: AppColors.primary(context),
                 foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8.r),
