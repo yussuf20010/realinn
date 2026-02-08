@@ -14,11 +14,11 @@ class AssetsManager {
   static const String kids = 'assets/png/kids.jpeg';
   static const String animals = 'assets/png/animals.jpeg';
   static const String needs = 'assets/png/needs.jpeg';
-  static const String provider2 = 'assets/png/2.jpeg';
-  static const String provider3 = 'assets/png/3.jpeg';
-  static const String provider6 = 'assets/png/6.jpeg';
-  static const String provider9 = 'assets/png/9.jpeg';
-  static const String provider10 = 'assets/png/10.jpeg';
+  static const String travel = 'assets/png/travel.jpeg';
+  static const String visitors = 'assets/png/visitors.jpeg';
+  static const String yoga = 'assets/png/yoga.jpeg';
+  static const String provider11 = 'assets/png/9.jpeg';
+  static const String provider12 = 'assets/png/10.jpeg';
 
 
   // jsons

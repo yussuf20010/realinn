@@ -47,10 +47,10 @@ class _SearchBoxWidgetState extends State<SearchBoxWidget> {
         children: [
           // Purple background - extends full width to stick to app bar
           Positioned(
-            top: 0,
+            top: -1, // Overlap with app bar slightly to ensure no light line appears
             left: 0,
             right: 0,
-            height: backgroundHeight,
+            height: backgroundHeight + 1,
             child: Container(
               color: primaryColor,
             ),

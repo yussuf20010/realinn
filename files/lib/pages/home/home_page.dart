@@ -332,10 +332,13 @@ class _HomePageState extends ConsumerState<HomePage> {
 
     return Scaffold(
         backgroundColor: Colors.white,
-        appBar: PreferredSize(
-          preferredSize: Size.fromHeight(appBarHeight),
-          child:
-              _buildCustomAppBar(context, primaryColor, isTablet, isLandscape),
+        appBar: AppBar(
+          backgroundColor: primaryColor,
+          elevation: 0,
+          shadowColor: Colors.transparent,
+          toolbarHeight: appBarHeight,
+          automaticallyImplyLeading: false,
+          flexibleSpace: _buildCustomAppBar(context, primaryColor, isTablet, isLandscape),
         ),
         body: SingleChildScrollView(
           child: Column(
