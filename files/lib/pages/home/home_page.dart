@@ -327,8 +327,8 @@ class _HomePageState extends ConsumerState<HomePage> {
     final isTablet = screenSize.width >= 768;
     final isLandscape = screenSize.width > screenSize.height;
 
-    // Adjust app bar height based on orientation
-    final appBarHeight = isLandscape ? (isTablet ? 85.h : 80.h) : 100.h;
+    // Adjust app bar height based on orientation - increased to allow spacing
+    final appBarHeight = isLandscape ? (isTablet ? 100.h : 95.h) : 125.h;
 
     return Scaffold(
         backgroundColor: Colors.white,
@@ -574,6 +574,8 @@ class _HomePageState extends ConsumerState<HomePage> {
                       );
                     }).toList(),
                   ),
+                  // Space after buttons to separate from the table below
+                  SizedBox(height: isLandscape ? 12.h : 16.h),
                 ],
               ),
             ),

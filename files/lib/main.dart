@@ -60,7 +60,7 @@ class RealInnApp extends StatelessWidget {
                     final width = mediaQuery.size.width;
                     final isTablet = width >= 768;
                     final textScale = isTablet ? 0.95 : 1.0;
-
+ 
 
                     // Handle RTL for Arabic
                     final isRTL = context.locale.languageCode == 'ar';

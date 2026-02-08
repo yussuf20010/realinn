@@ -9,14 +9,14 @@ class AssetsManager {
   static const String error = 'assets/png/error.png';
   static const String appbar = 'assets/png/appbar.png';
 
-  static const String provider1 = 'assets/png/1.jpeg';
+  static const String taxi = 'assets/png/taxi.jpeg';
+  static const String driver = 'assets/png/driver.jpeg';
+  static const String kids = 'assets/png/kids.jpeg';
+  static const String animals = 'assets/png/animals.jpeg';
+  static const String needs = 'assets/png/needs.jpeg';
   static const String provider2 = 'assets/png/2.jpeg';
   static const String provider3 = 'assets/png/3.jpeg';
-  static const String provider4 = 'assets/png/4.jpeg';
-  static const String provider5 = 'assets/png/5.jpeg';
   static const String provider6 = 'assets/png/6.jpeg';
-  static const String provider7 = 'assets/png/7.jpeg';
-  static const String provider8 = 'assets/png/8.jpeg';
   static const String provider9 = 'assets/png/9.jpeg';
   static const String provider10 = 'assets/png/10.jpeg';
 

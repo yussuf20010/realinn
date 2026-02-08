@@ -75,7 +75,7 @@ class AdBannerWidget extends StatelessWidget {
                 ad.imageUrl!,
                 height: height ?? defaultHeight,
                 width: width ?? double.infinity,
-                fit: BoxFit.cover,
+                fit: BoxFit.contain,
               ),
             ),
             // "Ad" label - better positioned and styled for tablets

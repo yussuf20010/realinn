@@ -130,11 +130,11 @@ class _CategoriesPageState extends State<CategoriesPage> {
                             shrinkWrap: true,
                             physics: NeverScrollableScrollPhysics(),
                             gridDelegate:
-                                SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 3,
+                               SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: isTablet ? 4 : 3,
                               crossAxisSpacing: isTablet ? 24.w : 16.w,
                               mainAxisSpacing: isTablet ? 28.h : 20.h,
-                              childAspectRatio: 0.70,
+                              childAspectRatio: 0.65, // Increased height even more to be safe
                             ),
                             itemCount: _filteredCategories().length,
                             itemBuilder: (context, index) {
@@ -197,43 +197,6 @@ class _CategoriesPageState extends State<CategoriesPage> {
             ),
           ),
         ),
-        SizedBox(height: 10.h),
-        Wrap(
-          spacing: 8.w,
-          runSpacing: 6.h,
-          children: [
-            FilterChip(
-              label: Text('Has providers'),
-              selected: _selectedNames.contains('__HAS__'),
-              onSelected: (v) => setState(() {
-                if (v) {
-                  _selectedNames.add('__HAS__');
-                } else {
-                  _selectedNames.remove('__HAS__');
-                }
-              }),
-              selectedColor: Colors.green.shade50,
-              checkmarkColor: Colors.green,
-            ),
-            ...topNames.map((n) {
-              // Capture the name in a local variable to avoid closure issues
-              final name = n;
-              return FilterChip(
-                label: Text(name),
-                selected: _selectedNames.contains(name),
-                onSelected: (v) {
-                  setState(() {
-                    if (v) {
-                      _selectedNames.add(name);
-                    } else {
-                      _selectedNames.remove(name);
-                    }
-                  });
-                },
-              );
-            }),
-          ],
-        ),
       ],
     );
   }
@@ -270,7 +233,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
             ),
             clipBehavior: Clip.antiAlias,
             child: Image.asset(
-              LocalProviderImages.getImagePath(index),
+              LocalProviderImages.getImagePathByName(category.name),
               fit: BoxFit.cover,
               errorBuilder: (context, error, stackTrace) {
                 return Icon(

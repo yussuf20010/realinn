@@ -36,17 +36,19 @@ class SideAdWidget extends StatelessWidget {
     return Container(
       width: width ?? defaultWidth,
       margin: EdgeInsets.symmetric(vertical: isTablet ? 4.h : 8.h),
-      child: Column(
-        children: bannerAds.map((ad) {
-          return Padding(
-            padding: EdgeInsets.only(bottom: spacing),
-            child: AdBannerWidget(
-              ad: ad,
-              width: width ?? defaultWidth,
-              height: height ?? defaultHeight,
-            ),
-          );
-        }).toList(),
+      child: SingleChildScrollView(
+        child: Column(
+          children: bannerAds.map((ad) {
+            return Padding(
+              padding: EdgeInsets.only(bottom: spacing),
+              child: AdBannerWidget(
+                ad: ad,
+                width: width ?? defaultWidth,
+                height: height ?? defaultHeight,
+              ),
+            );
+          }).toList(),
+        ),
       ),
     );
   }

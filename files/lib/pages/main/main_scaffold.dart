@@ -57,7 +57,6 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
         body: Stack(
           children: [
             _pages[_currentIndex],
-            WhatsAppFloatingButton(),
           ],
         ),
         bottomNavigationBar: _buildBottomNavigationBar(),

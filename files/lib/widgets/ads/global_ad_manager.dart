@@ -21,7 +21,7 @@ class GlobalAdManager {
     if (_lastPopupAdShown == null) return true;
     final now = DateTime.now();
     final difference = now.difference(_lastPopupAdShown!);
-    return difference.inSeconds >= 120; // 2 minutes
+    return difference.inSeconds >= 60; // 1 minute
   }
 
   /// Register an ad as showing

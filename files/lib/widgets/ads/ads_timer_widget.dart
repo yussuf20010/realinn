@@ -41,8 +41,8 @@ class _AdsTimerWidgetState extends ConsumerState<AdsTimerWidget> {
 
   void _startAdsTimer() {
     _adsTimer?.cancel();
-    // Popup ads show every 2 minutes (120 seconds)
-    _adsTimer = Timer.periodic(Duration(seconds: 120), (timer) {
+    // Popup ads show every 1 minute (60 seconds)
+    _adsTimer = Timer.periodic(Duration(seconds: 60), (timer) {
       if (!_isAdShowing && mounted) {
         _showAd();
       }
@@ -90,8 +90,10 @@ class _AdsTimerWidgetState extends ConsumerState<AdsTimerWidget> {
 
     if (adsOfType.isEmpty) return;
 
-    // Select first ad of that type (don't change/rotate ads)
-    final adToShow = adsOfType[0];
+    // Select a random ad from available ads of selected type
+    final adToShow = adsOfType[DateTime.now().millisecond % adsOfType.length];
+
+    _currentAdIndex++; // Still increment to cycle types if desired
 
     setState(() {
       _isAdShowing = true;

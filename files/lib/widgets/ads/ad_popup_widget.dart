@@ -147,7 +147,7 @@ class _AdPopupWidgetState extends State<AdPopupWidget> {
                     height: imageHeight,
                     child: NetworkImageWithLoader(
                       widget.ad.imageUrl!,
-                      fit: BoxFit.cover,
+                      fit: BoxFit.contain,
                     ),
                   ),
                 ),

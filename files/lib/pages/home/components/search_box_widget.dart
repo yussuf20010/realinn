@@ -39,9 +39,7 @@ class _SearchBoxWidgetState extends State<SearchBoxWidget> {
     final isLandscape = screenSize.width > screenSize.height;
 
     // Adjustable background height using ScreenUtil - responsive to orientation
-    final backgroundHeight = isLandscape
-        ? 35.h
-        : 43.h; // Purple background behind table, connects to app bar
+    final backgroundHeight = isLandscape ? 45.h : 55.h;
 
     return Container(
       margin: EdgeInsets.only(bottom: isLandscape ? 12.h : 20.h),
@@ -60,12 +58,11 @@ class _SearchBoxWidgetState extends State<SearchBoxWidget> {
 
           // Search table with proper margins and borders - increased width
           Container(
-            margin: EdgeInsets.symmetric(
-                horizontal: isLandscape
-                    ? (isTablet ? 20.w : 10.w)
-                    : (isTablet
-                        ? 40.w
-                        : 20.w)), // Reduced margins for wider search box
+            margin: EdgeInsets.only(
+              top: isLandscape ? 10.h : 15.h, // Space down then show table
+              left: isLandscape ? (isTablet ? 20.w : 10.w) : (isTablet ? 40.w : 20.w),
+              right: isLandscape ? (isTablet ? 20.w : 10.w) : (isTablet ? 40.w : 20.w),
+            ),
             decoration: BoxDecoration(
               color: Colors.white,
               border: Border.all(color: Colors.amber, width: 3),

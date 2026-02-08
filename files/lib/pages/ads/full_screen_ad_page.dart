@@ -15,7 +15,7 @@ class FullScreenAdPage extends StatelessWidget {
         children: [
           // Background Image (using one of the high-quality assets)
           Image.asset(
-            LocalProviderImages.images[0], // Using the first design as a featured ad background
+            LocalProviderImages.images[DateTime.now().millisecond % LocalProviderImages.images.length], // Using a random design as a featured ad background
             fit: BoxFit.cover,
           ),
           

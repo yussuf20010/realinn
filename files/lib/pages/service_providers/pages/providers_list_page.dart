@@ -404,7 +404,7 @@ class _ProvidersListPageState extends State<ProvidersListPage> {
         crossAxisCount: 3,
         crossAxisSpacing: isTablet ? 24.w : 16.w,
         mainAxisSpacing: isTablet ? 32.h : 24.h,
-        childAspectRatio: 0.75, // Adjusted for text below avatars
+        childAspectRatio: 0.65, // Increased height to prevent overflow
       ),
       itemCount: providers.length,
       itemBuilder: (context, index) {
@@ -449,7 +449,7 @@ class _ProvidersListPageState extends State<ProvidersListPage> {
             ),
             clipBehavior: Clip.antiAlias,
             child: Image.asset(
-              LocalProviderImages.getImagePath(index),
+              LocalProviderImages.getImagePathByName(provider.name),
               fit: BoxFit.cover,
               errorBuilder: (context, error, stackTrace) {
                 return Icon(
@@ -560,7 +560,7 @@ class _ProvidersListPageState extends State<ProvidersListPage> {
                       ),
                       clipBehavior: Clip.antiAlias,
                       child: Image.asset(
-                        LocalProviderImages.getImagePath(int.tryParse(provider.id) ?? 0),
+                        LocalProviderImages.getImagePathByName(provider.name),
                         fit: BoxFit.cover,
                         width: isTablet ? 90.w : 75.w,
                         height: isTablet ? 90.w : 75.w,
