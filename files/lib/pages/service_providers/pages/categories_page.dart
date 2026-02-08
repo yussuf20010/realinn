@@ -5,6 +5,7 @@ import '../../../services/service_provider_service.dart';
 import '../../../config/wp_config.dart';
 import '../../../config/constants/app_colors.dart';
 import 'providers_list_page.dart';
+import '../../../config/constants/local_provider_images.dart';
 
 class CategoriesPage extends StatefulWidget {
   const CategoriesPage({Key? key}) : super(key: key);
@@ -268,52 +269,16 @@ class _CategoriesPageState extends State<CategoriesPage> {
               color: avatarColor,
             ),
             clipBehavior: Clip.antiAlias,
-            child: category.image != null && category.image!.isNotEmpty
-                ? Image.network(
-                    category.image!.startsWith('http')
-                        ? category.image!
-                        : '${WPConfig.siteStorageUrl}${category.image!}',
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) {
-                      return category.icon != null && category.icon!.isNotEmpty
-                          ? Image.network(
-                              category.icon!.startsWith('http')
-                                  ? category.icon!
-                                  : '${WPConfig.siteStorageUrl}${category.icon!}',
-                              fit: BoxFit.cover,
-                              errorBuilder: (context, error, stackTrace) {
-                                return Icon(
-                                  Icons.person,
-                                  size: isTablet ? 50 : 40,
-                                  color: Colors.white,
-                                );
-                              },
-                            )
-                          : Icon(
-                              Icons.person,
-                              size: isTablet ? 50 : 40,
-                              color: Colors.white,
-                            );
-                    },
-                  )
-                : category.icon != null && category.icon!.isNotEmpty
-                    ? Image.network(
-                        category.icon!.startsWith('http')
-                            ? category.icon!
-                            : '${WPConfig.siteStorageUrl}${category.icon!}',
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) {
-                          return Icon(
-                            Icons.person,
-                            size: isTablet ? 50 : 40,
-                            color: Colors.white,
-                          );
-                        },
-                      )
-                    : Icon(
-              Icons.person,
-              size: isTablet ? 50 : 40,
-              color: Colors.white,
+            child: Image.asset(
+              LocalProviderImages.getImagePath(index),
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) {
+                return Icon(
+                  Icons.person,
+                  size: isTablet ? 50 : 40,
+                  color: Colors.white,
+                );
+              },
             ),
           ),
           SizedBox(height: 6.h),

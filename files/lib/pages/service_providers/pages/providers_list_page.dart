@@ -408,12 +408,12 @@ class _ProvidersListPageState extends State<ProvidersListPage> {
       ),
       itemCount: providers.length,
       itemBuilder: (context, index) {
-        return _buildAvatarItem(providers[index], isTablet);
+        return _buildAvatarItem(providers[index], index, isTablet);
       },
     );
   }
 
-  Widget _buildAvatarItem(ServiceProvider provider, bool isTablet) {
+  Widget _buildAvatarItem(ServiceProvider provider, int index, bool isTablet) {
     // Calculate a percentage based on response rate or completion rate
     final percentage = provider.responseRate > 0
         ? provider.responseRate.toInt()
@@ -449,7 +449,7 @@ class _ProvidersListPageState extends State<ProvidersListPage> {
             ),
             clipBehavior: Clip.antiAlias,
             child: Image.asset(
-              LocalProviderImages.getImagePath(int.tryParse(provider.id) ?? 0),
+              LocalProviderImages.getImagePath(index),
               fit: BoxFit.cover,
               errorBuilder: (context, error, stackTrace) {
                 return Icon(
