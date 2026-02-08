@@ -12,6 +12,7 @@ import '../../../config/components/network_image.dart';
 import '../../../models/hotel.dart';
 import '../../../models/selected_room.dart';
 import '../../../services/waiting_list_provider.dart';
+import '../../../config/constants/local_provider_images.dart';
 
 class ProviderDetailsPage extends StatefulWidget {
   final int providerId;
@@ -299,14 +300,15 @@ class _ProviderDetailsPageState extends State<ProviderDetailsPage> {
               color: Colors.grey[300],
             ),
             clipBehavior: Clip.antiAlias,
-            child: _provider!.imageUrl.isNotEmpty
-                ? NetworkImageWithLoader(
-                    _provider!.imageUrl,
-                    fit: BoxFit.cover,
-                    width: isTablet ? 120.w : 100.w,
-                    height: isTablet ? 80.w : 70.w,
-                  )
-                : Icon(Icons.person, size: 50, color: Colors.grey[600]),
+            child: Image.asset(
+              LocalProviderImages.getImagePath(int.tryParse(_provider!.id) ?? 0),
+              fit: BoxFit.cover,
+              width: isTablet ? 120.w : 100.w,
+              height: isTablet ? 80.w : 70.w,
+              errorBuilder: (context, error, stackTrace) {
+                return Icon(Icons.person, size: 50, color: Colors.grey[600]);
+              },
+            ),
           ), // Name and Verified Badge
           Row(
             mainAxisAlignment: MainAxisAlignment.center,

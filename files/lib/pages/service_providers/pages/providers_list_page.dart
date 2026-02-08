@@ -8,6 +8,7 @@ import '../../../models/providers_by_category_response.dart';
 import '../../../config/constants/app_colors.dart';
 import 'provider_details_page.dart';
 import '../../../config/components/network_image.dart';
+import '../../../config/constants/local_provider_images.dart';
 
 class ProvidersListPage extends StatefulWidget {
   final int categoryId;
@@ -447,23 +448,17 @@ class _ProvidersListPageState extends State<ProvidersListPage> {
               color: avatarColor,
             ),
             clipBehavior: Clip.antiAlias,
-            child: provider.imageUrl.isNotEmpty
-                ? Image.network(
-                    provider.imageUrl,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Icon(
-                        Icons.person,
-                        size: isTablet ? 50 : 40,
-                        color: Colors.white,
-                      );
-                    },
-                  )
-                : Icon(
-                    Icons.person,
-                    size: isTablet ? 50 : 40,
-                    color: Colors.white,
-                  ),
+            child: Image.asset(
+              LocalProviderImages.getImagePath(int.tryParse(provider.id) ?? 0),
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) {
+                return Icon(
+                  Icons.person,
+                  size: isTablet ? 50 : 40,
+                  color: Colors.white,
+                );
+              },
+            ),
           ),
           SizedBox(height: 8.h),
           // Provider name
@@ -564,15 +559,16 @@ class _ProvidersListPageState extends State<ProvidersListPage> {
                         color: Colors.grey.shade100,
                       ),
                       clipBehavior: Clip.antiAlias,
-                      child: provider.imageUrl.isNotEmpty
-                          ? NetworkImageWithLoader(
-                              provider.imageUrl,
-                              fit: BoxFit.cover,
-                              width: isTablet ? 90.w : 75.w,
-                              height: isTablet ? 90.w : 75.w,
-                            )
-                          : Icon(Icons.person,
-                              size: 40, color: Colors.grey.shade400),
+                      child: Image.asset(
+                        LocalProviderImages.getImagePath(int.tryParse(provider.id) ?? 0),
+                        fit: BoxFit.cover,
+                        width: isTablet ? 90.w : 75.w,
+                        height: isTablet ? 90.w : 75.w,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Icon(Icons.person,
+                              size: 40, color: Colors.grey.shade400);
+                        },
+                      ),
                     ),
                   ),
                   SizedBox(width: 16.w),

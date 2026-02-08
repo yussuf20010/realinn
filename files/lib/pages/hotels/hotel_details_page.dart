@@ -7,7 +7,7 @@ import '../../models/hotel.dart';
 import '../../models/selected_room.dart';
 import '../../services/favorites_provider.dart';
 import '../../services/waiting_list_provider.dart';
-import '../../widgets/ads/ads_timer_widget.dart';
+
 import '../service_providers/pages/categories_page.dart';
 
 class HotelDetailsPage extends ConsumerStatefulWidget {
@@ -37,9 +37,8 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
     final primaryColor = AppColors.primary(context);
     final isTablet = MediaQuery.of(context).size.width > 600;
 
-    return AdsTimerWidget(
-      currentPage: 'hotel',
-      child: Scaffold(
+
+    return Scaffold(
         backgroundColor: Colors.grey[50],
         appBar: PreferredSize(
           preferredSize: Size.fromHeight(100.h),
@@ -63,8 +62,7 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
         floatingActionButton: _selectedRooms.isNotEmpty
             ? _buildBookNowButton(primaryColor, isTablet)
             : null,
-      ),
-    );
+      );
   }
 
   Widget _buildCustomAppBar(Color primaryColor, bool isTablet) {

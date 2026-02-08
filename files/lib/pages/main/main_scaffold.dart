@@ -10,7 +10,6 @@ import '../waiting_list/waiting_list_page.dart';
 import '../history/history_page.dart';
 import '../../config/constants/app_colors.dart';
 import '../../widgets/whatsapp_floating_button.dart';
-import '../../widgets/ads/ads_timer_widget.dart';
 
 class MainScaffold extends ConsumerStatefulWidget {
   final int initialIndex;
@@ -54,9 +53,7 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
 
   @override
   Widget build(BuildContext context) {
-    return AdsTimerWidget(
-      currentPage: _getCurrentPageName(),
-      child: Scaffold(
+    return Scaffold(
         body: Stack(
           children: [
             _pages[_currentIndex],
@@ -64,8 +61,7 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
           ],
         ),
         bottomNavigationBar: _buildBottomNavigationBar(),
-      ),
-    );
+      );
   }
 
   Widget _buildBottomNavigationBar() {

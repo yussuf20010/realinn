@@ -12,7 +12,7 @@ import '../../services/hotel_service.dart';
 import '../../services/service_provider_service.dart';
 import '../../services/auth_service.dart';
 import '../../config/constants/assets.dart';
-import '../../widgets/ads/ads_timer_widget.dart';
+import '../ads/full_screen_ad_page.dart';
 import 'components/search_box_widget.dart';
 
 class HomePage extends ConsumerStatefulWidget {
@@ -48,6 +48,16 @@ class _HomePageState extends ConsumerState<HomePage> {
     super.initState();
     _loadLocationData();
     _loadAllHotels();
+
+    // Show the full screen ad after the first frame
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          fullscreenDialog: true,
+          builder: (context) => FullScreenAdPage(),
+        ),
+      );
+    });
   }
 
   @override
@@ -320,9 +330,7 @@ class _HomePageState extends ConsumerState<HomePage> {
     // Adjust app bar height based on orientation
     final appBarHeight = isLandscape ? (isTablet ? 85.h : 80.h) : 100.h;
 
-    return AdsTimerWidget(
-      currentPage: 'home',
-      child: Scaffold(
+    return Scaffold(
         backgroundColor: Colors.white,
         appBar: PreferredSize(
           preferredSize: Size.fromHeight(appBarHeight),
@@ -349,8 +357,7 @@ class _HomePageState extends ConsumerState<HomePage> {
             ],
           ),
         ),
-      ),
-    );
+      );
   }
 
   Widget _buildCustomAppBar(BuildContext context, Color primaryColor,
@@ -416,8 +423,8 @@ class _HomePageState extends ConsumerState<HomePage> {
                                   ? Image.network(
                                       logoUrl,
                                       height: isLandscape
-                                          ? (isTablet ? 26.h : 24.h)
-                                          : (isTablet ? 32.h : 32.h),
+                                          ? (isTablet ? 50.h : 45.h)
+                                          : (isTablet ? 60.h : 55.h),
                                       fit: BoxFit.contain,
                                       errorBuilder:
                                           (context, error, stackTrace) {
@@ -433,8 +440,8 @@ class _HomePageState extends ConsumerState<HomePage> {
                                   : Image.asset(
                                       AssetsManager.appbar,
                                       height: isLandscape
-                                          ? (isTablet ? 26.h : 24.h)
-                                          : (isTablet ? 32.h : 32.h),
+                                          ? (isTablet ? 50.h : 45.h)
+                                          : (isTablet ? 60.h : 55.h),
                                       fit: BoxFit.contain,
                                     );
                             },
