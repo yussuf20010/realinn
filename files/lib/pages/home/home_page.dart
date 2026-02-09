@@ -537,11 +537,11 @@ class _HomePageState extends ConsumerState<HomePage> {
                                     ? SvgPicture.asset(
                                         AssetsManager.service_providers,
                                         width: isLandscape
-                                            ? (isTablet ? 20.sp : 12.sp)
-                                            : (isTablet ? 22.sp : 16.sp),
+                                            ? (isTablet ? 30.sp : 20.sp)
+                                            : (isTablet ? 32.sp : 24.sp),
                                         height: isLandscape
-                                            ? (isTablet ? 20.sp : 12.sp)
-                                            : (isTablet ? 22  .sp : 16.sp),
+                                            ? (isTablet ? 30.sp : 20.sp)
+                                            : (isTablet ? 32.sp : 24.sp),
                                         colorFilter: ColorFilter.mode(
                                           Colors.white,
                                           BlendMode.srcIn,

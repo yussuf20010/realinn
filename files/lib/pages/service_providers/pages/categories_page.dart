@@ -232,17 +232,34 @@ class _CategoriesPageState extends State<CategoriesPage> {
               color: avatarColor,
             ),
             clipBehavior: Clip.antiAlias,
-            child: Image.asset(
-              LocalProviderImages.getImagePathByName(category.name),
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) {
-                return Icon(
-                  Icons.person,
-                  size: isTablet ? 50 : 40,
-                  color: Colors.white,
-                );
-              },
-            ),
+            child: category.image != null && category.image!.isNotEmpty
+                ? Image.network(
+                    category.image!.startsWith('http')
+                        ? category.image!
+                        : '${WPConfig.imageBaseUrl}${category.image}',
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      // print warning to debug
+                      print('Image failed to load: ${category.image}');
+                      return Image.network(
+                        '${WPConfig.imageBaseUrl}service-provider-categories/${category.image}',
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error2, stackTrace2) {
+                             print('Image failed to load (fallback): ${WPConfig.imageBaseUrl}service-provider-categories/${category.image}');
+                             return Icon(
+                                Icons.category,
+                                size: isTablet ? 50 : 40,
+                                color: Colors.white,
+                              );
+                        },
+                      );
+                    },
+                  )
+                : Icon(
+                    Icons.category,
+                    size: isTablet ? 50 : 40,
+                    color: Colors.white,
+                  ),
           ),
           SizedBox(height: 6.h),
           // Category name

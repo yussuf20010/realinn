@@ -448,17 +448,35 @@ class _ProvidersListPageState extends State<ProvidersListPage> {
               color: avatarColor,
             ),
             clipBehavior: Clip.antiAlias,
-            child: Image.asset(
-              LocalProviderImages.getImagePathByName(provider.name),
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) {
-                return Icon(
-                  Icons.person,
-                  size: isTablet ? 50 : 40,
-                  color: Colors.white,
-                );
-              },
-            ),
+            child: provider.imageUrl.isNotEmpty
+                ? Image.network(
+                    provider.imageUrl,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Image.asset(
+                        LocalProviderImages.getImagePathByName(provider.name),
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Icon(
+                            Icons.person,
+                            size: isTablet ? 50 : 40,
+                            color: Colors.white,
+                          );
+                        },
+                      );
+                    },
+                  )
+                : Image.asset(
+                    LocalProviderImages.getImagePathByName(provider.name),
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Icon(
+                        Icons.person,
+                        size: isTablet ? 50 : 40,
+                        color: Colors.white,
+                      );
+                    },
+                  ),
           ),
           SizedBox(height: 8.h),
           // Provider name
@@ -559,16 +577,35 @@ class _ProvidersListPageState extends State<ProvidersListPage> {
                         color: Colors.grey.shade100,
                       ),
                       clipBehavior: Clip.antiAlias,
-                      child: Image.asset(
-                        LocalProviderImages.getImagePathByName(provider.name),
-                        fit: BoxFit.cover,
-                        width: isTablet ? 90.w : 75.w,
-                        height: isTablet ? 90.w : 75.w,
-                        errorBuilder: (context, error, stackTrace) {
-                          return Icon(Icons.person,
-                              size: 40, color: Colors.grey.shade400);
-                        },
-                      ),
+                      child: provider.imageUrl.isNotEmpty
+                          ? Image.network(
+                              provider.imageUrl,
+                              fit: BoxFit.cover,
+                              width: isTablet ? 90.w : 75.w,
+                              height: isTablet ? 90.w : 75.w,
+                              errorBuilder: (context, error, stackTrace) {
+                                return Image.asset(
+                                  LocalProviderImages.getImagePathByName(provider.name),
+                                  fit: BoxFit.cover,
+                                  width: isTablet ? 90.w : 75.w,
+                                  height: isTablet ? 90.w : 75.w,
+                                  errorBuilder: (context, error, stackTrace) {
+                                    return Icon(Icons.person,
+                                        size: 40, color: Colors.grey.shade400);
+                                  },
+                                );
+                              },
+                            )
+                          : Image.asset(
+                              LocalProviderImages.getImagePathByName(provider.name),
+                              fit: BoxFit.cover,
+                              width: isTablet ? 90.w : 75.w,
+                              height: isTablet ? 90.w : 75.w,
+                              errorBuilder: (context, error, stackTrace) {
+                                return Icon(Icons.person,
+                                    size: 40, color: Colors.grey.shade400);
+                              },
+                            ),
                     ),
                   ),
                   SizedBox(width: 16.w),

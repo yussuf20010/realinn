@@ -17,8 +17,8 @@ class AssetsManager {
   static const String travel = 'assets/png/travel.jpeg';
   static const String visitors = 'assets/png/visitors.jpeg';
   static const String yoga = 'assets/png/yoga.jpeg';
-  static const String provider11 = 'assets/png/9.jpeg';
-  static const String provider12 = 'assets/png/10.jpeg';
+  static const String provider11 = 'assets/png/3.jpeg';
+  static const String provider12 = 'assets/png/6.jpeg';
 
 
   // jsons
