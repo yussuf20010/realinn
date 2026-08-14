@@ -50,7 +50,7 @@ class _PaymentDocumentsPageState extends ConsumerState<PaymentDocumentsPage> {
   Future<void> _uploadDocument() async {
     try {
       // Pick file
-      FilePickerResult? result = await FilePicker.platform.pickFiles(
+      FilePickerResult? result = await FilePicker.pickFiles(
         type: FileType.custom,
         allowedExtensions: ['pdf', 'jpg', 'jpeg', 'png'],
       );

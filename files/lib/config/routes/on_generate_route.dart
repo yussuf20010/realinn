@@ -73,6 +73,7 @@ class RouteGenerator {
         return CupertinoPageRoute(
             builder: (_) => ResetPasswordPage(
                   resetToken: args?['resetToken'] as String?,
+                  email: args?['email'] as String?,
                 ));
 
       case AppRoutes.homePage:

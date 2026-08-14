@@ -11,10 +11,12 @@ import '../../services/auth_service.dart';
 
 class ResetPasswordPage extends StatefulWidget {
   final String? resetToken;
+  final String? email;
 
   const ResetPasswordPage({
     Key? key,
     this.resetToken,
+    this.email,
   }) : super(key: key);
 
   @override
@@ -32,6 +34,60 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
   String? _errorMessage;
   String? _successMessage;
 
+  int _resendTimer = 60;
+  bool _canResend = false;
+  bool _isResending = false;
+
+  void _startResendTimer() {
+    _canResend = false;
+    _resendTimer = 60;
+    Future.doWhile(() async {
+      await Future.delayed(Duration(seconds: 1));
+      if (mounted && _resendTimer > 0) {
+        setState(() {
+          _resendTimer--;
+        });
+        return true;
+      } else {
+        if (mounted) {
+          setState(() {
+            _canResend = true;
+          });
+        }
+        return false;
+      }
+    });
+  }
+
+  Future<void> _resendCode() async {
+    if (!_canResend || _isResending) return;
+    if (widget.email == null || widget.email!.isEmpty) return;
+
+    setState(() {
+      _isResending = true;
+      _errorMessage = null;
+      _successMessage = null;
+    });
+
+    try {
+      await AuthService.forgotPassword(email: widget.email!.trim());
+      if (mounted) {
+        setState(() {
+          _successMessage = 'Verification code has been resent to ${widget.email}';
+          _isResending = false;
+        });
+        _startResendTimer();
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _errorMessage = e.toString().replaceAll('Exception: ', '');
+          _isResending = false;
+        });
+      }
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -41,6 +97,10 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
 
     _newPasswordController.addListener(() => setState(() {}));
     _confirmPasswordController.addListener(() => setState(() {}));
+
+    if (widget.email != null && widget.email!.isNotEmpty) {
+      _startResendTimer();
+    }
   }
 
   @override
@@ -251,6 +311,41 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                                   : null,
                               textInputAction: TextInputAction.next,
                             ),
+                          if (widget.resetToken == null || widget.resetToken!.isEmpty)
+                            if (widget.email != null && widget.email!.isNotEmpty) ...[
+                              SizedBox(height: 4.h),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  _isResending
+                                      ? SizedBox(
+                                          width: 16.w,
+                                          height: 16.w,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2,
+                                            valueColor:
+                                                AlwaysStoppedAnimation<Color>(
+                                                    AppStyles.mainBlue),
+                                          ),
+                                        )
+                                      : TextButton(
+                                          onPressed: _canResend ? _resendCode : null,
+                                          child: Text(
+                                            _canResend
+                                                ? 'resend_code'.tr()
+                                                : '${'resend_code'.tr()} (${_resendTimer}s)',
+                                            style: TextStyle(
+                                              color: _canResend
+                                                  ? AppStyles.mainBlue
+                                                  : Colors.grey,
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 14.sp,
+                                            ),
+                                          ),
+                                        ),
+                                ],
+                              ),
+                            ],
                           if (widget.resetToken == null || widget.resetToken!.isEmpty)
                             SizedBox(height: 12.h),
                           TextFormField(

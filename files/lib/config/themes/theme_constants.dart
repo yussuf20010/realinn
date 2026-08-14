@@ -310,7 +310,7 @@ class AppTheme {
         ),
       ),
     ),
-    tabBarTheme: TabBarTheme(
+    tabBarTheme: TabBarThemeData(
       indicator: UnderlineTabIndicator(
         borderSide: BorderSide(
           color: kPrimary,
@@ -411,7 +411,7 @@ class AppTheme {
         ),
       ),
     ),
-    tabBarTheme: TabBarTheme(
+    tabBarTheme: TabBarThemeData(
       indicator: UnderlineTabIndicator(
         borderSide: BorderSide(
           color: kPrimary,

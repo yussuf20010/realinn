@@ -53,14 +53,12 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
       );
 
       if (mounted) {
-        final resetToken = response['reset_token']?.toString();
-
-        // Navigate to reset password page with reset token
+        // Navigate to reset password page and pass email for the resend feature
         Navigator.pushReplacementNamed(
           context,
           AppRoutes.resetPass,
           arguments: {
-            'resetToken': resetToken ?? '',
+            'email': _emailController.text.trim(),
           },
         );
       }

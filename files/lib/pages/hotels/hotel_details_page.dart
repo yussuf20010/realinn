@@ -348,40 +348,6 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Service Providers button at start
-          Row(
-            children: [
-              Expanded(
-                child: ElevatedButton.icon(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => CategoriesPage(),
-                      ),
-                    );
-                  },
-                  icon: Icon(Icons.design_services, color: Colors.white),
-                  label: Text(
-                    'hotel.service_providers'.tr(),
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: isTablet ? 14 : 12,
-                    ),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: primaryColor,
-                    padding: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: 20),
           // Title
           Text(
             'most_popular_facilities'.tr(),
@@ -1682,35 +1648,35 @@ class _HotelDetailsPageState extends ConsumerState<HotelDetailsPage> {
           ],
         ));
       }
-
-      // Add each selected room to waiting list
-      final waitingListNotifier = ref.read(waitingListProvider.notifier);
-      for (SelectedRoom room in selectedRoomObjects) {
-        waitingListNotifier.addToWaitingList(
-          hotel: widget.hotel,
-          room: room,
-          checkInDate: widget.checkInDate ?? DateTime.now(),
-          checkOutDate:
-              widget.checkOutDate ?? DateTime.now().add(Duration(days: 1)),
-          quantity: _roomQuantities[room.name] ?? 1,
-        );
-      }
-
-      // Show success message and navigate to waiting list
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-              '${selectedRoomObjects.length} room(s) added to waiting list'),
-          backgroundColor: Colors.green,
-        ),
-      );
-      Navigator.pushNamed(context, '/waiting-list');
-
-      // Clear selected rooms
-      setState(() {
-        _selectedRooms.clear();
-        _roomQuantities.clear();
-      });
     }
+
+    // Add each selected room to waiting list
+    final waitingListNotifier = ref.read(waitingListProvider.notifier);
+    for (SelectedRoom room in selectedRoomObjects) {
+      waitingListNotifier.addToWaitingList(
+        hotel: widget.hotel,
+        room: room,
+        checkInDate: widget.checkInDate ?? DateTime.now(),
+        checkOutDate:
+            widget.checkOutDate ?? DateTime.now().add(Duration(days: 1)),
+        quantity: _roomQuantities[room.name] ?? 1,
+      );
+    }
+
+    // Show success message and navigate to waiting list
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+            '${selectedRoomObjects.length} room(s) added to waiting list'),
+        backgroundColor: Colors.green,
+      ),
+    );
+    Navigator.pushNamed(context, '/waiting-list');
+
+    // Clear selected rooms
+    setState(() {
+      _selectedRooms.clear();
+      _roomQuantities.clear();
+    });
   }
 }

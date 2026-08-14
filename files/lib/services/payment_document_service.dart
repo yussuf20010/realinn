@@ -97,21 +97,25 @@ class PaymentDocumentService {
       throw Exception('Failed to load payment documents: ${response.statusCode}');
     }
     
-    final data = json.decode(response.body) as Map<String, dynamic>;
-    final documentsList = (data['data'] as List?) ?? 
-                         (data['documents'] as List?) ?? 
-                         (data is List ? data : <dynamic>[]);
+    final data = json.decode(response.body);
     
     if (data is List) {
       return data.map((e) => PaymentDocument.fromJson(e as Map<String, dynamic>)).toList();
     }
     
-    return documentsList.map((e) {
-      if (e is! Map<String, dynamic>) {
-        throw Exception('Invalid payment document item');
-      }
-      return PaymentDocument.fromJson(e);
-    }).toList();
+    if (data is Map<String, dynamic>) {
+      final documentsList = (data['data'] as List?) ?? 
+                           (data['documents'] as List?) ?? 
+                           <dynamic>[];
+      return documentsList.map((e) {
+        if (e is! Map<String, dynamic>) {
+          throw Exception('Invalid payment document item');
+        }
+        return PaymentDocument.fromJson(e);
+      }).toList();
+    }
+    
+    return <PaymentDocument>[];
   }
 
   // Get single payment document

@@ -67,7 +67,7 @@ class _RegisterPageState extends State<RegisterPage> {
     super.initState();
     _usernameController = TextEditingController();
     _emailController = TextEditingController();
-    _phoneController = TextEditingController();
+    _phoneController = TextEditingController(text: '+971');
     _countryCodeController = TextEditingController();
     _passwordController = TextEditingController();
     _confirmPasswordController = TextEditingController();
@@ -83,6 +83,26 @@ class _RegisterPageState extends State<RegisterPage> {
     _currencyController = TextEditingController(text: 'USD');
     // Use initialUserType from widget if provided, otherwise default to 'user'
     _selectedUserType = widget.initialUserType ?? 'user';
+    
+    // Set UAE as default country
+    _selectedCountry = Country(
+      name: 'United Arab Emirates',
+      code: 'AE',
+      dialCode: '+971',
+      flag: '🇦🇪',
+    );
+    _countryCodeController.text = '+971';
+
+    // Add listener to prevent deleting the country dial code prefix
+    _phoneController.addListener(() {
+      final prefix = _selectedCountry?.dialCode ?? '';
+      if (prefix.isNotEmpty && !_phoneController.text.startsWith(prefix)) {
+        _phoneController.value = TextEditingValue(
+          text: prefix,
+          selection: TextSelection.collapsed(offset: prefix.length),
+        );
+      }
+    });
 
     _passwordController.addListener(() => setState(() {}));
     _confirmPasswordController.addListener(() => setState(() {}));
@@ -193,9 +213,19 @@ class _RegisterPageState extends State<RegisterPage> {
     });
 
     try {
-      final phone = _selectedCountry != null && _phoneController.text.isNotEmpty
-          ? '${_selectedCountry!.dialCode}${_phoneController.text.trim()}'
-          : null;
+      // Get phone number. If it contains only the dialCode prefix, treat it as empty (optional field).
+      String? phone;
+      if (_phoneController.text.isNotEmpty) {
+        final rawPhone = _phoneController.text.trim();
+        final dialCode = _selectedCountry?.dialCode ?? '';
+        if (rawPhone != dialCode && rawPhone.isNotEmpty) {
+          if (dialCode.isNotEmpty && rawPhone.startsWith(dialCode)) {
+            phone = rawPhone;
+          } else {
+            phone = '${dialCode}${rawPhone}';
+          }
+        }
+      }
 
       Map<String, dynamic> response;
       int? userId;
@@ -715,50 +745,57 @@ class _RegisterPageState extends State<RegisterPage> {
                                 SizedBox(height: 12.h),
                                 Row(
                                   children: [
-                                    // Circular country code button
+                                    // Enhanced country selector dropdown button
                                     Container(
-                                      width: 56.w,
                                       height: 56.w,
+                                      padding: EdgeInsets.symmetric(horizontal: 12.w),
                                       decoration: BoxDecoration(
-                                        shape: BoxShape.circle,
                                         color: AppStyles.fieldFill,
+                                        borderRadius: BorderRadius.circular(AppStyles.borderRadius),
                                         border: Border.all(
                                           color: Colors.grey.shade300,
                                           width: 1,
                                         ),
                                       ),
-                                      child: Material(
-                                        color: Colors.transparent,
-                                        child: InkWell(
-                                          borderRadius:
-                                              BorderRadius.circular(28.w),
-                                          onTap: () {
-                                            CountrySelectorModal.show(
-                                              context,
-                                              selectedDialCode:
-                                                  _selectedCountry?.dialCode,
-                                              onCountrySelected: (country) {
-                                                setState(() {
-                                                  _selectedCountry = country;
-                                                  _countryCodeController.text =
-                                                      country.dialCode;
-                                                });
-                                              },
-                                            );
-                                          },
-                                          child: Center(
-                                            child: _selectedCountry != null
-                                                ? Text(
-                                                    _selectedCountry!.flag,
-                                                    style: TextStyle(
-                                                        fontSize: 24.sp),
-                                                  )
-                                                : Icon(
-                                                    IconlyLight.call,
-                                                    color: AppStyles.mainBlue,
-                                                    size: 20.sp,
-                                                  ),
-                                          ),
+                                      child: InkWell(
+                                        borderRadius: BorderRadius.circular(AppStyles.borderRadius),
+                                        onTap: () {
+                                          CountrySelectorModal.show(
+                                            context,
+                                            selectedDialCode:
+                                                _selectedCountry?.dialCode,
+                                            onCountrySelected: (country) {
+                                              setState(() {
+                                                final oldPrefix = _selectedCountry?.dialCode ?? '';
+                                                _selectedCountry = country;
+                                                _countryCodeController.text =
+                                                    country.dialCode;
+
+                                                // Update prefix in phone controller
+                                                String currentText = _phoneController.text;
+                                                if (currentText.startsWith(oldPrefix)) {
+                                                  _phoneController.text = currentText.replaceFirst(oldPrefix, country.dialCode);
+                                                } else {
+                                                  _phoneController.text = country.dialCode;
+                                                }
+                                              });
+                                            },
+                                          );
+                                        },
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Text(
+                                              _selectedCountry?.flag ?? '🏳️',
+                                              style: TextStyle(fontSize: 24.sp),
+                                            ),
+                                            SizedBox(width: 4.w),
+                                            Icon(
+                                              Icons.arrow_drop_down,
+                                              color: AppStyles.mainBlue,
+                                              size: 20.sp,
+                                            ),
+                                          ],
                                         ),
                                       ),
                                     ),
