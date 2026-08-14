@@ -68,9 +68,9 @@ dev_dependencies:
 flutter_icons:
   android: true
   ios: true
-  image_path: "assets/maskable-icon.png"
-  adaptive_icon_background: "assets/maskable-icon.png"
-  adaptive_icon_foreground: "assets/logo.png"
+  image_path: "assets/png/maskable-icon.png"
+  adaptive_icon_background: "assets/png/maskable-icon.png"
+  adaptive_icon_foreground: "assets/png/logo.png"
 
 flutter:
   uses-material-design: true
