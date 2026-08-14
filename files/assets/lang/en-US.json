@@ -262,6 +262,7 @@
     "please_fill_all_fields": "Please fill all the fields",
     "please_wait_seconds": "Please wait {seconds} seconds",
     "resend_otp": "Didn't get OTP? Resend",
+    "resend_code": "Resend Code",
     "seconds_remaining": "{seconds} seconds remaining before you can resend",
     "mobile_number": "Mobile Number",
     "phone_required": "Phone number is required",

@@ -273,6 +273,7 @@
     "please_fill_all_fields": "يرجى ملء جميع الحقول",
     "please_wait_seconds": "يرجى الانتظار {seconds} ثانية",
     "resend_otp": "لم يصلك رمز التحقق؟ أعد الإرسال",
+    "resend_code": "إعادة إرسال الرمز",
     "seconds_remaining": "متبقي {seconds} ثانية قبل إعادة الإرسال",
     "mobile_number": "رقم الجوال",
     "phone_required": "رقم الجوال مطلوب",

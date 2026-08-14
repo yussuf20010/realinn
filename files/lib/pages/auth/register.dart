@@ -67,7 +67,7 @@ class _RegisterPageState extends State<RegisterPage> {
     super.initState();
     _usernameController = TextEditingController();
     _emailController = TextEditingController();
-    _phoneController = TextEditingController(text: '+971');
+    _phoneController = TextEditingController();
     _countryCodeController = TextEditingController();
     _passwordController = TextEditingController();
     _confirmPasswordController = TextEditingController();
@@ -92,17 +92,6 @@ class _RegisterPageState extends State<RegisterPage> {
       flag: '🇦🇪',
     );
     _countryCodeController.text = '+971';
-
-    // Add listener to prevent deleting the country dial code prefix
-    _phoneController.addListener(() {
-      final prefix = _selectedCountry?.dialCode ?? '';
-      if (prefix.isNotEmpty && !_phoneController.text.startsWith(prefix)) {
-        _phoneController.value = TextEditingValue(
-          text: prefix,
-          selection: TextSelection.collapsed(offset: prefix.length),
-        );
-      }
-    });
 
     _passwordController.addListener(() => setState(() {}));
     _confirmPasswordController.addListener(() => setState(() {}));
@@ -215,15 +204,22 @@ class _RegisterPageState extends State<RegisterPage> {
     try {
       // Get phone number. If it contains only the dialCode prefix, treat it as empty (optional field).
       String? phone;
-      if (_phoneController.text.isNotEmpty) {
-        final rawPhone = _phoneController.text.trim();
+      if (_phoneController.text.trim().isNotEmpty) {
+        String rawPhone = _phoneController.text.trim();
         final dialCode = _selectedCountry?.dialCode ?? '';
-        if (rawPhone != dialCode && rawPhone.isNotEmpty) {
-          if (dialCode.isNotEmpty && rawPhone.startsWith(dialCode)) {
+        if (dialCode.isNotEmpty) {
+          if (rawPhone.startsWith(dialCode)) {
+            phone = rawPhone;
+          } else if (rawPhone.startsWith('+')) {
             phone = rawPhone;
           } else {
-            phone = '${dialCode}${rawPhone}';
+            if (rawPhone.startsWith('0')) {
+              rawPhone = rawPhone.substring(1);
+            }
+            phone = '$dialCode$rawPhone';
           }
+        } else {
+          phone = rawPhone;
         }
       }
 
@@ -513,15 +509,31 @@ class _RegisterPageState extends State<RegisterPage> {
                 Expanded(
                   child: Center(
                     child: SingleChildScrollView(
-                      child: Card(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(24),
+                      child: Container(
+                        margin: EdgeInsets.symmetric(horizontal: 24.w, vertical: 20.h),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(28.r),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.06),
+                              blurRadius: 20,
+                              offset: const Offset(0, 10),
+                            ),
+                            BoxShadow(
+                              color: AppColors.primary(context).withOpacity(0.03),
+                              blurRadius: 40,
+                              offset: const Offset(0, 20),
+                            ),
+                          ],
+                          border: Border.all(
+                            color: Colors.grey.shade100,
+                            width: 1.5,
+                          ),
                         ),
-                        elevation: 8,
-                        margin: EdgeInsets.symmetric(horizontal: 24.w),
                         child: Padding(
                           padding: EdgeInsets.symmetric(
-                              vertical: 32.h, horizontal: 24.w),
+                              vertical: 36.h, horizontal: 24.w),
                           child: Form(
                             key: _formKey,
                             child: Column(
@@ -675,39 +687,46 @@ class _RegisterPageState extends State<RegisterPage> {
                                   ),
                                   SizedBox(height: 16.h),
                                 ],
-                                // Name field (for user and service provider)
-                                if (_selectedUserType == 'user' ||
-                                    _selectedUserType == 'service_provider')
-                                  TextFormField(
-                                    controller: _nameController,
-                                    decoration: AppStyles.inputDecoration(
-                                      label: 'auth.full_name'.tr(),
-                                      icon: IconlyLight.profile,
-                                    ),
-                                    textInputAction: TextInputAction.next,
-                                    onChanged: (value) => setState(() {}),
-                                  ),
-                                if (_selectedUserType == 'user' ||
-                                    _selectedUserType == 'service_provider')
-                                  SizedBox(height: 12.h),
-                                // Hotel Name (for hotel)
-                                if (_selectedUserType == 'hotel')
-                                  TextFormField(
-                                    controller: _hotelNameController,
-                                    decoration: AppStyles.inputDecoration(
-                                      label: 'auth.hotel_name_label'.tr(),
-                                      icon: Icons.hotel,
-                                    ),
-                                    validator: (v) =>
-                                        _selectedUserType == 'hotel' &&
-                                                (v == null || v.isEmpty)
-                                            ? 'auth.hotel_name_required'.tr()
-                                            : null,
-                                    textInputAction: TextInputAction.next,
-                                    onChanged: (value) => setState(() {}),
-                                  ),
-                                if (_selectedUserType == 'hotel')
-                                  SizedBox(height: 12.h),
+                                 AnimatedSize(
+                                   duration: const Duration(milliseconds: 300),
+                                   curve: Curves.easeInOut,
+                                   child: Column(
+                                     crossAxisAlignment: CrossAxisAlignment.stretch,
+                                     mainAxisSize: MainAxisSize.min,
+                                     children: [
+                                       if (_selectedUserType == 'user' ||
+                                           _selectedUserType == 'service_provider') ...[
+                                         TextFormField(
+                                           controller: _nameController,
+                                           decoration: AppStyles.inputDecoration(
+                                             label: 'auth.full_name'.tr(),
+                                             icon: IconlyLight.profile,
+                                           ),
+                                           textInputAction: TextInputAction.next,
+                                           onChanged: (value) => setState(() {}),
+                                         ),
+                                         SizedBox(height: 12.h),
+                                       ],
+                                       if (_selectedUserType == 'hotel') ...[
+                                         TextFormField(
+                                           controller: _hotelNameController,
+                                           decoration: AppStyles.inputDecoration(
+                                             label: 'auth.hotel_name_label'.tr(),
+                                             icon: Icons.hotel,
+                                           ),
+                                           validator: (v) =>
+                                               _selectedUserType == 'hotel' &&
+                                                       (v == null || v.isEmpty)
+                                                   ? 'auth.hotel_name_required'.tr()
+                                                   : null,
+                                           textInputAction: TextInputAction.next,
+                                           onChanged: (value) => setState(() {}),
+                                         ),
+                                         SizedBox(height: 12.h),
+                                       ],
+                                     ],
+                                   ),
+                                 ),
                                 TextFormField(
                                   controller: _usernameController,
                                   decoration: AppStyles.inputDecoration(
@@ -743,238 +762,243 @@ class _RegisterPageState extends State<RegisterPage> {
                                   onChanged: (value) => setState(() {}),
                                 ),
                                 SizedBox(height: 12.h),
-                                Row(
-                                  children: [
-                                    // Enhanced country selector dropdown button
-                                    Container(
-                                      height: 56.w,
-                                      padding: EdgeInsets.symmetric(horizontal: 12.w),
-                                      decoration: BoxDecoration(
-                                        color: AppStyles.fieldFill,
-                                        borderRadius: BorderRadius.circular(AppStyles.borderRadius),
-                                        border: Border.all(
-                                          color: Colors.grey.shade300,
-                                          width: 1,
-                                        ),
-                                      ),
-                                      child: InkWell(
-                                        borderRadius: BorderRadius.circular(AppStyles.borderRadius),
-                                        onTap: () {
-                                          CountrySelectorModal.show(
-                                            context,
-                                            selectedDialCode:
-                                                _selectedCountry?.dialCode,
-                                            onCountrySelected: (country) {
-                                              setState(() {
-                                                final oldPrefix = _selectedCountry?.dialCode ?? '';
-                                                _selectedCountry = country;
-                                                _countryCodeController.text =
-                                                    country.dialCode;
-
-                                                // Update prefix in phone controller
-                                                String currentText = _phoneController.text;
-                                                if (currentText.startsWith(oldPrefix)) {
-                                                  _phoneController.text = currentText.replaceFirst(oldPrefix, country.dialCode);
-                                                } else {
-                                                  _phoneController.text = country.dialCode;
-                                                }
-                                              });
-                                            },
-                                          );
-                                        },
-                                        child: Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            Text(
-                                              _selectedCountry?.flag ?? '🏳️',
-                                              style: TextStyle(fontSize: 24.sp),
-                                            ),
-                                            SizedBox(width: 4.w),
-                                            Icon(
-                                              Icons.arrow_drop_down,
-                                              color: AppStyles.mainBlue,
-                                              size: 20.sp,
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                    SizedBox(width: 12.w),
-                                    Expanded(
-                                      child: TextFormField(
-                                        controller: _phoneController,
-                                        decoration: AppStyles.inputDecoration(
-                                            label: 'mobile_number'.tr() +
-                                                ' (Optional)',
-                                            icon: IconlyLight.call),
-                                        validator: (v) =>
-                                            null, // Phone is optional
-                                        keyboardType: TextInputType.phone,
-                                        textInputAction: TextInputAction.next,
-                                        onChanged: (value) => setState(() {}),
-                                      ),
-                                    ),
-                                  ],
-                                ),
+                                 Row(
+                                   children: [
+                                     // Enhanced country selector dropdown button
+                                     Container(
+                                       height: 56.h,
+                                       padding: EdgeInsets.symmetric(horizontal: 12.w),
+                                       decoration: BoxDecoration(
+                                         color: AppStyles.fieldFill,
+                                         borderRadius: BorderRadius.circular(AppStyles.borderRadius),
+                                         border: Border.all(
+                                           color: Colors.grey.shade300,
+                                           width: 1,
+                                         ),
+                                       ),
+                                       child: InkWell(
+                                         borderRadius: BorderRadius.circular(AppStyles.borderRadius),
+                                         onTap: () {
+                                           CountrySelectorModal.show(
+                                             context,
+                                             selectedDialCode:
+                                                 _selectedCountry?.dialCode,
+                                             onCountrySelected: (country) {
+                                               setState(() {
+                                                 _selectedCountry = country;
+                                                 _countryCodeController.text =
+                                                     country.dialCode;
+                                               });
+                                             },
+                                           );
+                                         },
+                                         child: Row(
+                                           mainAxisSize: MainAxisSize.min,
+                                           children: [
+                                             Text(
+                                               '${_selectedCountry?.flag ?? '🏳️'} ${_selectedCountry?.dialCode ?? ''}',
+                                               style: TextStyle(
+                                                 fontSize: 14.sp,
+                                                 fontWeight: FontWeight.bold,
+                                                 color: Colors.black87,
+                                               ),
+                                             ),
+                                             SizedBox(width: 4.w),
+                                             Icon(
+                                               Icons.arrow_drop_down,
+                                               color: AppStyles.mainBlue,
+                                               size: 20.sp,
+                                             ),
+                                           ],
+                                         ),
+                                       ),
+                                     ),
+                                     SizedBox(width: 12.w),
+                                     Expanded(
+                                       child: TextFormField(
+                                         controller: _phoneController,
+                                         decoration: AppStyles.inputDecoration(
+                                             label: 'mobile_number'.tr() +
+                                                 ' (Optional)',
+                                             icon: IconlyLight.call),
+                                         validator: (v) =>
+                                             null, // Phone is optional
+                                         keyboardType: TextInputType.phone,
+                                         textInputAction: TextInputAction.next,
+                                         onChanged: (value) => setState(() {}),
+                                       ),
+                                     ),
+                                   ],
+                                 ),
                                 SizedBox(height: 12.h),
-                                // Hotel/Service Provider specific fields
-                                if (_selectedUserType == 'hotel') ...[
-                                  TextFormField(
-                                    controller: _addressController,
-                                    decoration: AppStyles.inputDecoration(
-                                      label: 'auth.address'.tr(),
-                                      icon: Icons.location_on,
-                                    ),
-                                    textInputAction: TextInputAction.next,
-                                  ),
-                                  SizedBox(height: 12.h),
-                                  TextFormField(
-                                    controller: _zipCodeController,
-                                    decoration: AppStyles.inputDecoration(
-                                      label: 'auth.zip_code'.tr(),
-                                      icon: Icons.pin,
-                                    ),
-                                    keyboardType: TextInputType.number,
-                                    textInputAction: TextInputAction.next,
-                                  ),
-                                  SizedBox(height: 12.h),
-                                ],
-                                if (_selectedUserType ==
-                                    'service_provider') ...[
-                                  TextFormField(
-                                    controller: _displayNameController,
-                                    decoration: AppStyles.inputDecoration(
-                                      label: 'auth.display_name'.tr(),
-                                      icon: Icons.badge,
-                                    ),
-                                    textInputAction: TextInputAction.next,
-                                  ),
-                                  SizedBox(height: 12.h),
-                                  TextFormField(
-                                    controller: _taglineController,
-                                    decoration: AppStyles.inputDecoration(
-                                      label: 'auth.tagline'.tr(),
-                                      icon: Icons.tag,
-                                    ),
-                                    textInputAction: TextInputAction.next,
-                                  ),
-                                  SizedBox(height: 12.h),
-                                  TextFormField(
-                                    controller: _descriptionController,
-                                    decoration: AppStyles.inputDecoration(
-                                      label: 'auth.description_skills'.tr(),
-                                      icon: Icons.description,
-                                    ),
-                                    maxLines: 3,
-                                    textInputAction: TextInputAction.next,
-                                  ),
-                                  SizedBox(height: 12.h),
-                                  // Currency field first
-                                  TextFormField(
-                                    controller: _currencyController,
-                                    decoration: AppStyles.inputDecoration(
-                                      label: 'auth.currency'.tr(),
-                                      icon: Icons.currency_exchange,
-                                    ),
-                                    textInputAction: TextInputAction.next,
-                                  ),
-                                  SizedBox(height: 12.h),
-                                  // Min and Max price fields below currency
-                                  Row(
-                                    children: [
-                                      Expanded(
-                                        child: TextFormField(
-                                          controller: _minPriceController,
-                                          decoration: AppStyles.inputDecoration(
-                                            label: 'auth.min_price'.tr(),
-                                            icon: Icons.attach_money,
-                                          ),
-                                          keyboardType: TextInputType.number,
-                                          textInputAction: TextInputAction.next,
-                                        ),
-                                      ),
-                                      SizedBox(width: 8.w),
-                                      Expanded(
-                                        child: TextFormField(
-                                          controller: _maxPriceController,
-                                          decoration: AppStyles.inputDecoration(
-                                            label: 'auth.max_price'.tr(),
-                                            icon: Icons.attach_money,
-                                          ),
-                                          keyboardType: TextInputType.number,
-                                          textInputAction: TextInputAction.next,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  SizedBox(height: 12.h),
-                                  // Service Categories Selection
-                                  _isLoadingCategories
-                                      ? Center(
-                                          child: Padding(
-                                            padding: EdgeInsets.symmetric(
-                                                vertical: 16.h),
-                                            child: CircularProgressIndicator(
-                                              color: AppColors.primary(context),
-                                            ),
-                                          ),
-                                        )
-                                      : _categories.isEmpty
-                                          ? Padding(
-                                              padding: EdgeInsets.symmetric(
-                                                  vertical: 8.h),
-                                              child: Text(
-                                                'auth.no_categories_available'
-                                                    .tr(),
-                                                style: TextStyle(
-                                                  fontSize: 12.sp,
-                                                  color: Colors.grey[600],
-                                                ),
-                                              ),
-                                            )
-                                          : DropdownButtonFormField<int>(
-                                              decoration:
-                                                  AppStyles.inputDecoration(
-                                                label: 'auth.select_categories'
-                                                    .tr(),
-                                                icon: Icons.category,
-                                              ),
-                                              value: _selectedCategoryId,
-                                              hint: Text(
-                                                'auth.select_categories'.tr(),
-                                                style: TextStyle(
-                                                  fontSize: 14.sp,
-                                                  color: Colors.grey[600],
-                                                ),
-                                              ),
-                                              items:
-                                                  _categories.map((category) {
-                                                return DropdownMenuItem<int>(
-                                                  value: category.id,
-                                                  child: Text(
-                                                    category.name,
-                                                    style: TextStyle(
-                                                      fontSize: 14.sp,
-                                                      color: Colors.grey[800],
-                                                    ),
-                                                  ),
-                                                );
-                                              }).toList(),
-                                              onChanged: (value) {
-                                                setState(() {
-                                                  _selectedCategoryId = value;
-                                                });
-                                              },
-                                              validator: (value) {
-                                                if (value == null) {
-                                                  return 'auth.category_required'
-                                                      .tr();
-                                                }
-                                                return null;
-                                              },
-                                            ),
-                                  SizedBox(height: 12.h),
-                                ],
+                                 // Hotel/Service Provider specific fields
+                                 AnimatedSize(
+                                   duration: const Duration(milliseconds: 300),
+                                   curve: Curves.easeInOut,
+                                   child: Column(
+                                     crossAxisAlignment: CrossAxisAlignment.stretch,
+                                     mainAxisSize: MainAxisSize.min,
+                                     children: [
+                                       if (_selectedUserType == 'hotel') ...[
+                                         TextFormField(
+                                           controller: _addressController,
+                                           decoration: AppStyles.inputDecoration(
+                                             label: 'auth.address'.tr(),
+                                             icon: Icons.location_on,
+                                           ),
+                                           textInputAction: TextInputAction.next,
+                                         ),
+                                         SizedBox(height: 12.h),
+                                         TextFormField(
+                                           controller: _zipCodeController,
+                                           decoration: AppStyles.inputDecoration(
+                                             label: 'auth.zip_code'.tr(),
+                                             icon: Icons.pin,
+                                           ),
+                                           keyboardType: TextInputType.number,
+                                           textInputAction: TextInputAction.next,
+                                         ),
+                                         SizedBox(height: 12.h),
+                                       ],
+                                       if (_selectedUserType ==
+                                           'service_provider') ...[
+                                         TextFormField(
+                                           controller: _displayNameController,
+                                           decoration: AppStyles.inputDecoration(
+                                             label: 'auth.display_name'.tr(),
+                                             icon: Icons.badge,
+                                           ),
+                                           textInputAction: TextInputAction.next,
+                                         ),
+                                         SizedBox(height: 12.h),
+                                         TextFormField(
+                                           controller: _taglineController,
+                                           decoration: AppStyles.inputDecoration(
+                                             label: 'auth.tagline'.tr(),
+                                             icon: Icons.tag,
+                                           ),
+                                           textInputAction: TextInputAction.next,
+                                         ),
+                                         SizedBox(height: 12.h),
+                                         TextFormField(
+                                           controller: _descriptionController,
+                                           decoration: AppStyles.inputDecoration(
+                                             label: 'auth.description_skills'.tr(),
+                                             icon: Icons.description,
+                                           ),
+                                           maxLines: 3,
+                                           textInputAction: TextInputAction.next,
+                                         ),
+                                         SizedBox(height: 12.h),
+                                         // Currency field first
+                                         TextFormField(
+                                           controller: _currencyController,
+                                           decoration: AppStyles.inputDecoration(
+                                             label: 'auth.currency'.tr(),
+                                             icon: Icons.currency_exchange,
+                                           ),
+                                           textInputAction: TextInputAction.next,
+                                         ),
+                                         SizedBox(height: 12.h),
+                                         // Min and Max price fields below currency
+                                         Row(
+                                           children: [
+                                             Expanded(
+                                               child: TextFormField(
+                                                 controller: _minPriceController,
+                                                 decoration: AppStyles.inputDecoration(
+                                                   label: 'auth.min_price'.tr(),
+                                                   icon: Icons.attach_money,
+                                                 ),
+                                                 keyboardType: TextInputType.number,
+                                                 textInputAction: TextInputAction.next,
+                                               ),
+                                             ),
+                                             SizedBox(width: 8.w),
+                                             Expanded(
+                                               child: TextFormField(
+                                                 controller: _maxPriceController,
+                                                 decoration: AppStyles.inputDecoration(
+                                                   label: 'auth.max_price'.tr(),
+                                                   icon: Icons.attach_money,
+                                                 ),
+                                                 keyboardType: TextInputType.number,
+                                                 textInputAction: TextInputAction.next,
+                                               ),
+                                             ),
+                                           ],
+                                         ),
+                                         SizedBox(height: 12.h),
+                                         // Service Categories Selection
+                                         _isLoadingCategories
+                                             ? Center(
+                                                 child: Padding(
+                                                   padding: EdgeInsets.symmetric(
+                                                       vertical: 16.h),
+                                                   child: CircularProgressIndicator(
+                                                     color: AppColors.primary(context),
+                                                   ),
+                                                 ),
+                                               )
+                                             : _categories.isEmpty
+                                                 ? Padding(
+                                                     padding: EdgeInsets.symmetric(
+                                                         vertical: 8.h),
+                                                     child: Text(
+                                                       'auth.no_categories_available'
+                                                           .tr(),
+                                                       style: TextStyle(
+                                                         fontSize: 12.sp,
+                                                         color: Colors.grey[600],
+                                                       ),
+                                                     ),
+                                                   )
+                                                 : DropdownButtonFormField<int>(
+                                                     decoration:
+                                                         AppStyles.inputDecoration(
+                                                       label: 'auth.select_categories'
+                                                           .tr(),
+                                                       icon: Icons.category,
+                                                     ),
+                                                     value: _selectedCategoryId,
+                                                     hint: Text(
+                                                       'auth.select_categories'.tr(),
+                                                       style: TextStyle(
+                                                         fontSize: 14.sp,
+                                                         color: Colors.grey[600],
+                                                       ),
+                                                     ),
+                                                     items:
+                                                         _categories.map((category) {
+                                                       return DropdownMenuItem<int>(
+                                                         value: category.id,
+                                                         child: Text(
+                                                           category.name,
+                                                           style: TextStyle(
+                                                             fontSize: 14.sp,
+                                                             color: Colors.grey[800],
+                                                           ),
+                                                         ),
+                                                       );
+                                                     }).toList(),
+                                                     onChanged: (value) {
+                                                       setState(() {
+                                                         _selectedCategoryId = value;
+                                                       });
+                                                     },
+                                                     validator: (value) {
+                                                       if (value == null) {
+                                                         return 'auth.category_required'
+                                                             .tr();
+                                                       }
+                                                       return null;
+                                                     },
+                                                   ),
+                                         SizedBox(height: 12.h),
+                                       ],
+                                     ],
+                                   ),
+                                 ),
                                 TextFormField(
                                   controller: _passwordController,
                                   obscureText: !_showPassword,
@@ -1064,62 +1088,70 @@ class _RegisterPageState extends State<RegisterPage> {
                                   ),
                                 ],
                                 SizedBox(height: 24.h),
-                                Container(
-                                  width: double.infinity,
-                                  decoration: BoxDecoration(
-                                    gradient: LinearGradient(
-                                      colors: [
-                                        Color(0xFF2196F3),
-                                        AppColors.primary(context)
-                                      ],
-                                      begin: Alignment.centerLeft,
-                                      end: Alignment.centerRight,
-                                    ),
-                                    borderRadius: BorderRadius.circular(
-                                        AppStyles.borderRadius),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black12,
-                                        blurRadius: 8,
-                                        offset: Offset(0, 4),
-                                      ),
-                                    ],
-                                  ),
-                                  child: Material(
-                                    color: Colors.transparent,
-                                    child: InkWell(
-                                      borderRadius: BorderRadius.circular(
-                                          AppStyles.borderRadius),
-                                      onTap:
-                                          _areAllFieldsValid() && !_isCreating
-                                              ? _register
-                                              : null,
-                                      child: Opacity(
-                                        opacity:
-                                            _areAllFieldsValid() ? 1.0 : 0.5,
-                                        child: Padding(
-                                          padding: EdgeInsets.symmetric(
-                                              vertical: 16.h),
-                                          child: Center(
-                                            child: _isCreating
-                                                ? CircularProgressIndicator(
-                                                    color: Colors.white,
-                                                  )
-                                                : Text(
-                                                    'auth.create_account'.tr(),
-                                                    style: TextStyle(
-                                                      color: Colors.white,
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                      fontSize: 18.sp,
-                                                    ),
-                                                  ),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
+                                 Container(
+                                   width: double.infinity,
+                                   decoration: BoxDecoration(
+                                     gradient: LinearGradient(
+                                       colors: _areAllFieldsValid()
+                                           ? [
+                                               AppStyles.mainBlue,
+                                               AppColors.primary(context),
+                                             ]
+                                           : [
+                                               Colors.grey.shade300,
+                                               Colors.grey.shade400,
+                                             ],
+                                       begin: Alignment.centerLeft,
+                                       end: Alignment.centerRight,
+                                     ),
+                                     borderRadius: BorderRadius.circular(
+                                         AppStyles.borderRadius),
+                                     boxShadow: _areAllFieldsValid()
+                                         ? [
+                                             BoxShadow(
+                                               color: AppColors.primary(context).withOpacity(0.24),
+                                               blurRadius: 12,
+                                               offset: const Offset(0, 6),
+                                             ),
+                                           ]
+                                         : [],
+                                   ),
+                                   child: Material(
+                                     color: Colors.transparent,
+                                     child: InkWell(
+                                       borderRadius: BorderRadius.circular(
+                                           AppStyles.borderRadius),
+                                       onTap:
+                                           _areAllFieldsValid() && !_isCreating
+                                               ? _register
+                                               : null,
+                                       child: Padding(
+                                         padding: EdgeInsets.symmetric(
+                                             vertical: 16.h),
+                                         child: Center(
+                                           child: _isCreating
+                                               ? SizedBox(
+                                                   height: 24.w,
+                                                   width: 24.w,
+                                                   child: CircularProgressIndicator(
+                                                     color: Colors.white,
+                                                     strokeWidth: 2.5,
+                                                   ),
+                                                 )
+                                               : Text(
+                                                   'auth.create_account'.tr(),
+                                                   style: TextStyle(
+                                                     color: Colors.white,
+                                                     fontWeight:
+                                                         FontWeight.bold,
+                                                     fontSize: 18.sp,
+                                                   ),
+                                                 ),
+                                         ),
+                                       ),
+                                     ),
+                                   ),
+                                 ),
                                 SizedBox(height: 12.h),
                                 Center(
                                   child: GestureDetector(
@@ -1199,18 +1231,29 @@ class _RegisterPageState extends State<RegisterPage> {
           _loadCategories();
         }
       },
-      borderRadius: BorderRadius.circular(8.r),
-      child: Container(
+      borderRadius: BorderRadius.circular(12.r),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 250),
+        curve: Curves.easeInOut,
         padding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 8.w),
         decoration: BoxDecoration(
           color: isSelected
-              ? AppColors.primary(context).withOpacity(0.1)
-              : Colors.grey[100],
-          borderRadius: BorderRadius.circular(8.r),
+              ? AppColors.primary(context).withOpacity(0.08)
+              : Colors.grey[50],
+          borderRadius: BorderRadius.circular(12.r),
           border: Border.all(
             color: isSelected ? AppColors.primary(context) : Colors.grey[300]!,
-            width: isSelected ? 2 : 1,
+            width: isSelected ? 2.w : 1.w,
           ),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: AppColors.primary(context).withOpacity(0.12),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  )
+                ]
+              : [],
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -1218,14 +1261,14 @@ class _RegisterPageState extends State<RegisterPage> {
             Icon(
               icon,
               color: isSelected ? AppColors.primary(context) : Colors.grey[600],
-              size: 20.sp,
+              size: 22.sp,
             ),
-            SizedBox(height: 4.h),
+            SizedBox(height: 6.h),
             Text(
               label,
               style: TextStyle(
                 fontSize: 11.sp,
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
                 color:
                     isSelected ? AppColors.primary(context) : Colors.grey[700],
               ),

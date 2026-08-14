@@ -67,7 +67,7 @@ class RealInnApp extends StatelessWidget {
                     return MediaQuery(
                       data: mediaQuery.copyWith(
                         textScaler: TextScaler.linear(textScale),
-                      ),
+                      ), 
                       child: Directionality(
                         textDirection:
                             isRTL ? ui.TextDirection.rtl : ui.TextDirection.ltr,
