@@ -1,4 +1,4 @@
-//package com.realinnbcircles.app
+//package com.realn.app
 //
 //import android.content.BroadcastReceiver
 //import android.content.Context
@@ -9,7 +9,7 @@
 // 
 //}
 
-package com.realinnbcircles.app
+package com.realn.app
 
 import android.content.BroadcastReceiver
 import android.content.Context

@@ -1,7 +1,7 @@
 name: realinn
 description: "A new Flutter project."
 publish_to: 'none'
-version: 1.0.0
+version: 1.0.0+1
 
 environment:
   sdk: '>=3.4.0-282.3.beta <4.0.0'
