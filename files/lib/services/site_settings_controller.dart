@@ -13,7 +13,9 @@ final siteSettingsProvider = FutureProvider<SiteSettings>((ref) async {
   });
 
   try {
-    final response = await http.get(Uri.parse(url), headers: headers);
+    final response = await http
+        .get(Uri.parse(url), headers: headers)
+        .timeout(const Duration(seconds: 10));
 
     // Print site settings API response
     print('=== Site Settings API Response ===');

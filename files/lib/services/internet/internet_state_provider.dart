@@ -12,40 +12,50 @@ StateNotifierProvider<IsConnectedNotifier, InternetState>(
 
 class IsConnectedNotifier extends StateNotifier<InternetState> {
   final Ref ref;
-  late final StreamSubscription _subscription;
+  StreamSubscription? _subscription;
 
   IsConnectedNotifier(this.ref) : super(InternetState.loading) {
+    ref.onDispose(() {
+      _subscription?.cancel();
+    });
     _init();
   }
 
   Future<void> _init() async {
-    final result = await Connectivity().checkConnectivity();
+    try {
+      final result = await Connectivity().checkConnectivity();
 
-    if (result.isEmpty || result.contains(ConnectivityResult.none)) {
-      state = InternetState.disconnected;
-    } else {
-      final isConnected =
-      await InternetConnectionChecker.createInstance().hasConnection;
-      state = isConnected
-          ? InternetState.connected
-          : InternetState.disconnected;
-    }
-
-    _subscription =
-        Connectivity().onConnectivityChanged.listen((results) async {
-          if (results.contains(ConnectivityResult.none)) {
-            state = InternetState.disconnected;
-          } else {
-            final isConnected =
+      if (!mounted) return;
+      if (result.isEmpty || result.contains(ConnectivityResult.none)) {
+        state = InternetState.disconnected;
+      } else {
+        final isConnected =
             await InternetConnectionChecker.createInstance().hasConnection;
-            state = isConnected
-                ? InternetState.connected
-                : InternetState.disconnected;
-          }
-        });
+        if (!mounted) return;
+        state = isConnected
+            ? InternetState.connected
+            : InternetState.disconnected;
+      }
 
-    ref.onDispose(() {
-      _subscription.cancel();
-    });
+      _subscription =
+          Connectivity().onConnectivityChanged.listen((results) async {
+            if (!mounted) return;
+            if (results.contains(ConnectivityResult.none)) {
+              state = InternetState.disconnected;
+            } else {
+              final isConnected =
+                  await InternetConnectionChecker.createInstance().hasConnection;
+              if (!mounted) return;
+              state = isConnected
+                  ? InternetState.connected
+                  : InternetState.disconnected;
+            }
+          });
+    } catch (e) {
+      debugPrint('InternetStateNotifier init error: $e');
+      if (mounted) {
+        state = InternetState.connected;
+      }
+    }
   }
 }

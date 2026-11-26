@@ -7,58 +7,62 @@ import '../welcome/welcome_page.dart';
 import '../auth/login.dart';
 import '../maintenance/maintenance_page.dart';
 import 'components/loading_dependency.dart';
-import 'package:easy_localization/easy_localization.dart';
 import '../../services/token_storage_service.dart';
 
 class LoadingAppPage extends ConsumerWidget {
   const LoadingAppPage({Key? key}) : super(key: key);
 
+  Widget _buildAppFlow(AsyncValue<AppState> appState) {
+    return appState.when(
+      data: (initialState) {
+        switch (initialState) {
+          case AppState.loggedIn:
+            return FutureBuilder<String?>(
+              future: TokenStorageService.getUserType(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const LoadingDependencies();
+                }
+                final userType = snapshot.data;
+                // If user is hotel or service provider, show welcome page
+                if (userType == 'hotel' || userType == 'service_provider') {
+                  return WelcomePage();
+                }
+                // Otherwise show main scaffold (for regular users)
+                return MainScaffold();
+              },
+            );
+          case AppState.loggedOut:
+            // Always show login page when logged out
+            return const LoginPage();
+          default:
+            return const LoginPage();
+        }
+      },
+      error: (e, _) => const LoginPage(),
+      loading: () => const LoadingDependencies(),
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final appState = ref.watch(coreAppStateProvider(context));
+    final appState = ref.watch(coreAppStateProvider);
     final siteSettingsAsync = ref.watch(siteSettingsProvider);
-    
-    // Check maintenance mode first
+
+    // Check maintenance mode first, but never trap the user on the splash screen
+    // if site settings fail to load (e.g. offline or temporary API error).
     return siteSettingsAsync.when(
       data: (siteSettings) {
         // Check if maintenance mode is enabled
         if (siteSettings.maintenanceStatus == 1) {
           return MaintenancePage(siteSettings: siteSettings);
         }
-        
+
         // Continue with normal app flow
-        return appState.map(
-          data: (initialState) {
-            switch (initialState.value) {
-              case AppState.loggedIn:
-                return FutureBuilder<String?>(
-                  future: TokenStorageService.getUserType(),
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const LoadingDependencies();
-                    }
-                    final userType = snapshot.data;
-                    // If user is hotel or service provider, show welcome page
-                    if (userType == 'hotel' || userType == 'service_provider') {
-                      return WelcomePage();
-                    }
-                    // Otherwise show main scaffold (for regular users)
-                    return MainScaffold();
-                  },
-                );
-              case AppState.loggedOut:
-                // Always show login page when logged out
-                return const LoginPage();
-              default:
-                return const LoginPage();
-            }
-          },
-          error: (t) => Text('unknown_error'.tr()),
-          loading: (t) => const LoadingDependencies(),
-        );
+        return _buildAppFlow(appState);
       },
       loading: () => const LoadingDependencies(),
-      error: (e, _) => const LoadingDependencies(),
+      error: (e, _) => _buildAppFlow(appState),
     );
   }
 }

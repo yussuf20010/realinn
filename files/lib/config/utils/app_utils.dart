@@ -11,7 +11,6 @@ import 'package:timeago/timeago.dart' as timeago;
 import 'package:url_launcher/url_launcher.dart' as launcher;
 import 'package:url_launcher/url_launcher_string.dart';
 
-import '../../config/wp_config.dart';
 import '../constants/app_colors.dart';
 
 class AppUtil {
@@ -76,12 +75,12 @@ class AppUtil {
 
   /// Set the display refresh rate to maximum
   /// Doesn't apply to IOS
-  static void setDisplayToHighRefreshRate() {
+  static Future<void> setDisplayToHighRefreshRate() async {
     if (Platform.isAndroid) {
       try {
-        FlutterDisplayMode.setHighRefreshRate();
+        await FlutterDisplayMode.setHighRefreshRate();
       } catch (e) {
-        Fluttertoast.showToast(msg: e.toString());
+        debugPrint('Failed to set high refresh rate: $e');
       }
     } else {
       debugPrint('High Refresh Rate is not supported in ios');

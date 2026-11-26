@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class WPConfig {
-  static const String appName = 'RealInn';
+  static const String appName = 'Ryln';
   static const String url = 'https://realinn.b-circles.co';
   static const String siteStorageUrl = 'https://realinn.b-circles.co/storage/';
   static const String apiBaseUrl = '$url/api';
