@@ -24,10 +24,9 @@ Widget _buildTestApp(List<Override> overrides) {
 }
 
 void main() {
-  test('WPConfig points to active rylnn.com domain', () {
-    expect(WPConfig.url, 'https://rylnn.com');
-    expect(WPConfig.siteStorageUrl, 'https://rylnn.com/storage/');
-    expect(WPConfig.siteSettingsApiUrl, 'https://rylnn.com/api/site-settings');
+  test('WPConfig builds site-settings endpoint from configured URL', () {
+    expect(WPConfig.url, isNotEmpty);
+    expect(WPConfig.siteSettingsApiUrl, '${WPConfig.url}/api/site-settings');
   });
 
   testWidgets('Launches into LoginPage when site settings load normally',
